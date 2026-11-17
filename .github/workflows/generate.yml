@@ -1,0 +1,72 @@
+name: Generate stories
+
+on:
+  workflow_dispatch:
+    inputs:
+      count:
+        description: "How many stories to write now (0 = automatic top-up)"
+        required: false
+        default: "0"
+      start_date:
+        description: "First publish date YYYY-MM-DD (only needed once)"
+        required: false
+        default: ""
+  schedule:
+    # twice a day. Writes the first 30 stories, then refills to 20 when fewer than 10 are pending.
+    - cron: "0 1 * * *"
+    - cron: "0 13 * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: stories-csv
+  cancel-in-progress: false
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install Python packages
+        run: pip install -r requirements.txt
+
+      - name: Write stories
+        env:
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+          LLM_PROVIDER: ${{ vars.LLM_PROVIDER || 'gemini' }}
+          LLM_MODEL: ${{ vars.LLM_MODEL }}
+        run: |
+          COUNT="${{ inputs.count || '0' }}"
+          if [ "$COUNT" = "0" ]; then
+            python src/generate_stories.py --auto --max-per-run ${{ vars.STORIES_PER_RUN || '5' }}
+          else
+            python src/generate_stories.py --count "$COUNT" --max-per-run "$COUNT"
+          fi
+
+      - name: Schedule publish dates
+        if: always()
+        run: |
+          if [ -n "${{ inputs.start_date }}" ]; then
+            python src/schedule.py --start-date "${{ inputs.start_date }}"
+          else
+            python src/schedule.py
+          fi
+
+      - name: Commit stories
+        if: always()
+        run: |
+          git config user.name "story-bot"
+          git config user.email "story-bot@users.noreply.github.com"
+          git add stories.csv story_index.md SCHEDULE.md channel.json 2>/dev/null || true
+          git diff --cached --quiet && exit 0
+          git commit -m "Add stories [skip ci]"
+          git pull --rebase
+          git push

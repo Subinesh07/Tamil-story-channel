@@ -1,0 +1,316 @@
+"""Phase 1: write original Tamil stories automatically and append them to stories.csv.
+
+python src/generate_stories.py --count 3          # write up to 3 stories now
+python src/generate_stories.py --auto             # top up: 30 total at first, then keep >= MIN_PENDING
+
+Each story: plan (JSON) -> script in two halves -> automatic self-check and repair -> saved.
+The CSV is saved after every story, so a quota stop never loses finished work.
+"""
+import argparse
+import json
+import logging
+import random
+import re
+import sys
+from collections import Counter
+
+from config import (GENRE_MIX, IMAGE_STYLE, MAX_SCENES, MAX_WORDS, MAX_WORDS_PER_SENTENCE,
+                    MIN_PENDING, MIN_SCENES, MIN_WORDS, OPENING_STYLES, PROMPT_SEP,
+                    SENTENCE_SEP, STORY_INDEX)
+from llm import LLMError, complete
+from stories import load_rows, save_rows, word_count
+
+log = logging.getLogger("generate")
+
+RULES = f"""Hard rules:
+- The story must be completely ORIGINAL. Do not copy or closely paraphrase any YouTube channel,
+  book, film, TV serial, folk tale or song. No song lyrics at all.
+- Natural spoken Tamil as a warm storyteller would narrate it at home, not textbook Tamil.
+  Light everyday Tamil-English mixing is fine where people really talk that way.
+- Every sentence must have fewer than {MAX_WORDS_PER_SENTENCE} words, so subtitles stay readable.
+- Hook in the first 30 seconds, rising tension, a turning point around 60%, emotional climax,
+  and a satisfying ending that resolves the main conflict.
+- Family-friendly. No graphic violence."""
+
+
+# ---------------- index of premises and names ----------------
+
+def read_index():
+    if not STORY_INDEX.exists():
+        return [], set()
+    premises, names = [], set()
+    for line in STORY_INDEX.read_text(encoding="utf-8").splitlines():
+        if line.startswith("- "):
+            premises.append(line[2:])
+            m = re.search(r"names: (.*)$", line)
+            if m:
+                names.update(n.strip() for n in m.group(1).split(","))
+    return premises, names
+
+
+def append_index(row_id, genre, title_en, premise, names):
+    header = "# Story index\nOne line per story, so no two stories repeat a plot or reuse names.\n\n"
+    text = STORY_INDEX.read_text(encoding="utf-8") if STORY_INDEX.exists() else header
+    text += f"- {row_id} | {genre} | {title_en} | {premise} | names: {', '.join(names)}\n"
+    STORY_INDEX.write_text(text, encoding="utf-8")
+
+
+# ---------------- choosing what to write ----------------
+
+def next_genre(rows):
+    """Keep every block of 30 at 12 / 8 / 5 / 5."""
+    block = rows[-(len(rows) % 30):] if len(rows) % 30 else []
+    have = Counter(r["genre"] for r in block)
+    need = [g for g, n in GENRE_MIX.items() for _ in range(max(0, n - have[g]))]
+    return random.choice(need or list(GENRE_MIX))
+
+
+def next_opening(rows):
+    recent = [r.get("_opening", "") for r in rows[-5:]]
+    options = [o for o in OPENING_STYLES if o not in recent] or OPENING_STYLES
+    return random.choice(options)
+
+
+# ---------------- LLM steps ----------------
+
+def plan_story(genre, opening, premises, used_names):
+    n_beats = random.randint(MIN_SCENES + 1, MAX_SCENES)
+    avoid = "\n".join(premises[-80:]) or "(none yet)"
+    prompt = f"""You are planning an original Tamil {genre} story for a YouTube narration channel.
+It will be narrated for 20-25 minutes (about 3,700 Tamil words).
+The story opens with {opening}.
+{RULES}
+- Do NOT make it a mother-sacrifice plot unless the genre truly needs it, and vary the setting
+  (village, Chennai flat, small town, bus depot, school, market, hospital, farm, coastal town ...).
+- Use fresh Tamil character names. Do not use any of these names: {', '.join(sorted(used_names)) or 'none'}.
+- The premise must be clearly different from every premise already used:
+{avoid}
+
+Return JSON with exactly these keys:
+{{
+ "title_ta": "Tamil title, under 60 characters",
+ "title_en": "English title",
+ "premise_en": "one-line English premise",
+ "characters": [{{"name": "...", "role": "...", "age": 0,
+                  "appearance_en": "fixed look: face, hair, clothes, so images stay consistent"}}],
+ "beats": [{{"summary_en": "what happens", "characters": ["names in scene"],
+             "setting_en": "place", "time_of_day": "morning/afternoon/evening/night",
+             "emotion": "dominant feeling"}}]
+}}
+Give exactly {n_beats} beats in story order, covering hook, rising tension, turning point
+around beat {round(n_beats * 0.6)}, climax and ending."""
+    plan = complete(prompt, want_json=True, max_tokens=8000)
+    if not MIN_SCENES <= len(plan.get("beats", [])) <= MAX_SCENES:
+        raise LLMError(f"plan has {len(plan.get('beats', []))} beats")
+    return plan
+
+
+def write_half(plan, half, previous_text=""):
+    beats = plan["beats"]
+    mid = len(beats) // 2
+    part = beats[:mid] if half == 1 else beats[mid:]
+    chars = "\n".join(f"- {c['name']}: {c['role']}, {c.get('age', '')}" for c in plan["characters"])
+    beat_text = "\n".join(f"{i + 1}. {b['summary_en']} ({b['emotion']})" for i, b in enumerate(part))
+    context = ("" if half == 1 else
+               "Here is the end of the first half, continue seamlessly from it:\n"
+               + previous_text[-1500:])
+    ending = ("Stop at the end of these beats, mid-story; do not conclude." if half == 1 else
+              "Finish the story with these beats and give it a satisfying, complete ending.")
+    prompt = f"""Write the {'first' if half == 1 else 'second'} half of this Tamil story script in Tamil.
+Title: {plan['title_ta']} ({plan['title_en']})
+Premise: {plan['premise_en']}
+Characters:
+{chars}
+Beats for this half:
+{beat_text}
+{context}
+{RULES}
+Length: about 1,900 Tamil words for this half. Write the full narration, not an outline.
+Format: ONE sentence per line. No numbering, no headings, no stage directions, no English
+translation. Dialogue is fine inside a sentence. {ending}"""
+    return complete(prompt, max_tokens=32000)
+
+
+def fix_long_sentences(sentences):
+    """Split at commas; ask the model to shorten whatever is still too long; hard-split last."""
+    out, todo = [], []
+    for s in sentences:
+        if word_count(s) <= MAX_WORDS_PER_SENTENCE:
+            out.append(s)
+            continue
+        pieces = [p.strip() for p in re.split(r"[,،]\s*", s) if p.strip()]
+        if len(pieces) > 1 and all(3 <= word_count(p) <= MAX_WORDS_PER_SENTENCE for p in pieces):
+            out.extend(pieces)
+        else:
+            out.append(s)
+            todo.append(s)
+    if todo:
+        try:
+            fixed = complete(
+                "Rewrite each Tamil sentence below as 2 or 3 shorter natural spoken-Tamil "
+                f"sentences, each under {MAX_WORDS_PER_SENTENCE} words, keeping the meaning. "
+                "Return JSON: a list of lists of strings, same order.\n"
+                + json.dumps(todo, ensure_ascii=False), want_json=True, max_tokens=8000)
+            mapping = dict(zip(todo, fixed)) if len(fixed) == len(todo) else {}
+        except (LLMError, ValueError):
+            mapping = {}
+        result = []
+        for s in out:
+            if s in mapping and all(word_count(x) <= MAX_WORDS_PER_SENTENCE for x in mapping[s]):
+                result.extend(x.strip() for x in mapping[s] if x.strip())
+            elif word_count(s) > MAX_WORDS_PER_SENTENCE:
+                w = s.split()
+                result.extend(" ".join(w[i:i + 12]) for i in range(0, len(w), 12))
+            else:
+                result.append(s)
+        out = result
+    return out
+
+
+def to_sentences(text):
+    sents = []
+    for line in text.splitlines():
+        line = re.sub(r"^\s*(\d+[.)]|[-*•])\s*", "", line).strip().strip("\"“”")
+        if not line or line.startswith("#"):
+            continue
+        for s in re.split(r"(?<=[.!?।])\s+", line):
+            s = s.strip().rstrip(".।").strip()
+            if s:
+                sents.append(s)
+    return sents
+
+
+def scene_prompts(plan):
+    looks = {c["name"]: f"{c['name']} ({c.get('age', '')}, {c['appearance_en']})"
+             for c in plan["characters"]}
+    prompts = []
+    for b in plan["beats"]:
+        who = ", ".join(looks.get(n, n) for n in b.get("characters", [])) or "no people"
+        p = (f"{b['summary_en']}. Characters: {who}. Setting: {b['setting_en']}, "
+             f"{b['time_of_day']}. Mood: {b['emotion']}. {IMAGE_STYLE}")
+        prompts.append(p.replace(PROMPT_SEP, "/"))
+    return prompts
+
+
+def self_check(plan, sentences):
+    words = sum(word_count(s) for s in sentences)
+    problems = []
+    if not MIN_WORDS <= words <= MAX_WORDS:
+        problems.append(f"{words} words (need {MIN_WORDS}-{MAX_WORDS})")
+    long_ = [s for s in sentences if word_count(s) > MAX_WORDS_PER_SENTENCE]
+    if long_:
+        problems.append(f"{len(long_)} sentences over {MAX_WORDS_PER_SENTENCE} words")
+    if not MIN_SCENES <= len(plan["beats"]) <= MAX_SCENES:
+        problems.append("scene count out of range")
+    return words, problems
+
+
+def originality_and_ending_check(plan, sentences):
+    ending = " ".join(sentences[-25:])
+    verdict = complete(
+        "Answer as JSON {\"resolves_conflict\": true/false, \"resembles_known_work\": "
+        "\"name of a known film/book/serial/YouTube story it closely copies, or empty\"}.\n"
+        f"Premise: {plan['premise_en']}\nEnding (Tamil): {ending}",
+        want_json=True, max_tokens=1000)
+    problems = []
+    if not verdict.get("resolves_conflict", False):
+        problems.append("ending does not resolve the conflict")
+    if verdict.get("resembles_known_work"):
+        problems.append(f"too close to: {verdict['resembles_known_work']}")
+    return problems
+
+
+def adjust_length(plan, sentences):
+    """One repair pass if the script is too short or too long."""
+    words = sum(word_count(s) for s in sentences)
+    if words < MIN_WORDS:
+        need = MIN_WORDS + 150 - words
+        cut = int(len(sentences) * 0.55)
+        extra = complete(
+            f"This Tamil story is {need} words too short. Write about {need} more Tamil words of "
+            "new scene detail and dialogue that fit naturally right after the passage below "
+            "(before the turning point). Same characters, same style, one sentence per line, "
+            f"every sentence under {MAX_WORDS_PER_SENTENCE} words.\n\n"
+            + "\n".join(sentences[cut - 30:cut]), max_tokens=16000)
+        sentences = sentences[:cut] + fix_long_sentences(to_sentences(extra)) + sentences[cut:]
+    elif words > MAX_WORDS:
+        # drop whole sentences from the middle section, never the hook or the ending
+        while sum(word_count(s) for s in sentences) > MAX_WORDS - 50:
+            del sentences[int(len(sentences) * 0.45)]
+    return sentences
+
+
+def write_story(rows):
+    premises, used_names = read_index()
+    genre, opening = next_genre(rows), next_opening(rows)
+    log.info("Planning a %s story opening with %s", genre, opening)
+    for attempt in range(2):
+        plan = plan_story(genre, opening, premises, used_names)
+        names = [c["name"] for c in plan["characters"]]
+        if not set(names) & used_names:
+            break
+        log.warning("Plan reused names %s, re-planning", set(names) & used_names)
+    first = write_half(plan, 1)
+    second = write_half(plan, 2, first)
+    sentences = fix_long_sentences(to_sentences(first) + to_sentences(second))
+    sentences = adjust_length(plan, sentences)
+    sentences = fix_long_sentences(sentences)
+    words, problems = self_check(plan, sentences)
+    problems += originality_and_ending_check(plan, sentences)
+    if problems:
+        raise LLMError("self-check failed: " + "; ".join(problems))
+    next_id = max([int(r["id"]) for r in rows if r["id"].isdigit()] or [0]) + 1
+    script = " ".join(f"{i + 1}. {s}{SENTENCE_SEP}" for i, s in enumerate(sentences))
+    row = {"id": str(next_id), "genre": genre, "title_ta": plan["title_ta"],
+           "title_en": plan["title_en"], "script_ta": script,
+           "scene_prompts": f" {PROMPT_SEP} ".join(scene_prompts(plan)),
+           "publish_at": "", "status": "pending", "video_id": "", "fail_reason": ""}
+    log.info("Story %s ok: %d words, %d sentences, %d scenes", next_id, words, len(sentences),
+             len(plan["beats"]))
+    return row, plan["premise_en"], names
+
+
+def main():
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--count", type=int, default=0)
+    ap.add_argument("--auto", action="store_true",
+                    help="30 stories in total at first, then refill to 20 pending when below 10")
+    ap.add_argument("--max-per-run", type=int, default=5)
+    args = ap.parse_args()
+
+    rows = load_rows()
+    pending = sum(r["status"] == "pending" for r in rows)
+    if args.auto:
+        if len(rows) < 30:
+            want = 30 - len(rows)
+        elif pending < MIN_PENDING:
+            want = 20 - pending
+        else:
+            want = 0
+    else:
+        want = args.count
+    want = min(want, args.max_per_run)
+    log.info("%d rows, %d pending -> writing %d stories this run", len(rows), pending, want)
+
+    written, failures = 0, 0
+    while written < want and failures < 3:
+        try:
+            row, premise, names = write_story(rows)
+        except LLMError as e:
+            if str(e).startswith("RATE_LIMIT"):
+                log.warning("Stopping: %s. The next scheduled run will continue.", e)
+                break
+            failures += 1
+            log.warning("Story attempt failed (%s); trying a new plan", e)
+            continue
+        rows.append(row)
+        save_rows(rows)
+        append_index(row["id"], row["genre"], row["title_en"], premise, names)
+        written += 1
+    log.info("Wrote %d stories", written)
+    return 0 if written or want == 0 else 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())

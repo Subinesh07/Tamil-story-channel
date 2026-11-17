@@ -1,0 +1,87 @@
+name: Produce video
+
+on:
+  workflow_dispatch:
+    inputs:
+      row_id:
+        description: "Story id to produce (blank = next pending story)"
+        required: false
+        default: ""
+      upload:
+        description: "Upload to YouTube"
+        type: boolean
+        default: true
+  schedule:
+    # every day 05:30 UTC (11:00 IST). Uploads the next story as private with its 19:00 publish time.
+    - cron: "30 5 * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: stories-csv          # never two jobs editing stories.csv at once
+  cancel-in-progress: false
+
+jobs:
+  produce:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install ffmpeg and Tamil fonts
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg fonts-noto-core fonts-noto-unhinted
+          fc-list | grep -i "Noto Sans Tamil" | head -2
+
+      - name: Install Python packages
+        run: pip install -r requirements.txt
+
+      - name: Sample test (must pass before any API use)
+        run: python tests/test_sample.py
+
+      - name: Make video
+        env:
+          IMAGE_API_KEY: ${{ secrets.IMAGE_API_KEY }}
+          YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
+          YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
+          YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
+        run: |
+          ARGS=""
+          if [ -n "${{ inputs.row_id }}" ]; then ARGS="--row-id ${{ inputs.row_id }}"; fi
+          if [ "${{ inputs.upload }}" = "false" ]; then ARGS="$ARGS --no-upload"; fi
+          python src/make_video.py $ARGS
+
+      - name: Update schedule page
+        if: always()
+        run: python src/schedule.py
+
+      - name: Save video, timings and log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: video-${{ github.run_number }}
+          path: |
+            output/*.mp4
+            output/*.json
+            output/*.png
+            output/run.log
+          retention-days: 7
+          if-no-files-found: warn
+
+      - name: Commit updated stories.csv
+        if: always()
+        run: |
+          git config user.name "story-bot"
+          git config user.email "story-bot@users.noreply.github.com"
+          git add stories.csv SCHEDULE.md
+          git diff --cached --quiet && exit 0
+          git commit -m "Update story status [skip ci]"
+          git pull --rebase
+          git push
