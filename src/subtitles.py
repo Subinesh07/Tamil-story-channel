@@ -20,6 +20,9 @@ ScaledBorderAndShadow: yes
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
 Style: Default,{FONT_NAME},{FONT_SIZE},&H0000FFFF,&H0000FFFF,&H00000000,&H64000000,0,0,0,0,100,100,0,0,1,3,1,2,60,60,48,1
+Style: Brand,{FONT_NAME},40,&H00FFFFFF,&H00FFFFFF,&H00000000,&H64000000,1,0,0,0,100,100,0,0,1,2,1,8,60,60,70,1
+Style: Title,{FONT_NAME},72,&H0000D7FF,&H0000D7FF,&H00000000,&H78000000,1,0,0,0,100,100,0,0,1,4,2,5,80,80,0,1
+Style: Sub,{FONT_NAME},40,&H00FFFFFF,&H00FFFFFF,&H00000000,&H78000000,0,0,0,0,100,100,0,0,1,2,1,5,80,80,0,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
@@ -39,17 +42,27 @@ def _escape(text):
     return text.replace("\\", "＼").replace("{", "(").replace("}", ")").replace("\n", " ")
 
 
-def build_ass(timings, out_path):
+def build_ass(timings, out_path, cards=()):
+    """cards: (start, end, brand, title, subtitle) title-card overlays for intro/outro."""
     lines = [HEADER]
     for s in timings["sentences"]:
         lines.append(f"Dialogue: 0,{_ts(s['start'])},{_ts(s['end'])},Default,,0,0,0,,{_escape(s['text'])}\n")
+    fade = r"{\fad(500,500)}"
+    for start, end, brand, title, sub in cards:
+        if brand:
+            lines.append(f"Dialogue: 1,{_ts(start)},{_ts(end)},Brand,,0,0,0,,{fade}{_escape(brand)}\n")
+        if title:
+            lines.append(f"Dialogue: 1,{_ts(start)},{_ts(end)},Title,,0,0,0,,{fade}{{\\pos(640,320)}}{_escape(title)}\n")
+        if sub:
+            lines.append(f"Dialogue: 1,{_ts(start)},{_ts(end)},Sub,,0,0,0,,{fade}{{\\pos(640,420)}}{_escape(sub)}\n")
     out_path.write_text("".join(lines), encoding="utf-8-sig")
     return len(timings["sentences"])
 
 
 def count_dialogues(ass_path):
+    """Spoken-sentence subtitles only (title-card overlays are not counted)."""
     return sum(1 for ln in ass_path.read_text(encoding="utf-8-sig").splitlines()
-               if ln.startswith("Dialogue:"))
+               if ln.startswith("Dialogue:") and ln.split(",")[3] == "Default")
 
 
 # ---------------- glyph check ----------------

@@ -1,0 +1,69 @@
+"""Automatic image checker: a free vision model rejects broken or wrong pictures.
+
+Uses the Gemini key (LLM_API_KEY). If no key is set or the service is busy, the check is
+skipped (the image is accepted) so a video is never blocked by the checker itself.
+"""
+import base64
+import json
+import logging
+import os
+import re
+
+import requests
+
+log = logging.getLogger(__name__)
+_model = None
+
+QUESTION = """You are checking an illustration for a family story video.
+The illustration was requested with this description:
+"{prompt}"
+
+Reject it if ANY of these is true:
+- a deformed or broken object (e.g. bicycle with missing/merged wheels, melted furniture)
+- deformed people: extra or missing limbs, extra fingers, distorted or duplicated faces
+- people who should not be there (more people than described, random extra figures)
+- visible text, letters, watermarks or logos
+- it clearly does not match the description
+
+Answer only JSON: {{"ok": true or false, "problem": "short reason or empty"}}"""
+
+
+def _pick_model(key):
+    global _model
+    if _model is None:
+        from llm import gemini_models
+        models = gemini_models(key)
+        _model = models[0] if models else ""
+    return _model
+
+
+def check(png_bytes, prompt):
+    """Return (ok, reason)."""
+    key = os.environ.get("LLM_API_KEY", "")
+    if not key or os.environ.get("IMAGE_CHECK", "on") == "off":
+        return True, "check skipped (no key)"
+    try:
+        model = _pick_model(key)
+        if not model:
+            return True, "check skipped (no vision model)"
+        body = {
+            "contents": [{"parts": [
+                {"inline_data": {"mime_type": "image/png",
+                                 "data": base64.b64encode(png_bytes).decode()}},
+                {"text": QUESTION.format(prompt=prompt[:600])},
+            ]}],
+            "generationConfig": {"temperature": 0, "responseMimeType": "application/json",
+                                 "maxOutputTokens": 300},
+        }
+        r = requests.post(
+            f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent",
+            headers={"x-goog-api-key": key}, json=body, timeout=90)
+        if r.status_code != 200:
+            return True, f"check skipped (HTTP {r.status_code})"
+        text = "".join(p.get("text", "") for p in
+                       r.json()["candidates"][0]["content"]["parts"])
+        verdict = json.loads(re.sub(r"^```(?:json)?|```$", "", text.strip()))
+        return bool(verdict.get("ok", True)), verdict.get("problem", "")
+    except Exception as e:  # never block a video because the checker failed
+        log.warning("Image check skipped: %s", str(e)[:120])
+        return True, "check skipped (error)"

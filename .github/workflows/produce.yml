@@ -37,7 +37,7 @@ jobs:
       - name: Install ffmpeg and Tamil fonts
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq ffmpeg fonts-noto-core fonts-noto-unhinted
+          sudo apt-get install -y -qq ffmpeg fonts-noto-core fonts-noto-unhinted libraqm0
           fc-list | grep -i "Noto Sans Tamil" | head -2
 
       - name: Install Python packages
@@ -49,6 +49,7 @@ jobs:
       - name: Make video
         env:
           IMAGE_API_KEY: ${{ secrets.IMAGE_API_KEY }}
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
           YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
           YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
           YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}

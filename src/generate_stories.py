@@ -91,6 +91,7 @@ Return JSON with exactly these keys:
  "title_ta": "Tamil title, under 60 characters",
  "title_en": "English title",
  "premise_en": "one-line English premise",
+ "description_ta": "2-3 line Tamil YouTube description that hooks the viewer without spoiling the ending",
  "characters": [{{"name": "...", "role": "...", "age": 0,
                   "appearance_en": "fixed look: face, hair, clothes, so images stay consistent"}}],
  "beats": [{{"summary_en": "what happens", "characters": ["names in scene"],
@@ -98,7 +99,11 @@ Return JSON with exactly these keys:
              "emotion": "dominant feeling"}}]
 }}
 Give exactly {n_beats} beats in story order, covering hook, rising tension, turning point
-around beat {round(n_beats * 0.6)}, climax and ending."""
+around beat {round(n_beats * 0.6)}, climax and ending.
+Each beat becomes ONE illustration, so describe a simple, paintable moment:
+- at most 2 people in the picture, named in "characters"; list [] if nobody is in it
+- no small objects held in hands, no vehicles or bicycles in close-up, no written text
+- a clear setting and one visible emotion"""
     plan = complete(prompt, want_json=True, max_tokens=8000)
     if not MIN_SCENES <= len(plan.get("beats", [])) <= MAX_SCENES:
         raise LLMError(f"plan has {len(plan.get('beats', []))} beats")
@@ -188,9 +193,14 @@ def scene_prompts(plan):
              for c in plan["characters"]}
     prompts = []
     for b in plan["beats"]:
-        who = ", ".join(looks.get(n, n) for n in b.get("characters", [])) or "no people"
-        p = (f"{b['summary_en']}. Characters: {who}. Setting: {b['setting_en']}, "
-             f"{b['time_of_day']}. Mood: {b['emotion']}. {IMAGE_STYLE}")
+        names = b.get("characters", [])[:2]
+        if names:
+            who = (f"Only these people in the picture: {', '.join(looks.get(n, n) for n in names)}. "
+                   "No other people")
+        else:
+            who = "No people in the picture"
+        p = (f"{b['summary_en']}. {who}. Setting: {b['setting_en']}, {b['time_of_day']}. "
+             f"Mood: {b['emotion']}. Simple composition, natural hands and faces. {IMAGE_STYLE}")
         prompts.append(p.replace(PROMPT_SEP, "/"))
     return prompts
 
@@ -268,7 +278,8 @@ def write_story(rows):
     row = {"id": str(next_id), "genre": genre, "title_ta": plan["title_ta"],
            "title_en": plan["title_en"], "script_ta": script,
            "scene_prompts": f" {PROMPT_SEP} ".join(scene_prompts(plan)),
-           "publish_at": "", "status": "pending", "video_id": "", "fail_reason": ""}
+           "publish_at": "", "status": "pending", "video_id": "", "fail_reason": "",
+           "description_ta": plan.get("description_ta", "")}
     log.info("Story %s ok: %d words, %d sentences, %d scenes", next_id, words, len(sentences),
              len(plan["beats"]))
     return row, plan["premise_en"], names

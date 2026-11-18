@@ -1,9 +1,10 @@
 """Phase 6: upload as a private video with a scheduled publish time."""
 import logging
 import os
+import re
 from datetime import datetime, timezone
 
-from config import DISCLOSURE_LINE, HASHTAGS, YT_CATEGORY_ID
+from config import CHANNEL_NAME_EN, CHANNEL_NAME_TA, DISCLOSURE_LINE, HASHTAGS, YT_CATEGORY_ID
 
 log = logging.getLogger(__name__)
 SCOPES = ["https://www.googleapis.com/auth/youtube.upload"]
@@ -25,8 +26,10 @@ def _client():
 
 def build_metadata(row):
     title = row["title_ta"].strip()[:100]
-    script = row["script_ta"].replace("।", ". ").replace("  ", " ").strip()
-    description = f"{script[:200].rstrip()}…\n\n{DISCLOSURE_LINE}\n\n{HASHTAGS}"
+    script = re.sub(r"\d+\.\s*", "", row["script_ta"]).replace("।", ".").strip()
+    intro = (row.get("description_ta") or "").strip() or f"{script[:200].rstrip()}…"
+    description = (f"{intro}\n\n{CHANNEL_NAME_TA} ({CHANNEL_NAME_EN}) - தினமும் மாலை 7 மணிக்கு ஒரு புது கதை.\n"
+                   f"{DISCLOSURE_LINE}\n\n{HASHTAGS}")
     publish = datetime.fromisoformat(row["publish_at"]) if row.get("publish_at") else None
     status = {"privacyStatus": "private", "selfDeclaredMadeForKids": False,
               "containsSyntheticMedia": True}
@@ -56,3 +59,15 @@ def upload(video_path, row):
             log.info("Upload %d%%", int(status.progress() * 100))
     log.info("Uploaded video id %s", response["id"])
     return response["id"]
+
+
+def set_thumbnail(video_id, jpg_path):
+    """Custom thumbnails need a phone-verified channel; failure is only a warning."""
+    from googleapiclient.http import MediaFileUpload
+    try:
+        _client().thumbnails().set(videoId=video_id,
+                                   media_body=MediaFileUpload(str(jpg_path), mimetype="image/jpeg")
+                                   ).execute()
+        log.info("Thumbnail set")
+    except Exception as e:
+        log.warning("Thumbnail not set (verify the channel at youtube.com/verify): %s", str(e)[:200])

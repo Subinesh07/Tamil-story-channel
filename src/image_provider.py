@@ -31,7 +31,7 @@ def to_png_1280x720(raw: bytes) -> bytes:
 class ImageProvider:
     name = "base"
 
-    def generate(self, prompt: str) -> bytes:  # pragma: no cover - interface
+    def generate(self, prompt: str, seed=None) -> bytes:  # pragma: no cover - interface
         raise NotImplementedError
 
 
@@ -46,11 +46,11 @@ class PollinationsProvider(ImageProvider):
         self.api_key = api_key or os.environ.get("IMAGE_API_KEY", "")
         self.model, self.seed, self.delay = model, seed, delay
 
-    def generate(self, prompt):
+    def generate(self, prompt, seed=None):
         params = {"model": self.model, "width": WIDTH, "height": HEIGHT, "nologo": "true",
                   "enhance": "false", "safe": "true"}
-        if self.seed is not None:
-            params["seed"] = self.seed
+        if seed is not None or self.seed is not None:
+            params["seed"] = seed if seed is not None else self.seed
         headers = {"Authorization": f"Bearer {self.api_key}"} if self.api_key else {}
         url = self.URL.format(prompt=urllib.parse.quote(prompt, safe=""))
         r = self.session.get(url, params=params, headers=headers, timeout=180)
@@ -65,7 +65,7 @@ class PlaceholderProvider(ImageProvider):
     """Offline provider for tests: a coloured card per prompt. Makes no network calls."""
     name = "placeholder"
 
-    def generate(self, prompt):
+    def generate(self, prompt, seed=None):
         h = hashlib.md5(prompt.encode()).digest()
         img = Image.new("RGB", (WIDTH, HEIGHT), (60 + h[0] % 150, 60 + h[1] % 150, 60 + h[2] % 150))
         d = ImageDraw.Draw(img)
@@ -89,26 +89,51 @@ def get_provider(seed=None) -> ImageProvider:
     raise SystemExit(f"Unknown IMAGE_PROVIDER '{name}'")
 
 
-def generate_all(provider, prompts, out_dir):
-    """Generate every scene image. A failed scene is retried, then reuses the previous image."""
+def make_card(png_path, out_path, darken=0.45, blur=6):
+    """Darkened, blurred copy of a scene image: background for intro/outro title cards."""
+    from PIL import ImageEnhance, ImageFilter
+    img = Image.open(png_path).convert("RGB").filter(ImageFilter.GaussianBlur(blur))
+    ImageEnhance.Brightness(img).enhance(darken).save(out_path, "PNG")
+    return out_path
+
+
+def generate_all(provider, prompts, out_dir, check=True, base_seed=1000):
+    """Generate every scene image.
+
+    Each image goes through the automatic checker (image_check.py). A rejected image is
+    regenerated with a new seed (up to IMAGE_RETRIES more times); if all attempts are rejected
+    the last one is kept with a warning. A scene that fails to generate at all reuses the
+    previous image.
+    """
+    from image_check import check as vision_check
     out_dir.mkdir(parents=True, exist_ok=True)
     paths, warnings, prev = [], [], None
     for i, prompt in enumerate(prompts):
         path = out_dir / f"scene_{i:02d}.png"
-        data = None
+        data, reason = None, ""
         for attempt in range(1 + IMAGE_RETRIES):
             try:
-                data = provider.generate(prompt)
-                break
+                candidate = provider.generate(prompt, seed=base_seed + i * 10 + attempt)
             except Exception as e:
                 log.warning("Image %d attempt %d failed: %s", i, attempt + 1, e)
                 time.sleep(5 * (attempt + 1))
+                continue
+            data = candidate
+            if not check:
+                break
+            ok, reason = vision_check(candidate, prompt)
+            if ok:
+                if reason:
+                    log.info("Image %d: %s", i, reason)
+                break
+            log.warning("Image %d rejected by checker (%s); regenerating", i, reason)
+        else:
+            if data is not None and check:
+                msg = f"Scene {i}: kept image although checker said: {reason}"
+                log.warning(msg)
+                warnings.append(msg)
         if data is None:
-            if prev is None:
-                # first scene failed: try later prompts' images later; use a neutral card for now
-                data = PlaceholderProvider().generate(prompt)
-            else:
-                data = prev
+            data = prev if prev is not None else PlaceholderProvider().generate(prompt)
             msg = f"Scene {i}: image failed, reused previous image"
             log.warning(msg)
             warnings.append(msg)

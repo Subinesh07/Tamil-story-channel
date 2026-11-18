@@ -11,7 +11,7 @@ OUTPUT_DIR = ROOT / "output"      # final mp4 / timings / logs (git-ignored)
 
 CSV_COLUMNS = [
     "id", "genre", "title_ta", "title_en", "script_ta", "scene_prompts",
-    "publish_at", "status", "video_id", "fail_reason",
+    "publish_at", "status", "video_id", "fail_reason", "description_ta",
 ]
 
 # --- Story rules ---
@@ -66,3 +66,28 @@ MIN_PENDING = 10
 YT_CATEGORY_ID = "22"   # People & Blogs
 HASHTAGS = "#TamilStory #TamilFamilyStory #TamilEmotionalStory"
 DISCLOSURE_LINE = "Original Tamil story | Narration by AI"
+
+# --- Branding ---
+CHANNEL_NAME_TA = "நிலா கதைகள்"
+CHANNEL_NAME_EN = "Nila Kathaigal"
+TTS_RATE = "-6%"            # a little slower than default: storytelling pace
+MUSIC_FILE = ROOT / "assets" / "music.mp3"   # optional soft background music (royalty-free)
+MUSIC_VOLUME = 0.07
+THUMB_FONT = "/usr/share/fonts/truetype/noto/NotoSansTamil-Bold.ttf"
+
+# Intro / outro lines rotate by story id so videos don't all sound the same.
+# {title} is replaced with the story title. Keep every sentence short.
+INTRO_LINES = [
+    "வணக்கம்! நிலா கதைகளுக்கு உங்களை அன்போட வரவேற்கிறோம்। இன்னைக்கு கதை, {title}",
+    "நிலா கதைகள்ல இன்னைக்கு ஒரு புது கதை। கதையோட பேரு, {title}",
+    "வாங்க, ஒரு கதை கேட்கலாம்। நிலா கதைகள் வழங்கும், {title}",
+    "இன்னைக்கு சாயங்காலம் நிலா கதைகள்ல, {title}। வாங்க கேட்கலாம்",
+    "வணக்கம் நண்பர்களே! இது நிலா கதைகள்। இன்னைக்கு நம்ம கதை, {title}",
+]
+OUTRO_LINES = [
+    "கதை பிடிச்சிருந்தா லைக் பண்ணுங்க। நிலா கதைகளை சப்ஸ்க்ரைப் பண்ணுங்க। நாளைக்கு இன்னொரு கதையோட சந்திப்போம்",
+    "இந்த கதை உங்க மனசை தொட்டிருந்தா, கமெண்ட்ல சொல்லுங்க। சப்ஸ்க்ரைப் பண்ண மறந்துடாதீங்க",
+    "உங்களுக்கு பிடிச்ச பகுதி எது? கமெண்ட்ல எழுதுங்க। தினமும் ஒரு கதைக்கு நிலா கதைகளை சப்ஸ்க்ரைப் பண்ணுங்க",
+    "இந்த கதையை உங்க குடும்பத்தோட பகிர்ந்துக்கோங்க। பெல் ஐகானை அழுத்துங்க, நாளைக்கு சந்திப்போம்",
+    "நன்றி நண்பர்களே! நிலா கதைகளை சப்ஸ்க்ரைப் பண்ணுங்க। நாளை சாயங்காலம் ஏழு மணிக்கு புது கதை",
+]

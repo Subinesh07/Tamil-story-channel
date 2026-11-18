@@ -1,8 +1,8 @@
 """Phase 4: zoompan scene clips -> xfade chain -> burned ASS subtitles -> phone-safe MP4."""
 import logging
 
-from config import (FADE_IN, FADE_OUT, FPS, HEIGHT, WIDTH, X264_CRF, X264_PRESET, XFADE,
-                    ZOOM_AMOUNT)
+from config import (FADE_IN, FADE_OUT, FPS, HEIGHT, MUSIC_FILE, MUSIC_VOLUME, WIDTH, X264_CRF,
+                    X264_PRESET, XFADE, ZOOM_AMOUNT)
 from ffutil import run
 
 log = logging.getLogger(__name__)
@@ -36,6 +36,9 @@ def render_video(scenes, images, narration, ass_path, total, work_dir, out_path)
         inputs += ["-i", str(c)]
     inputs += ["-i", str(narration)]
     a_idx = len(clips)
+    music = MUSIC_FILE.exists()
+    if music:
+        inputs += ["-stream_loop", "-1", "-i", str(MUSIC_FILE)]
 
     parts, prev = [], "[0:v]"
     for k in range(1, len(clips)):
@@ -46,7 +49,14 @@ def render_video(scenes, images, narration, ass_path, total, work_dir, out_path)
     fade_out_start = max(0.0, total - FADE_OUT)
     parts.append(f"{prev}fade=t=in:st=0:d={FADE_IN},fade=t=out:st={fade_out_start:.3f}:d={FADE_OUT},"
                  f"ass={ass_path.name},format=yuv420p[v]")
-    parts.append(f"[{a_idx}:a]afade=t=in:st=0:d=0.5,afade=t=out:st={fade_out_start:.3f}:d={FADE_OUT}[a]")
+    if music:
+        log.info("Mixing background music from %s", MUSIC_FILE.name)
+        parts.append(f"[{a_idx + 1}:a]aformat=sample_rates=44100:channel_layouts=stereo,"
+                     f"volume={MUSIC_VOLUME},atrim=0:{total:.3f}[m]")
+        parts.append(f"[{a_idx}:a][m]amix=inputs=2:duration=first:normalize=0,"
+                     f"afade=t=in:st=0:d=0.5,afade=t=out:st={fade_out_start:.3f}:d={FADE_OUT}[a]")
+    else:
+        parts.append(f"[{a_idx}:a]afade=t=in:st=0:d=0.5,afade=t=out:st={fade_out_start:.3f}:d={FADE_OUT}[a]")
     graph = work_dir / "filter.txt"
     graph.write_text(";\n".join(parts), encoding="utf-8")
 

@@ -3,7 +3,7 @@ import asyncio
 import json
 import logging
 
-from config import (SENTENCE_PAUSE, TTS_RETRIES, TTS_RETRY_WAIT, VOICE_FALLBACK,
+from config import (SENTENCE_PAUSE, TTS_RATE, TTS_RETRIES, TTS_RETRY_WAIT, VOICE_FALLBACK,
                     VOICE_PRIMARY)
 from ffutil import ffprobe_duration, run
 
@@ -20,7 +20,7 @@ async def _synth_one(text, voice, out_path):
     last = None
     for attempt in range(1, TTS_RETRIES + 1):
         try:
-            await edge_tts.Communicate(text, voice).save(str(out_path))
+            await edge_tts.Communicate(text, voice, rate=TTS_RATE).save(str(out_path))
             if out_path.exists() and out_path.stat().st_size > 1000:
                 return
             last = "empty audio"

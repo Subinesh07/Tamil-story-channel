@@ -11,13 +11,17 @@ import shutil
 import sys
 import traceback
 
-from config import OUTPUT_DIR, WORK_DIR
-from image_provider import generate_all, get_provider
+import re
+
+from config import CHANNEL_NAME_EN, CHANNEL_NAME_TA, INTRO_LINES, OUTPUT_DIR, OUTRO_LINES, WORK_DIR
+from ffutil import run
+from image_provider import generate_all, get_provider, make_card
 from quality import quality_gate
 from render import render_video
 from scenes import plan_scenes
 from stories import load_rows, long_sentences, pick_row, split_prompts, split_sentences, update_row
 from subtitles import build_ass
+from thumbnail import make_thumbnail
 from tts import build_narration, synthesize
 
 log = logging.getLogger("make_video")
@@ -31,15 +35,23 @@ def produce(row, upload=True, check_duration=True):
     out = OUTPUT_DIR.resolve()
     out.mkdir(exist_ok=True)
 
-    sentences = split_sentences(row["script_ta"])
+    story = split_sentences(row["script_ta"])
     prompts = split_prompts(row["scene_prompts"])
-    if not sentences or not prompts:
+    if not story or not prompts:
         raise ValueError("script_ta or scene_prompts is empty")
     if upload and not row["publish_at"] and check_duration:
         raise ValueError("no publish_at date: run the Generate stories workflow with a start_date")
-    if long_sentences(sentences):
-        log.warning("%d sentences exceed the word limit", len(long_sentences(sentences)))
-    log.info("Row %s '%s': %d sentences, %d prompts", rid, row["title_en"], len(sentences), len(prompts))
+    if long_sentences(story):
+        log.warning("%d sentences exceed the word limit", len(long_sentences(story)))
+
+    # intro + story + outro; the wording rotates by story id so videos don't sound templated
+    title = re.sub(r"\s*\(.*?\)\s*$", "", row["title_ta"]).strip() or row["title_ta"]
+    n = int(rid) if rid.isdigit() else 0
+    intro = split_sentences(INTRO_LINES[n % len(INTRO_LINES)].format(title=title))
+    outro = split_sentences(OUTRO_LINES[n % len(OUTRO_LINES)])
+    sentences = intro + story + outro
+    log.info("Row %s '%s': %d story sentences (+%d intro, +%d outro), %d prompts", rid,
+             row["title_en"], len(story), len(intro), len(outro), len(prompts))
 
     log.info("== Voice ==")
     clips, voice = synthesize(sentences, work / "tts")
@@ -47,14 +59,31 @@ def produce(row, upload=True, check_duration=True):
     log.info("Narration %.1f min", timings["total"] / 60)
 
     log.info("== Images ==")
-    scenes = plan_scenes(timings, len(prompts))
-    needed = [prompts[s["prompt_index"]] for s in scenes]
-    provider = get_provider(seed=int(rid) * 1000 + 7)  # same seed per story keeps style steady
-    images, img_warnings = generate_all(provider, needed, work / "images")
+    scenes = plan_scenes(timings, len(prompts), intro=len(intro), outro=len(outro))
+    story_scenes = [s for s in scenes if s["kind"] == "story"]
+    provider = get_provider()
+    story_imgs, img_warnings = generate_all(provider, [prompts[s["prompt_index"]] for s in story_scenes],
+                                            work / "images", base_seed=n * 1000 + 7)
+    it = iter(story_imgs)
+    images = []
+    for s in scenes:
+        if s["kind"] == "intro":
+            images.append(make_card(story_imgs[0], work / "images" / "intro_card.png"))
+        elif s["kind"] == "outro":
+            images.append(make_card(story_imgs[-1], work / "images" / "outro_card.png"))
+        else:
+            images.append(next(it))
 
     log.info("== Render ==")
+    cards = []
+    for s in scenes:
+        if s["kind"] == "intro":
+            cards.append((s["start"] + 0.3, s["end"] - 0.2, CHANNEL_NAME_TA, title, CHANNEL_NAME_EN))
+        elif s["kind"] == "outro":
+            cards.append((s["start"] + 0.3, s["end"], CHANNEL_NAME_TA, "Subscribe பண்ணுங்க!",
+                          "தினமும் மாலை 7 மணிக்கு ஒரு புது கதை"))
     ass = work / "subs.ass"
-    build_ass(timings, ass)
+    build_ass(timings, ass, cards)
     video = work / f"story_{rid}.mp4"
     render_video(scenes, images, narration, ass, timings["total"], work, video)
 
@@ -67,6 +96,15 @@ def produce(row, upload=True, check_duration=True):
     shutil.copy(video, out / video.name)
     shutil.copy(work / "timings.json", out / f"story_{rid}_timings.json")
     (out / f"story_{rid}_scenes.json").write_text(json.dumps(scenes, indent=1))
+    # intro frame too, so the title card can be checked in the artifacts
+    run(["ffmpeg", "-y", "-ss", f"{max(0.5, scenes[0]['duration'] / 2):.2f}", "-i", str(video),
+         "-frames:v", "1", str(out / f"story_{rid}_intro_frame.png")], check=False)
+    thumb = None
+    try:
+        thumb = make_thumbnail(story_imgs[min(1, len(story_imgs) - 1)], title,
+                               out / f"story_{rid}_thumbnail.jpg")
+    except Exception as e:
+        log.warning("Thumbnail failed: %s", e)
     if not ok:
         raise RuntimeError("Quality gate failed: " + " | ".join(failures))
 
@@ -74,8 +112,12 @@ def produce(row, upload=True, check_duration=True):
         log.info("Upload skipped (--no-upload)")
         return None
     log.info("== Upload ==")
+    from youtube_upload import set_thumbnail
     from youtube_upload import upload as yt_upload
-    return yt_upload(out / video.name, row)
+    video_id = yt_upload(out / video.name, row)
+    if thumb:
+        set_thumbnail(video_id, thumb)
+    return video_id
 
 
 def main():
