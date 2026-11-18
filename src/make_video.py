@@ -23,7 +23,7 @@ from tts import build_narration, synthesize
 log = logging.getLogger("make_video")
 
 
-def produce(row, upload=True):
+def produce(row, upload=True, check_duration=True):
     rid = row["id"]
     work = (WORK_DIR / f"row_{rid}").resolve()
     shutil.rmtree(work, ignore_errors=True)
@@ -60,7 +60,8 @@ def produce(row, upload=True):
 
     log.info("== Quality gate ==")
     frame = out / f"story_{rid}_subtitle_frame.png"
-    ok, failures, warnings = quality_gate(video, ass, timings, sentences, images, frame)
+    ok, failures, warnings = quality_gate(video, ass, timings, sentences, images, frame,
+                                          check_duration=check_duration)
     for w in warnings + img_warnings:
         log.warning("QC warning: %s", w)
     shutil.copy(video, out / video.name)
@@ -81,6 +82,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--row-id", default="")
     ap.add_argument("--no-upload", action="store_true")
+    ap.add_argument("--test", action="store_true",
+                    help="short test story: skip the 19-26 minute length check and never upload")
     args = ap.parse_args()
 
     OUTPUT_DIR.mkdir(exist_ok=True)
@@ -94,7 +97,8 @@ def main():
     row = pick_row(rows, args.row_id or None)
     update_row(row["id"], status="processing", fail_reason="")
     try:
-        video_id = produce(row, upload=not args.no_upload)
+        video_id = produce(row, upload=not (args.no_upload or args.test),
+                           check_duration=not args.test)
     except Exception as e:
         log.error("Row %s failed: %s", row["id"], e)
         log.debug(traceback.format_exc())

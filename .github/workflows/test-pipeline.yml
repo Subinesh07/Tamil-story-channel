@@ -1,0 +1,51 @@
+name: Test pipeline
+
+# Makes one short video from tests/test_story.csv using the REAL voice and image services.
+# Never uploads to YouTube and never changes stories.csv. Download the result from Artifacts.
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install ffmpeg and Tamil fonts
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg fonts-noto-core fonts-noto-unhinted
+
+      - name: Install Python packages
+        run: pip install -r requirements.txt
+
+      - name: Offline sample test
+        run: python tests/test_sample.py
+
+      - name: Make test video (no upload)
+        env:
+          IMAGE_API_KEY: ${{ secrets.IMAGE_API_KEY }}
+          STORIES_CSV: tests/test_story_run.csv
+        run: |
+          cp tests/test_story.csv tests/test_story_run.csv
+          python src/make_video.py --row-id 900 --test
+          echo "---- result ----"
+          python -c "import csv;r=list(csv.DictReader(open('tests/test_story_run.csv',encoding='utf-8')))[0];print(r['status'], r['fail_reason'])"
+
+      - name: Save test video
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-video-${{ github.run_number }}
+          path: |
+            output/*.mp4
+            output/*.json
+            output/*.png
+            output/run.log
+          retention-days: 7

@@ -1,8 +1,9 @@
 """Central settings for the Tamil story pipeline. Change values here, not in code."""
+import os
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-STORIES_CSV = ROOT / "stories.csv"
+STORIES_CSV = Path(os.environ.get("STORIES_CSV", ROOT / "stories.csv"))
 STORY_INDEX = ROOT / "story_index.md"
 SCHEDULE_MD = ROOT / "SCHEDULE.md"
 WORK_DIR = ROOT / "work"          # per-run scratch (git-ignored)
