@@ -87,7 +87,11 @@ def main():
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s",
                         handlers=[logging.StreamHandler(),
                                   logging.FileHandler(OUTPUT_DIR / "run.log", encoding="utf-8")])
-    row = pick_row(load_rows(), args.row_id or None)
+    rows = load_rows()
+    if not args.row_id and not any(r["status"] == "pending" for r in rows):
+        log.info("No pending stories yet - nothing to produce today.")
+        return 0
+    row = pick_row(rows, args.row_id or None)
     update_row(row["id"], status="processing", fail_reason="")
     try:
         video_id = produce(row, upload=not args.no_upload)
