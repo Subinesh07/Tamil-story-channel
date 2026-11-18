@@ -57,7 +57,7 @@ def check(png_bytes, prompt):
         }
         r = requests.post(
             f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent",
-            headers={"x-goog-api-key": key}, json=body, timeout=90)
+            headers={"x-goog-api-key": key}, json=body, timeout=45)
         if r.status_code != 200:
             return True, f"check skipped (HTTP {r.status_code})"
         text = "".join(p.get("text", "") for p in
