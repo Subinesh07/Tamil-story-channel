@@ -1,9 +1,14 @@
 name: Test pipeline
 
 # Makes one short video from tests/test_story.csv using the REAL voice and image services.
-# Never uploads to YouTube and never changes stories.csv. Download the result from Artifacts.
+# Uploads only if you tick "upload_to_youtube" (always PRIVATE). Never changes stories.csv. Download the result from Artifacts.
 on:
   workflow_dispatch:
+    inputs:
+      upload_to_youtube:
+        description: "Also upload the test video to YouTube as PRIVATE"
+        type: boolean
+        default: false
 
 jobs:
   test:
@@ -31,12 +36,17 @@ jobs:
       - name: Make test video (no upload)
         env:
           IMAGE_API_KEY: ${{ secrets.IMAGE_API_KEY }}
+          YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
+          YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
+          YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
           STORIES_CSV: tests/test_story_run.csv
         run: |
           cp tests/test_story.csv tests/test_story_run.csv
-          python src/make_video.py --row-id 900 --test
+          EXTRA=""
+          if [ "${{ inputs.upload_to_youtube }}" = "true" ]; then EXTRA="--test-upload"; fi
+          python src/make_video.py --row-id 900 --test $EXTRA
           echo "---- result ----"
-          python -c "import csv;r=list(csv.DictReader(open('tests/test_story_run.csv',encoding='utf-8')))[0];print(r['status'], r['fail_reason'])"
+          python -c "import csv;r=list(csv.DictReader(open('tests/test_story_run.csv',encoding='utf-8')))[0];print(r['status'], r['fail_reason'], 'https://youtu.be/'+r['video_id'] if r['video_id'] else '')"
 
       - name: Save test video
         if: always()

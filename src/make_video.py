@@ -35,7 +35,7 @@ def produce(row, upload=True, check_duration=True):
     prompts = split_prompts(row["scene_prompts"])
     if not sentences or not prompts:
         raise ValueError("script_ta or scene_prompts is empty")
-    if upload and not row["publish_at"]:
+    if upload and not row["publish_at"] and check_duration:
         raise ValueError("no publish_at date: run the Generate stories workflow with a start_date")
     if long_sentences(sentences):
         log.warning("%d sentences exceed the word limit", len(long_sentences(sentences)))
@@ -84,6 +84,8 @@ def main():
     ap.add_argument("--no-upload", action="store_true")
     ap.add_argument("--test", action="store_true",
                     help="short test story: skip the 19-26 minute length check and never upload")
+    ap.add_argument("--test-upload", action="store_true",
+                    help="with --test: upload the test video as a PRIVATE video (no schedule)")
     args = ap.parse_args()
 
     OUTPUT_DIR.mkdir(exist_ok=True)
@@ -97,7 +99,8 @@ def main():
     row = pick_row(rows, args.row_id or None)
     update_row(row["id"], status="processing", fail_reason="")
     try:
-        video_id = produce(row, upload=not (args.no_upload or args.test),
+        upload = args.test_upload if args.test else not args.no_upload
+        video_id = produce(row, upload=upload,
                            check_duration=not args.test)
     except Exception as e:
         log.error("Row %s failed: %s", row["id"], e)

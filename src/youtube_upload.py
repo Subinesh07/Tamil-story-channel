@@ -27,14 +27,14 @@ def build_metadata(row):
     title = row["title_ta"].strip()[:100]
     script = row["script_ta"].replace("।", ". ").replace("  ", " ").strip()
     description = f"{script[:200].rstrip()}…\n\n{DISCLOSURE_LINE}\n\n{HASHTAGS}"
-    publish = datetime.fromisoformat(row["publish_at"])
+    publish = datetime.fromisoformat(row["publish_at"]) if row.get("publish_at") else None
     status = {"privacyStatus": "private", "selfDeclaredMadeForKids": False,
               "containsSyntheticMedia": True}
-    if publish > datetime.now(timezone.utc):
+    if publish and publish > datetime.now(timezone.utc):
         status["publishAt"] = publish.isoformat()
     else:
-        log.warning("publish_at %s is in the past; uploading as private without a schedule",
-                    row["publish_at"])
+        log.warning("No future publish_at (%s); uploading as private without a schedule",
+                    row.get("publish_at") or "empty")
     return {
         "snippet": {"title": title, "description": description, "categoryId": YT_CATEGORY_ID,
                     "defaultLanguage": "ta", "defaultAudioLanguage": "ta",
