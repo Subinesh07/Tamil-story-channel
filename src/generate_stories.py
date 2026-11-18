@@ -105,30 +105,33 @@ around beat {round(n_beats * 0.6)}, climax and ending."""
     return plan
 
 
-def write_half(plan, half, previous_text=""):
+PARTS = 4  # smaller pieces suit free models with short output limits
+
+
+def write_part(plan, part, previous_text=""):
     beats = plan["beats"]
-    mid = len(beats) // 2
-    part = beats[:mid] if half == 1 else beats[mid:]
+    size = -(-len(beats) // PARTS)
+    chunk = beats[part * size:(part + 1) * size]
     chars = "\n".join(f"- {c['name']}: {c['role']}, {c.get('age', '')}" for c in plan["characters"])
-    beat_text = "\n".join(f"{i + 1}. {b['summary_en']} ({b['emotion']})" for i, b in enumerate(part))
-    context = ("" if half == 1 else
-               "Here is the end of the first half, continue seamlessly from it:\n"
-               + previous_text[-1500:])
-    ending = ("Stop at the end of these beats, mid-story; do not conclude." if half == 1 else
-              "Finish the story with these beats and give it a satisfying, complete ending.")
-    prompt = f"""Write the {'first' if half == 1 else 'second'} half of this Tamil story script in Tamil.
+    beat_text = "\n".join(f"{i + 1}. {b['summary_en']} ({b['emotion']})" for i, b in enumerate(chunk))
+    context = ("" if part == 0 else
+               "The story so far ends like this; continue seamlessly from it:\n" + previous_text[-1200:])
+    last = part == PARTS - 1
+    ending = ("Finish the story with these beats and give it a satisfying, complete ending."
+              if last else "Stop at the end of these beats, mid-story; do not conclude.")
+    prompt = f"""Write part {part + 1} of {PARTS} of this Tamil story script, in Tamil.
 Title: {plan['title_ta']} ({plan['title_en']})
 Premise: {plan['premise_en']}
 Characters:
 {chars}
-Beats for this half:
+Beats for this part:
 {beat_text}
 {context}
 {RULES}
-Length: about 1,900 Tamil words for this half. Write the full narration, not an outline.
+Length: about 950 Tamil words for this part. Write the full narration, not an outline.
 Format: ONE sentence per line. No numbering, no headings, no stage directions, no English
 translation. Dialogue is fine inside a sentence. {ending}"""
-    return complete(prompt, max_tokens=32000)
+    return complete(prompt, max_tokens=16000)
 
 
 def fix_long_sentences(sentences):
@@ -250,9 +253,10 @@ def write_story(rows):
         if not set(names) & used_names:
             break
         log.warning("Plan reused names %s, re-planning", set(names) & used_names)
-    first = write_half(plan, 1)
-    second = write_half(plan, 2, first)
-    sentences = fix_long_sentences(to_sentences(first) + to_sentences(second))
+    text = ""
+    for part in range(PARTS):
+        text += "\n" + write_part(plan, part, text)
+    sentences = fix_long_sentences(to_sentences(text))
     sentences = adjust_length(plan, sentences)
     sentences = fix_long_sentences(sentences)
     words, problems = self_check(plan, sentences)

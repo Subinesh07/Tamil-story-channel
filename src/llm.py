@@ -1,8 +1,14 @@
-"""Pluggable text model for story writing.
+"""Free-first text model chain for story writing.
 
-LLM_PROVIDER = gemini (default, free tier) | anthropic (paid)
-LLM_API_KEY  = the provider's key (GitHub secret)
-LLM_MODEL    = optional model override
+Every request tries the providers in order and moves to the next one when a provider is
+busy, out of free quota, or broken. Only providers with a key set are used.
+
+  GEMINI   key: LLM_API_KEY          (Google AI Studio, free tier)
+  OPENROUTER key: OPENROUTER_API_KEY (free ":free" models)
+  GROQ     key: GROQ_API_KEY         (free tier)
+  ANTHROPIC key: ANTHROPIC_API_KEY   (paid, optional; or LLM_PROVIDER=anthropic with LLM_API_KEY)
+
+Order can be changed with LLM_ORDER, e.g. "openrouter,gemini,groq".
 """
 import json
 import logging
@@ -13,146 +19,225 @@ import time
 import requests
 
 log = logging.getLogger(__name__)
-DEFAULT_MODELS = {"gemini": "gemini-3.8-flash", "anthropic": "claude-sonnet-5-5"}
-_resolved = {}
-
-
-def _gemini_models(key):
-    """Text models this key can use, best first: newest flash, then flash-lite, then pro."""
-    r = requests.get("https://generativelanguage.googleapis.com/v1beta/models",
-                     headers={"x-goog-api-key": key}, params={"pageSize": 200}, timeout=60)
-    r.raise_for_status()
-    found = []
-    for m in r.json().get("models", []):
-        name = m["name"].split("/")[-1]
-        kind = re.fullmatch(r"gemini-([\d.]+)-(flash|flash-lite|pro)", name)
-        if kind and "generateContent" in m.get("supportedGenerationMethods", []):
-            rank = {"flash": 0, "flash-lite": 1, "pro": 2}[kind.group(2)]
-            found.append((rank, [-int(x) for x in kind.group(1).split(".")], name))
-    return [n for _, _, n in sorted(found)]
-
-
-def _latest_gemini_flash(key):
-    """Ask Google which models this key can use and pick the newest plain 'flash' text model."""
-    r = requests.get("https://generativelanguage.googleapis.com/v1beta/models",
-                     headers={"x-goog-api-key": key}, params={"pageSize": 200}, timeout=60)
-    r.raise_for_status()
-    names = []
-    for m in r.json().get("models", []):
-        name = m["name"].split("/")[-1]
-        if ("generateContent" in m.get("supportedGenerationMethods", [])
-                and re.fullmatch(r"gemini-[\d.]+-flash", name)):
-            names.append(name)
-    if not names:
-        raise LLMError("no Gemini flash model available for this key")
-    def version(n):
-        return [int(x) for x in re.findall(r"\d+", n)]
-    return max(names, key=version)
+DEFAULT_ORDER = "gemini,openrouter,groq,anthropic"
+TIMEOUT = 300
 
 
 class LLMError(RuntimeError):
     pass
 
 
-def _gemini(prompt, model, key, want_json, max_tokens):
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
+class Unavailable(LLMError):
+    """Busy, out of quota, model gone: try the next model/provider."""
+
+
+# ---------------------------------------------------------------- helpers
+
+def _check(r, name):
+    if r.status_code == 200:
+        return
+    body = r.text[:300]
+    if r.status_code in (401, 403):
+        raise Unavailable(f"{name}: key rejected (HTTP {r.status_code})")
+    if r.status_code in (404, 410, 429, 500, 502, 503, 504, 529) or "quota" in body.lower():
+        raise Unavailable(f"{name}: HTTP {r.status_code} {body[:150]}")
+    raise LLMError(f"{name}: HTTP {r.status_code} {body}")
+
+
+def _version_key(name):
+    return [-int(x) for x in re.findall(r"\d+", name)[:3]]
+
+
+# ---------------------------------------------------------------- Gemini
+
+def gemini_models(key):
+    r = requests.get("https://generativelanguage.googleapis.com/v1beta/models",
+                     headers={"x-goog-api-key": key}, params={"pageSize": 200}, timeout=60)
+    _check(r, "gemini")
+    found = []
+    for m in r.json().get("models", []):
+        name = m["name"].split("/")[-1]
+        kind = re.fullmatch(r"gemini-([\d.]+)-(flash|flash-lite|pro)", name)
+        if kind and "generateContent" in m.get("supportedGenerationMethods", []):
+            rank = {"flash": 0, "flash-lite": 1, "pro": 2}[kind.group(2)]
+            found.append((rank, _version_key(kind.group(1)), name))
+    return [n for _, _, n in sorted(found)]
+
+
+def gemini_call(prompt, model, key, want_json, max_tokens):
     cfg = {"temperature": 0.9, "maxOutputTokens": max_tokens}
     if want_json:
         cfg["responseMimeType"] = "application/json"
-    r = requests.post(url, headers={"x-goog-api-key": key},
-                      json={"contents": [{"parts": [{"text": prompt}]}], "generationConfig": cfg},
-                      timeout=300)
-    if r.status_code == 429:
-        raise LLMError("RATE_LIMIT: Gemini free-tier quota reached for today")
-    if r.status_code in (500, 502, 503, 504):
-        raise LLMError(f"BUSY: Gemini HTTP {r.status_code} (servers overloaded)")
-    if r.status_code != 200:
-        raise LLMError(f"Gemini HTTP {r.status_code}: {r.text[:300]}")
+    r = requests.post(
+        f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent",
+        headers={"x-goog-api-key": key},
+        json={"contents": [{"parts": [{"text": prompt}]}], "generationConfig": cfg},
+        timeout=TIMEOUT)
+    _check(r, f"gemini/{model}")
     data = r.json()
     try:
         return "".join(p.get("text", "") for p in data["candidates"][0]["content"]["parts"])
     except (KeyError, IndexError):
-        raise LLMError(f"Gemini returned no text: {str(data)[:300]}")
+        raise Unavailable(f"gemini/{model}: empty answer")
 
 
-def _anthropic(prompt, model, key, want_json, max_tokens):
+# ---------------------------------------------------------------- OpenAI-compatible (OpenRouter, Groq)
+
+PREFERRED = ["deepseek", "qwen", "gemini", "llama-3.3", "llama-4", "gpt-oss", "gemma", "mistral", "llama"]
+
+
+def _rank_by_family(names):
+    def key(n):
+        low = n.lower()
+        fam = next((i for i, f in enumerate(PREFERRED) if f in low), len(PREFERRED))
+        return (fam, _version_key(low))
+    return sorted(names, key=key)
+
+
+def openrouter_models(key):
+    r = requests.get("https://openrouter.ai/api/v1/models", timeout=60)
+    _check(r, "openrouter")
+    free = []
+    for m in r.json().get("data", []):
+        p = m.get("pricing", {})
+        if (m["id"].endswith(":free") and str(p.get("prompt", "1")) in ("0", "0.0")
+                and (m.get("context_length") or 0) >= 32000
+                and "text" in m.get("architecture", {}).get("output_modalities", ["text"])):
+            free.append(m["id"])
+    return _rank_by_family(free)[:6]
+
+
+def groq_models(key):
+    r = requests.get("https://api.groq.com/openai/v1/models",
+                     headers={"Authorization": f"Bearer {key}"}, timeout=60)
+    _check(r, "groq")
+    names = [m["id"] for m in r.json().get("data", [])
+             if m.get("active", True) and not re.search(r"whisper|tts|guard|vision|embed", m["id"])]
+    return _rank_by_family(names)[:4]
+
+
+def _openai_style(url, name, prompt, model, key, want_json, max_tokens, extra_headers=None):
+    body = {"model": model, "temperature": 0.9, "max_tokens": max_tokens,
+            "messages": [{"role": "user", "content": prompt}]}
+    if want_json:
+        body["messages"][0]["content"] += "\n\nReturn only valid JSON, no markdown fences."
+    headers = {"Authorization": f"Bearer {key}", **(extra_headers or {})}
+    r = requests.post(url, headers=headers, json=body, timeout=TIMEOUT)
+    if r.status_code == 400 and "max_tokens" in r.text and max_tokens > 8000:
+        return _openai_style(url, name, prompt, model, key, want_json, 8000, extra_headers)
+    _check(r, f"{name}/{model}")
+    try:
+        text = r.json()["choices"][0]["message"]["content"] or ""
+    except (KeyError, IndexError):
+        raise Unavailable(f"{name}/{model}: empty answer")
+    return re.sub(r"<think>.*?</think>", "", text, flags=re.S).strip()
+
+
+def openrouter_call(prompt, model, key, want_json, max_tokens):
+    return _openai_style("https://openrouter.ai/api/v1/chat/completions", "openrouter",
+                         prompt, model, key, want_json, max_tokens,
+                         {"X-Title": "Tamil Story Uploader"})
+
+
+def groq_call(prompt, model, key, want_json, max_tokens):
+    return _openai_style("https://api.groq.com/openai/v1/chat/completions", "groq",
+                         prompt, model, key, want_json, min(max_tokens, 32000))
+
+
+# ---------------------------------------------------------------- Anthropic (paid, optional)
+
+def anthropic_models(key):
+    return [os.environ.get("ANTHROPIC_MODEL", "claude-sonnet-5-5")]
+
+
+def anthropic_call(prompt, model, key, want_json, max_tokens):
     if want_json:
         prompt += "\n\nReturn only valid JSON, with no markdown fences."
     r = requests.post("https://api.anthropic.com/v1/messages",
-                      headers={"x-api-key": key, "anthropic-version": "2023-06-01",
-                               "content-type": "application/json"},
+                      headers={"x-api-key": key, "anthropic-version": "2023-06-01"},
                       json={"model": model, "max_tokens": max_tokens,
                             "messages": [{"role": "user", "content": prompt}]},
-                      timeout=600)
-    if r.status_code == 429:
-        raise LLMError("RATE_LIMIT: Anthropic rate limit")
-    if r.status_code != 200:
-        raise LLMError(f"Anthropic HTTP {r.status_code}: {r.text[:300]}")
+                      timeout=TIMEOUT)
+    _check(r, f"anthropic/{model}")
     return "".join(b.get("text", "") for b in r.json()["content"] if b["type"] == "text")
 
 
-def complete(prompt, want_json=False, max_tokens=32000, retries=3):
-    provider = os.environ.get("LLM_PROVIDER", "gemini").lower()
-    key = os.environ.get("LLM_API_KEY", "")
-    if not key:
-        raise LLMError("LLM_API_KEY is not set")
-    model = _resolved.get(provider) or os.environ.get("LLM_MODEL") or DEFAULT_MODELS[provider]
-    fn = {"gemini": _gemini, "anthropic": _anthropic}[provider]
-    last = None
-    for attempt in range(retries):
-        try:
-            text = fn(prompt, model, key, want_json, max_tokens)
-            _resolved[provider] = model
-            return parse_json(text) if want_json else text
-        except LLMError as e:
-            if str(e).startswith("RATE_LIMIT"):
-                raise
-            if provider == "gemini" and "HTTP 404" in str(e):
-                # model retired: switch to the newest flash model this key can use
-                new = _latest_gemini_flash(key)
-                if new != model:
-                    log.warning("Gemini model %s unavailable, switching to %s", model, new)
-                    model = _resolved[provider] = new
-                    continue
-            last = e
-        except (ValueError, requests.RequestException) as e:
-            last = e
-        log.warning("LLM attempt %d failed: %s", attempt + 1, str(last)[:200])
-        busy = str(last).startswith("BUSY") or isinstance(last, requests.RequestException)
-        time.sleep((30 if busy else 10) * 2 ** attempt if busy else 10 * (attempt + 1))
-    if str(last).startswith("BUSY") or isinstance(last, requests.RequestException):
-        if provider == "gemini":
-            alt = _try_other_gemini_models(prompt, model, key, want_json, max_tokens)
-            if alt is not None:
-                return alt
-        raise LLMError(f"BUSY: {last}")
-    raise LLMError(str(last))
+# ---------------------------------------------------------------- chain
+
+PROVIDERS = {
+    "gemini": (lambda: os.environ.get("LLM_API_KEY") if os.environ.get("LLM_PROVIDER", "gemini") == "gemini" else None,
+               gemini_models, gemini_call),
+    "openrouter": (lambda: os.environ.get("OPENROUTER_API_KEY"), openrouter_models, openrouter_call),
+    "groq": (lambda: os.environ.get("GROQ_API_KEY"), groq_models, groq_call),
+    "anthropic": (lambda: os.environ.get("ANTHROPIC_API_KEY") or
+                  (os.environ.get("LLM_API_KEY") if os.environ.get("LLM_PROVIDER") == "anthropic" else None),
+                  anthropic_models, anthropic_call),
+}
+_model_cache = {}
+_benched = {}   # model -> time it failed; skipped for 10 minutes
+_last_good = None
 
 
-
-def _try_other_gemini_models(prompt, busy_model, key, want_json, max_tokens):
-    """The main model is overloaded: try the other free Gemini models, two quick tries each."""
-    try:
-        others = [m for m in _gemini_models(key) if m != busy_model]
-    except requests.RequestException:
-        return None
-    for alt in others:
-        for attempt in range(2):
+def _candidates():
+    order = [p.strip() for p in os.environ.get("LLM_ORDER", DEFAULT_ORDER).split(",") if p.strip()]
+    out = []
+    for p in order:
+        get_key, list_models, call = PROVIDERS[p]
+        key = get_key()
+        if not key:
+            continue
+        if p not in _model_cache:
             try:
-                text = _gemini(prompt, alt, key, want_json, max_tokens)
-                log.warning("%s is overloaded; used %s instead", busy_model, alt)
-                _resolved["gemini"] = alt
-                return parse_json(text) if want_json else text
-            except LLMError as e:
-                if str(e).startswith("RATE_LIMIT") or "HTTP 404" in str(e):
-                    break  # this model has no free quota or is retired: next model
-                time.sleep(20)
-            except (ValueError, requests.RequestException):
-                time.sleep(20)
-    return None
+                _model_cache[p] = list_models(key)
+                log.info("%s models: %s", p, ", ".join(_model_cache[p][:4]) or "none")
+            except (LLMError, requests.RequestException) as e:
+                log.warning("Could not list %s models: %s", p, str(e)[:150])
+                _model_cache[p] = []
+        for m in _model_cache[p]:
+            out.append((p, m, key, call))
+    if not out:
+        raise LLMError("No AI provider key is set (LLM_API_KEY / OPENROUTER_API_KEY / GROQ_API_KEY)")
+    return out
+
+
+def complete(prompt, want_json=False, max_tokens=32000, rounds=3):
+    """Try every available free model; wait and go round again if all are busy."""
+    global _last_good
+    for rnd in range(rounds):
+        cands = _candidates()
+        if _last_good in [(p, m) for p, m, _, _ in cands]:
+            cands.sort(key=lambda c: (c[0], c[1]) != _last_good)
+        for provider, model, key, call in cands:
+            if time.time() - _benched.get(model, 0) < 600:
+                continue
+            for attempt in range(2):
+                try:
+                    text = call(prompt, model, key, want_json, max_tokens)
+                    result = parse_json(text) if want_json else text
+                    if not want_json and len(text.strip()) < 20:
+                        raise Unavailable("too short")
+                    if (provider, model) != _last_good:
+                        log.info("Using %s / %s", provider, model)
+                    _last_good = (provider, model)
+                    return result
+                except Unavailable as e:
+                    log.warning("%s", str(e)[:200])
+                    _benched[model] = time.time()
+                    break
+                except (ValueError, requests.RequestException) as e:
+                    log.warning("%s/%s attempt %d: %s", provider, model, attempt + 1, str(e)[:150])
+                    time.sleep(10)
+            else:
+                _benched[model] = time.time()
+        wait = 120 * (rnd + 1)
+        log.warning("All AI models busy (round %d/%d); waiting %d s", rnd + 1, rounds, wait)
+        time.sleep(wait)
+        _benched.clear()
+    raise LLMError("BUSY: every free AI model is busy or out of quota right now")
 
 
 def parse_json(text):
     text = text.strip()
     text = re.sub(r"^```(?:json)?\s*|\s*```$", "", text)
-    return json.loads(text)
+    start = min([i for i in (text.find("{"), text.find("[")) if i >= 0], default=0)
+    return json.loads(text[start:])

@@ -40,8 +40,11 @@ jobs:
       - name: Write stories
         env:
           LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           LLM_PROVIDER: ${{ vars.LLM_PROVIDER || 'gemini' }}
-          LLM_MODEL: ${{ vars.LLM_MODEL }}
+          LLM_ORDER: ${{ vars.LLM_ORDER }}
         run: |
           COUNT="${{ inputs.count || '0' }}"
           if [ "$COUNT" = "0" ]; then

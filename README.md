@@ -47,8 +47,16 @@ Add each secret at **GitHub repo → Settings → Secrets and variables → Acti
 | `LLM_API_KEY` | **Gemini (free):** https://aistudio.google.com → **Get API key** → **Create API key**. **Or Claude (paid):** https://console.anthropic.com → **API keys** |
 | `YT_CLIENT_ID`, `YT_CLIENT_SECRET`, `YT_REFRESH_TOKEN` | Step 2 below |
 
-If you use Claude instead of Gemini, go to the **Variables** tab and add `LLM_PROVIDER` = `anthropic`.
-Optional variables: `LLM_MODEL` (override the model), `STORIES_PER_RUN` (default 5).
+**Free backup story writers (recommended).** The story writer tries each free service in turn and
+moves on when one is busy or out of free quota. Add as many as you like:
+
+| Secret | Free key from |
+|---|---|
+| `OPENROUTER_API_KEY` | https://openrouter.ai/settings/keys → **Create key** (no card needed) |
+| `GROQ_API_KEY` | https://console.groq.com/keys → **Create API key** (no card needed) |
+| `ANTHROPIC_API_KEY` | Optional, paid. Used last |
+
+Optional variables: `LLM_ORDER` (for example `openrouter,gemini,groq`), `STORIES_PER_RUN` (default 5).
 
 ### 2. YouTube access (one time, works on a phone)
 Sign in everywhere with **the Google account that owns the channel**.
