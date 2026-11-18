@@ -12,9 +12,8 @@ on:
         required: false
         default: ""
   schedule:
-    # twice a day. Writes the first 30 stories, then refills to 20 when fewer than 10 are pending.
-    - cron: "0 1 * * *"
-    - cron: "0 13 * * *"
+    # every 6 hours. Writes the first 30 stories, then refills to 20 when fewer than 10 are pending.
+    - cron: "0 */6 * * *"
 
 permissions:
   contents: write

@@ -293,13 +293,14 @@ def main():
     want = min(want, args.max_per_run)
     log.info("%d rows, %d pending -> writing %d stories this run", len(rows), pending, want)
 
-    written, failures = 0, 0
+    written, failures, stopped_early = 0, 0, False
     while written < want and failures < 3:
         try:
             row, premise, names = write_story(rows)
         except LLMError as e:
-            if str(e).startswith("RATE_LIMIT"):
-                log.warning("Stopping: %s. The next scheduled run will continue.", e)
+            if str(e).startswith(("RATE_LIMIT", "BUSY")):
+                log.warning("Stopping: %s. The next scheduled run will continue.", str(e)[:200])
+                stopped_early = True
                 break
             failures += 1
             log.warning("Story attempt failed (%s); trying a new plan", e)
@@ -309,7 +310,8 @@ def main():
         append_index(row["id"], row["genre"], row["title_en"], premise, names)
         written += 1
     log.info("Wrote %d stories", written)
-    return 0 if written or want == 0 else 1
+    # quota / busy servers are temporary: not a failure, the next run continues
+    return 0 if written or want == 0 or stopped_early else 1
 
 
 if __name__ == "__main__":

@@ -46,9 +46,11 @@ def _gemini(prompt, model, key, want_json, max_tokens):
         cfg["responseMimeType"] = "application/json"
     r = requests.post(url, headers={"x-goog-api-key": key},
                       json={"contents": [{"parts": [{"text": prompt}]}], "generationConfig": cfg},
-                      timeout=600)
+                      timeout=300)
     if r.status_code == 429:
         raise LLMError("RATE_LIMIT: Gemini free-tier quota reached for today")
+    if r.status_code in (500, 502, 503, 504):
+        raise LLMError(f"BUSY: Gemini HTTP {r.status_code} (servers overloaded)")
     if r.status_code != 200:
         raise LLMError(f"Gemini HTTP {r.status_code}: {r.text[:300]}")
     data = r.json()
@@ -74,7 +76,7 @@ def _anthropic(prompt, model, key, want_json, max_tokens):
     return "".join(b.get("text", "") for b in r.json()["content"] if b["type"] == "text")
 
 
-def complete(prompt, want_json=False, max_tokens=32000, retries=3):
+def complete(prompt, want_json=False, max_tokens=32000, retries=5):
     provider = os.environ.get("LLM_PROVIDER", "gemini").lower()
     key = os.environ.get("LLM_API_KEY", "")
     if not key:
@@ -100,8 +102,11 @@ def complete(prompt, want_json=False, max_tokens=32000, retries=3):
             last = e
         except (ValueError, requests.RequestException) as e:
             last = e
-        log.warning("LLM attempt %d failed: %s", attempt + 1, last)
-        time.sleep(10 * (attempt + 1))
+        log.warning("LLM attempt %d failed: %s", attempt + 1, str(last)[:200])
+        busy = str(last).startswith("BUSY") or isinstance(last, requests.RequestException)
+        time.sleep((30 if busy else 10) * 2 ** attempt if busy else 10 * (attempt + 1))
+    if str(last).startswith("BUSY") or isinstance(last, requests.RequestException):
+        raise LLMError(f"BUSY: {last}")
     raise LLMError(str(last))
 
 
