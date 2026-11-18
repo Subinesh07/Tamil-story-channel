@@ -50,20 +50,23 @@ Add each secret at **GitHub repo → Settings → Secrets and variables → Acti
 If you use Claude instead of Gemini, go to the **Variables** tab and add `LLM_PROVIDER` = `anthropic`.
 Optional variables: `LLM_MODEL` (override the model), `STORIES_PER_RUN` (default 5).
 
-### 2. YouTube access (one time)
-1. Go to https://console.cloud.google.com and create a new project.
-2. Open **APIs & Services → Library**, search **YouTube Data API v3**, and click **Enable**.
-3. Open **APIs & Services → OAuth consent screen** (shown as "Google Auth Platform"):
-   - Choose **External** and fill in the app name and your email.
-   - Under **Audience**, click **Publish app** so the status is **In production**.
-     If you skip this, the refresh token **expires after 7 days** and uploads stop.
-4. Open **Clients → Create client → Desktop app → Create → Download JSON**. Rename the file to `client_secret.json`.
-5. On your laptop, run:
-   ```
-   pip install google-auth-oauthlib
-   python get_refresh_token.py
-   ```
-   Sign in with **the Google account that owns the channel**. On the "Google hasn't verified this app" screen, click **Advanced → Go to (app)**. Then copy the three printed values into GitHub secrets.
+### 2. YouTube access (one time, works on a phone)
+Sign in everywhere with **the Google account that owns the channel**.
+
+1. **Project:** open https://console.cloud.google.com/projectcreate, name it `tamil-story`, then tap **Create**.
+2. **Enable YouTube:** open https://console.cloud.google.com/apis/library/youtube.googleapis.com, then tap **Enable**.
+3. **Login screen:** open https://console.cloud.google.com/auth/overview and tap **Get started**. Enter app name `Tamil Story Uploader` and your email, choose **External**, then tap **Create**.
+   Then open https://console.cloud.google.com/auth/audience and tap **Publish app**. If you skip this, the token **expires after 7 days**.
+4. **Client:** open https://console.cloud.google.com/auth/clients/create and choose **Web application**.
+   Under **Authorized redirect URIs**, add `https://developers.google.com/oauthplayground`, then tap **Create**.
+   Save the Client ID as secret `YT_CLIENT_ID` and the Client secret as `YT_CLIENT_SECRET`.
+5. **Refresh token:** open https://developers.google.com/oauthplayground (use "Desktop site" on a phone).
+   - Tap the **⚙️ gear** and tick **Use your own OAuth credentials**. Paste the Client ID and Client secret.
+   - In **Input your own scopes**, paste `https://www.googleapis.com/auth/youtube.upload`, then tap **Authorize APIs**.
+   - Sign in. On "Google hasn't verified this app", tap **Advanced → Go to Tamil Story Uploader → Continue**.
+   - Tap **Exchange authorization code for tokens**. Copy the **Refresh token** (starts with `1//`) into secret `YT_REFRESH_TOKEN`.
+
+(Laptop alternative: create a **Desktop app** client instead, download it as `client_secret.json`, and run `python get_refresh_token.py`.)
 
 ### 3. YouTube channel requirements
 - **Verify the channel** at https://www.youtube.com/verify. Without this, uploads longer than 15 minutes are rejected.
