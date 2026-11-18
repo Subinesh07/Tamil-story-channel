@@ -17,6 +17,21 @@ DEFAULT_MODELS = {"gemini": "gemini-3.8-flash", "anthropic": "claude-sonnet-5-5"
 _resolved = {}
 
 
+def _gemini_models(key):
+    """Text models this key can use, best first: newest flash, then flash-lite, then pro."""
+    r = requests.get("https://generativelanguage.googleapis.com/v1beta/models",
+                     headers={"x-goog-api-key": key}, params={"pageSize": 200}, timeout=60)
+    r.raise_for_status()
+    found = []
+    for m in r.json().get("models", []):
+        name = m["name"].split("/")[-1]
+        kind = re.fullmatch(r"gemini-([\d.]+)-(flash|flash-lite|pro)", name)
+        if kind and "generateContent" in m.get("supportedGenerationMethods", []):
+            rank = {"flash": 0, "flash-lite": 1, "pro": 2}[kind.group(2)]
+            found.append((rank, [-int(x) for x in kind.group(1).split(".")], name))
+    return [n for _, _, n in sorted(found)]
+
+
 def _latest_gemini_flash(key):
     """Ask Google which models this key can use and pick the newest plain 'flash' text model."""
     r = requests.get("https://generativelanguage.googleapis.com/v1beta/models",
@@ -76,7 +91,7 @@ def _anthropic(prompt, model, key, want_json, max_tokens):
     return "".join(b.get("text", "") for b in r.json()["content"] if b["type"] == "text")
 
 
-def complete(prompt, want_json=False, max_tokens=32000, retries=5):
+def complete(prompt, want_json=False, max_tokens=32000, retries=3):
     provider = os.environ.get("LLM_PROVIDER", "gemini").lower()
     key = os.environ.get("LLM_API_KEY", "")
     if not key:
@@ -106,8 +121,35 @@ def complete(prompt, want_json=False, max_tokens=32000, retries=5):
         busy = str(last).startswith("BUSY") or isinstance(last, requests.RequestException)
         time.sleep((30 if busy else 10) * 2 ** attempt if busy else 10 * (attempt + 1))
     if str(last).startswith("BUSY") or isinstance(last, requests.RequestException):
+        if provider == "gemini":
+            alt = _try_other_gemini_models(prompt, model, key, want_json, max_tokens)
+            if alt is not None:
+                return alt
         raise LLMError(f"BUSY: {last}")
     raise LLMError(str(last))
+
+
+
+def _try_other_gemini_models(prompt, busy_model, key, want_json, max_tokens):
+    """The main model is overloaded: try the other free Gemini models, two quick tries each."""
+    try:
+        others = [m for m in _gemini_models(key) if m != busy_model]
+    except requests.RequestException:
+        return None
+    for alt in others:
+        for attempt in range(2):
+            try:
+                text = _gemini(prompt, alt, key, want_json, max_tokens)
+                log.warning("%s is overloaded; used %s instead", busy_model, alt)
+                _resolved["gemini"] = alt
+                return parse_json(text) if want_json else text
+            except LLMError as e:
+                if str(e).startswith("RATE_LIMIT") or "HTTP 404" in str(e):
+                    break  # this model has no free quota or is retired: next model
+                time.sleep(20)
+            except (ValueError, requests.RequestException):
+                time.sleep(20)
+    return None
 
 
 def parse_json(text):
