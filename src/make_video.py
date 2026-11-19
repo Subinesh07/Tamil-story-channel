@@ -102,7 +102,7 @@ def produce(row, upload=True, check_duration=True):
     thumb = None
     try:
         thumb = make_thumbnail(story_imgs[min(1, len(story_imgs) - 1)], title,
-                               out / f"story_{rid}_thumbnail.jpg")
+                               out / f"story_{rid}_thumbnail.jpg", variant=n)
     except Exception as e:
         log.warning("Thumbnail failed: %s", e)
     if not ok:
@@ -114,10 +114,46 @@ def produce(row, upload=True, check_duration=True):
     log.info("== Upload ==")
     from youtube_upload import set_thumbnail
     from youtube_upload import upload as yt_upload
-    video_id = yt_upload(out / video.name, row)
+    video_id = yt_upload(out / video.name, {**row, "chapters": chapters(scenes)})
     if thumb:
         set_thumbnail(video_id, thumb)
+    try:
+        from community import draft
+        (out / "community_post.md").write_text(draft(row, video_id), encoding="utf-8")
+    except Exception as e:
+        log.warning("Community post draft failed: %s", e)
     return video_id
+
+
+CHAPTER_MARKS = [(0.0, "கதை ஆரம்பம்"), (0.35, "கதை நகர்கிறது"), (0.6, "திருப்புமுனை"),
+                 (0.85, "உச்சக்கட்டம்")]
+
+
+def _stamp(t):
+    t = int(t)
+    return f"{t // 3600}:{t % 3600 // 60:02d}:{t % 60:02d}" if t >= 3600 else f"{t // 60}:{t % 60:02d}"
+
+
+def chapters(scenes):
+    """YouTube chapters (need 0:00 first, at least 3, each at least 10 s), snapped to scene cuts."""
+    story = [s for s in scenes if s["kind"] == "story"]
+    if not story:
+        return ""
+    s0, s1 = story[0]["start"], story[-1]["end"]
+    marks = [(0.0, "அறிமுகம்")] if scenes[0]["kind"] == "intro" else []
+    for frac, label in CHAPTER_MARKS:
+        target = s0 + frac * (s1 - s0)
+        t = min((s["start"] for s in story), key=lambda x: abs(x - target))
+        marks.append((t, label))
+    if scenes[-1]["kind"] == "outro":
+        marks.append((scenes[-1]["start"], "முடிவு"))
+    clean = []
+    for t, label in sorted(marks):
+        if not clean:
+            clean.append((0.0, label))
+        elif t - clean[-1][0] >= 10:
+            clean.append((t, label))
+    return "\n".join(f"{_stamp(t)} {label}" for t, label in clean) if len(clean) >= 3 else ""
 
 
 def main():

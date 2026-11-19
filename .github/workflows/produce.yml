@@ -17,6 +17,7 @@ on:
 
 permissions:
   contents: write
+  issues: write
 
 concurrency:
   group: stories-csv          # never two jobs editing stories.csv at once
@@ -27,9 +28,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.11"
           cache: pip
@@ -59,13 +60,25 @@ jobs:
           if [ "${{ inputs.upload }}" = "false" ]; then ARGS="$ARGS --no-upload"; fi
           python src/make_video.py $ARGS
 
+      - name: Community post draft -> GitHub issue
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ -f output/community_post.md ]; then
+            gh issue create --title "📣 Community post for today's video ($(date +%d-%b))" \
+              --body-file output/community_post.md --label community-post 2>/dev/null \
+            || gh issue create --title "📣 Community post for today's video ($(date +%d-%b))" \
+              --body-file output/community_post.md
+          fi
+
       - name: Update schedule page
         if: always()
         run: python src/schedule.py
 
       - name: Save video, timings and log
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: video-${{ github.run_number }}
           path: |

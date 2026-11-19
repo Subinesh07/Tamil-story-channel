@@ -28,7 +28,8 @@ def build_metadata(row):
     title = row["title_ta"].strip()[:100]
     script = re.sub(r"\d+\.\s*", "", row["script_ta"]).replace("।", ".").strip()
     intro = (row.get("description_ta") or "").strip() or f"{script[:200].rstrip()}…"
-    description = (f"{intro}\n\n{CHANNEL_NAME_TA} ({CHANNEL_NAME_EN}) - தினமும் மாலை 7 மணிக்கு ஒரு புது கதை.\n"
+    chapters = f"\n\n{row['chapters']}" if row.get("chapters") else ""
+    description = (f"{intro}{chapters}\n\n{CHANNEL_NAME_TA} ({CHANNEL_NAME_EN}) - தினமும் மாலை 7 மணிக்கு ஒரு புது கதை.\n"
                    f"{DISCLOSURE_LINE}\n\n{HASHTAGS}")
     publish = datetime.fromisoformat(row["publish_at"]) if row.get("publish_at") else None
     status = {"privacyStatus": "private", "selfDeclaredMadeForKids": False,

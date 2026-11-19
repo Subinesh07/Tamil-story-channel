@@ -1,0 +1,3 @@
+# Competitor channels to track every week: one per line.
+# Accepts a channel link, an @handle, or a channel ID (starts with UC...).
+# If fewer than 5 are listed, similar Tamil story channels are found automatically.
