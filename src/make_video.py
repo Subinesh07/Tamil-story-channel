@@ -118,8 +118,10 @@ def produce(row, upload=True, check_duration=True):
 
     log.info("== Quality gate ==")
     frame = out / f"story_{rid}_subtitle_frame.png"
+    from config import DOOM_HARD, DOOM_SOFT
+    bounds = {"hard": DOOM_HARD, "soft": DOOM_SOFT} if row.get("genre") == "doomsday" else {}
     ok, failures, warnings = quality_gate(video, ass, timings, sentences, images, frame,
-                                          check_duration=check_duration)
+                                          check_duration=check_duration, **bounds)
     for w in warnings + img_warnings:
         log.warning("QC warning: %s", w)
     shutil.copy(video, out / video.name)

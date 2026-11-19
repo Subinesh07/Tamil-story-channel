@@ -60,6 +60,11 @@ X264_CRF = 21
 # --- Quality gate (minutes) ---
 HARD_MIN, HARD_MAX = 12.0, 30.0   # fail outside; warn outside the soft range
 SOFT_MIN, SOFT_MAX = 18.0, 26.0
+# Weekend Doomsday serial (12 PM Sat/Sun): shorter parts, so two videos a day fit Leda's free limit
+DOOM_MIN_WORDS, DOOM_MAX_WORDS = 1150, 1450
+DOOM_HARD = (8.0, 16.0)
+DOOM_SOFT = (9.5, 14.0)
+DOOM_HOUR = 12
 MAX_AV_DRIFT = 1.0
 
 # --- Scheduling / YouTube ---

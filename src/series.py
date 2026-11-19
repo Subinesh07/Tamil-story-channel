@@ -45,6 +45,55 @@ GENRES = {
 }
 
 
+GENRES["doomsday"] = {
+    "ta": "டூம்ஸ்டே தொடர்", "parts": 7,
+    "brief": "an ORIGINAL realistic sci-fi disaster thriller (fiction): a giant solar storm will black out "
+             "Earth in 7 days; each part is one day of the countdown. Suspense, chases, family emotion, "
+             "brave ordinary people. NO gore or graphic violence, no real politicians, agencies or brands, "
+             "and nothing from Marvel, DC or any film (no superheroes, no famous villain names)"}
+
+# Pre-written bible (approved sample), so no AI tokens are spent creating it
+DOOMSDAY_BIBLE = {
+    "id": "doomsday-1", "genre": "doomsday", "status": "active", "parts_total": 7, "parts_done": 0,
+    "so_far": [], "title_ta": "டூம்ஸ்டே: கடைசி 7 நாட்கள்", "title_en": "Doomsday: The Last 7 Days",
+    "premise_en": "Meera, a young astronomer at a Kodaikanal observatory, discovers that a giant solar "
+                  "storm will black out the whole world in 7 days. Nobody believes her, secretive "
+                  "officials try to silence her, and she races to Chennai to protect her father and "
+                  "little brother, and finally to save the city's power grid.",
+    "characters": [
+        {"name": "மீரா", "role": "young astronomer, brave and clever heroine", "age": 28,
+         "appearance_en": "slim Tamil woman, black hair in a loose braid, round black glasses, "
+                          "maroon kurta with a grey hoodie, ID card lanyard"},
+        {"name": "செல்வம்", "role": "Meera's father, a kind Chennai auto-rickshaw driver", "age": 58,
+         "appearance_en": "thin Tamil man, grey moustache, short grey hair, khaki shirt, white veshti"},
+        {"name": "அர்ஜுன்", "role": "Meera's 10-year-old brother, curious and funny", "age": 10,
+         "appearance_en": "small Tamil boy, messy hair, blue school t-shirt, red backpack"},
+        {"name": "ராகவன்", "role": "cold, secretive senior official who wants the news hidden", "age": 50,
+         "appearance_en": "tall Tamil man, neat grey beard, black coat, rimless glasses"},
+        {"name": "கார்த்திக்", "role": "Meera's journalist friend who slowly believes her", "age": 30,
+         "appearance_en": "Tamil man, short beard, checked shirt, camera bag"},
+    ],
+    "arc": [
+        "Day 7: at night in the Kodaikanal lab Meera finds a giant sunspot; her maths says a solar storm "
+        "hits in 7 days and every light, phone and hospital machine will die. She calls her father. Two "
+        "men in black coats walk in and order her to stop. Cliffhanger: she escapes with a copy of the data.",
+        "Day 6: a tense escape down the misty ghat road to Chennai; the men follow; small strange signs "
+        "begin (phones glitching, a faint red glow in the sky). Cliffhanger: Raghavan is waiting at her home.",
+        "Day 5: Raghavan says the panic would be worse than the storm. Meera and journalist Karthik "
+        "try to warn the public; their video vanishes. Cliffhanger: Arjun overhears something terrible.",
+        "Day 4: the family prepares while neighbours laugh at them; Arjun finds a secret list of the "
+        "few people who will be protected. Cliffhanger: their names are not on it, and Raghavan's is.",
+        "Day 3: the sky turns red at night and people start to believe; panic in the city. Meera learns "
+        "why Raghavan hid the truth. Cliffhanger: Selvam goes missing in the crowd.",
+        "Day 2: Meera finds the real hope: if the city switches off its grid just before the storm, the "
+        "transformers survive. She must reach the control centre. Cliffhanger: Raghavan blocks the door.",
+        "Day 1 to zero hour: Raghavan finally helps; the switch-off happens seconds before the storm; "
+        "the whole world goes dark, but Chennai's lights come back first. The family is together, "
+        "Selvam is a hero, and a final quiet twist about the next storm sets up a possible season 2.",
+    ],
+}
+
+
 def load():
     if PATH.exists():
         return json.loads(PATH.read_text(encoding="utf-8"))
@@ -55,13 +104,41 @@ def save(data):
     PATH.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
+def is_doom(r):
+    return (r.get("series_id") or "").startswith("doomsday") or r.get("genre") == "doomsday"
+
+
 def next_publish_date(rows):
-    """The day after the last scheduled story (never today after 15:00, never in the past)."""
+    """The day after the last scheduled 7 PM story (never today after 15:00, never in the past)."""
     now = datetime.now(TZ)
     earliest = now.date() if now.hour < 15 else now.date() + timedelta(days=1)
-    taken = [datetime.fromisoformat(r["publish_at"]).date() for r in rows if r.get("publish_at")]
+    taken = [datetime.fromisoformat(r["publish_at"]).date() for r in rows
+             if r.get("publish_at") and not is_doom(r)]
     day = max(taken) + timedelta(days=1) if taken else earliest
     return max(day, earliest)
+
+
+def next_doom_date(rows):
+    """Next free Saturday/Sunday after the last Doomsday part (12 PM slot)."""
+    now = datetime.now(TZ)
+    earliest = now.date() if now.hour < 6 else now.date() + timedelta(days=1)
+    taken = [datetime.fromisoformat(r["publish_at"]).date() for r in rows if r.get("publish_at") and is_doom(r)]
+    day = max(max(taken) + timedelta(days=1), earliest) if taken else earliest
+    while day.weekday() not in (5, 6):
+        day += timedelta(days=1)
+    return day
+
+
+def doomsday_series(data):
+    """The active Doomsday series (created from the approved bible the first time)."""
+    for s in data["series"]:
+        if s["genre"] == "doomsday" and s["status"] == "active":
+            return s
+    if any(s["genre"] == "doomsday" for s in data["series"]):
+        return None   # season finished; a new season is only started on request
+    s = json.loads(json.dumps(DOOMSDAY_BIBLE))
+    data["series"].append(s)
+    return s
 
 
 def publish_at(day, hour=None):
@@ -76,7 +153,8 @@ def publish_at(day, hour=None):
 
 def views_per_day_by_series(rows):
     """{series_id: views/day} over our recent videos, via the YouTube API (readonly)."""
-    vids = {r["video_id"]: r.get("series_id") for r in rows if r.get("video_id") and r.get("series_id")}
+    vids = {r["video_id"]: r.get("series_id") for r in rows
+            if r.get("video_id") and r.get("series_id") and not is_doom(r)}
     if not vids or not os.environ.get("YT_REFRESH_TOKEN"):
         return {}
     try:

@@ -5,14 +5,14 @@ from subtitles import count_dialogues, glyph_check
 
 
 def quality_gate(video, ass_path, timings, sentences, images, frame_png,
-                 check_duration=True):
+                 check_duration=True, hard=(HARD_MIN, HARD_MAX), soft=(SOFT_MIN, SOFT_MAX)):
     failures, warnings = [], []
 
     if check_duration:
         minutes = ffprobe_duration(video) / 60
-        if not HARD_MIN <= minutes <= HARD_MAX:
-            failures.append(f"duration {minutes:.1f} min outside {HARD_MIN}-{HARD_MAX}")
-        elif not SOFT_MIN <= minutes <= SOFT_MAX:
+        if not hard[0] <= minutes <= hard[1]:
+            failures.append(f"duration {minutes:.1f} min outside {hard[0]}-{hard[1]}")
+        elif not soft[0] <= minutes <= soft[1]:
             warnings.append(f"duration {minutes:.1f} min is near the limit")
 
     n_subs = count_dialogues(ass_path)

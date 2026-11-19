@@ -259,6 +259,7 @@ LAYOUTS = {"ribbon_top": ribbon_top, "bottom_heavy": bottom_heavy, "split_arrow"
            "horror_title": horror_title}
 GENRE_LAYOUTS = {
     "horror": ["horror_title", "bottom_heavy"],
+    "doomsday": ["horror_title", "bottom_heavy"],
     "family serial": ["split_arrow", "ribbon_top", "bottom_heavy"],
     "family emotional": ["split_arrow", "ribbon_top", "bottom_heavy"],
     "family moral": ["ribbon_top", "bottom_heavy", "split_arrow"],
@@ -276,10 +277,10 @@ def make(bg, texts, out_path, genre="", variant=0, part=""):
     texts.setdefault("line2", "")
     texts["line1"] = texts["line1"] or texts.get("title", "") or texts.get("tagline", "") or "யாரும் எதிர்பார்க்காத கதை…"
     texts["line2"] = texts["line2"] or texts.get("tagline", "") or "கடைசியில் நடந்தது என்ன?"
-    if genre == "horror" and texts.get("title"):
+    if genre in ("horror", "doomsday") and texts.get("title"):
         name = "horror_title"
     texts = {**texts, "_reserve": 340 if part else 100}
-    img = LAYOUTS[name](_prep(bg, horror=(genre == "horror")), texts)
+    img = LAYOUTS[name](_prep(bg, horror=(genre in ("horror", "doomsday"))), texts)
     if part:
         part_ribbon(ImageDraw.Draw(img), part)
     img.save(out_path, "JPEG", quality=92, optimize=True)

@@ -8,6 +8,7 @@ The CSV is saved after every story, so a quota stop never loses finished work.
 """
 import argparse
 import json
+import os
 import logging
 import random
 import re
@@ -86,11 +87,12 @@ def next_opening(rows):
 
 # ---------------- LLM steps ----------------
 
-def plan_story(genre, opening, premises, used_names, topic=None, series_brief=None):
+def plan_story(genre, opening, premises, used_names, topic=None, series_brief=None,
+               minutes="20-25", words="2,650"):
     n_beats = random.randint(MIN_SCENES + 1, MAX_SCENES)
     avoid = "\n".join(premises[-80:]) or "(none yet)"
     prompt = f"""You are planning {'one part of a Tamil story series' if series_brief else 'an original Tamil ' + genre + ' story'} for a YouTube narration channel.
-It will be narrated for 20-25 minutes (about 2,650 Tamil words).
+It will be narrated for {minutes} minutes (about {words} Tamil words).
 {series_brief or ''}
 The part opens with {opening}.
 {('STORY IDEA (build the whole story on this idea, with your own original characters and twists): ' + topic) if topic else ''}
@@ -108,8 +110,8 @@ Return JSON with exactly these keys:
  "thumb_line1_ta": "thumbnail SETUP line, casual Tamil, 4-7 words ending with … (e.g. டிரைவர் என்று காதலித்தாள்… / அம்மாவை தனியாக தவிக்கவிட்ட மகன்…)",
  "thumb_line2_ta": "thumbnail REVEAL tease, 3-6 Tamil words that cut off before the answer, ending ..! or ? (e.g. அவன் யார் என்று தெரிந்ததும்..! / கடைசியில் நடந்தது என்ன?)",
  "thumb_ribbon_ta": "optional extra ribbon, 3-5 Tamil words of shocking contrast (e.g. கோடீஸ்வரியாக திரும்பி வந்த அம்மா!), or empty",
- "thumb_title_ta": "HORROR ONLY: a 1-3 word big Tamil title (e.g. கடைசி பேருந்து), else empty",
- "thumb_tagline_ta": "HORROR ONLY: a 4-7 word mystery tagline with a clue (e.g. 14 பயணிகள்… 15 டிக்கெட் யாருக்கு?), else empty",
+ "thumb_title_ta": "HORROR/DOOMSDAY ONLY: a 1-3 word big Tamil title (e.g. கடைசி பேருந்து), else empty",
+ "thumb_tagline_ta": "HORROR/DOOMSDAY ONLY: a 4-7 word mystery tagline with a clue (e.g. 14 பயணிகள்… 15 டிக்கெட் யாருக்கு?), else empty",
  "thumb_scene_en": "the thumbnail PICTURE that makes people ask 'how is this possible?'. Family/moral/real-life: a SPLIT composition: LEFT half = the setup moment, RIGHT half = the surprising twist (e.g. left: old mother crying alone at an airport with a suitcase; right: same mother smiling, richly dressed beside a luxury car). Horror: one dark night scene with the scared main character in close-up in the foreground, an eerie figure in the background and a clue object or place sign. Adventure: the hero small in front of a huge danger or discovery. Name the characters and give their positions, faces and strong emotions.",
  "title_en": "English title",
  "premise_en": "one-line English premise",
@@ -136,7 +138,8 @@ Each beat becomes ONE illustration, so describe a simple, paintable moment:
 PARTS = 4  # smaller pieces suit free models with short output limits
 
 
-def write_part(plan, part, previous_text="", final_note=None):
+def write_part(plan, part, previous_text="", final_note=None, parts=PARTS, part_words="660-720"):
+    PARTS = parts
     beats = plan["beats"]
     size = -(-len(beats) // PARTS)
     chunk = beats[part * size:(part + 1) * size]
@@ -156,7 +159,7 @@ Beats for this part:
 {beat_text}
 {context}
 {RULES}
-Length: about 660-720 Tamil words for this part (count carefully). Write the full narration, not an outline.
+Length: about {part_words} Tamil words for this part (count carefully). Write the full narration, not an outline.
 Format: ONE sentence per line. No numbering, no headings, no stage directions, no English
 translation. Dialogue is fine inside a sentence. {ending}"""
     return complete(prompt, max_tokens=16000)
@@ -281,11 +284,11 @@ def scene_prompts(plan):
     return prompts
 
 
-def self_check(plan, sentences):
+def self_check(plan, sentences, lo=MIN_WORDS, hi=MAX_WORDS):
     words = sum(word_count(s) for s in sentences)
     problems = []
-    if not MIN_WORDS <= words <= MAX_WORDS:
-        problems.append(f"{words} words (need {MIN_WORDS}-{MAX_WORDS})")
+    if not lo <= words <= hi:
+        problems.append(f"{words} words (need {lo}-{hi})")
     long_ = [s for s in sentences if word_count(s) > MAX_WORDS_PER_SENTENCE]
     if long_:
         problems.append(f"{len(long_)} sentences over {MAX_WORDS_PER_SENTENCE} words")
@@ -327,11 +330,11 @@ def _expand(plan, sentences, need):
     return sentences[:cut] + kept + sentences[cut:]
 
 
-def _trim(sentences):
+def _trim(sentences, max_words=MAX_WORDS):
     """Drop whole sentences from the middle, never the hook (first 10%) or the ending (last 25%)."""
     lo, hi = int(len(sentences) * 0.10), int(len(sentences) * 0.75)
     step = 0
-    while sum(word_count(x) for x in sentences) > MAX_WORDS - 50 and hi - lo > 5:
+    while sum(word_count(x) for x in sentences) > max_words - 50 and hi - lo > 5:
         idx = lo + (step * 7) % (hi - lo)   # spread the cuts out instead of one big hole
         del sentences[idx]
         hi -= 1
@@ -339,14 +342,14 @@ def _trim(sentences):
     return sentences
 
 
-def adjust_length(plan, sentences, passes=3):
+def adjust_length(plan, sentences, passes=3, lo=MIN_WORDS, hi=MAX_WORDS):
     """Expand (up to `passes` times) until long enough, then trim to the maximum."""
     for _ in range(passes):
         words = sum(word_count(x) for x in sentences)
-        if words >= MIN_WORDS:
+        if words >= lo:
             break
-        sentences = _expand(plan, sentences, MIN_WORDS + 150 - words)
-    return _trim(sentences)
+        sentences = _expand(plan, sentences, lo + 150 - words)
+    return _trim(sentences, hi)
 
 
 TOPICS = Path(__file__).resolve().parent.parent / "topics.json"
@@ -368,33 +371,45 @@ def mark_topic_used(i):
     TOPICS.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
-def write_story(rows):
-    """Write the next part of whichever series owns the next publish date."""
+def write_story(rows, doomsday=False):
+    """Write the next part of whichever series owns the next publish date
+    (doomsday=True: the next weekend 12 PM Doomsday part instead)."""
     import series as S
+    from config import DOOM_HOUR, DOOM_MAX_WORDS, DOOM_MIN_WORDS
     premises, used_names = read_index()
     data = S.load()
-    day = S.next_publish_date(rows)
-    genre, why = S.genre_for(day, rows, data)
+    if doomsday:
+        ser = S.doomsday_series(data)
+        if not ser:
+            raise LLMError("NO_DOOMSDAY: season finished")
+        day, genre, why = S.next_doom_date(rows), "doomsday", "weekend 12 PM"
+        lo, hi, n_parts, part_words, mins, approx = DOOM_MIN_WORDS, DOOM_MAX_WORDS, 2, "620-700", "10-12", "1,300"
+    else:
+        day = S.next_publish_date(rows)
+        genre, why = S.genre_for(day, rows, data)
+        lo, hi, n_parts, part_words, mins, approx = MIN_WORDS, MAX_WORDS, PARTS, "660-720", "20-25", "2,650"
     prefer = why.split(":", 1)[1] if why.startswith("weekend:") else None
-    ser = S.active_series(data, genre, prefer) or S.create_series(genre, data, complete, used_names)
+    if not doomsday:
+        ser = S.active_series(data, genre, prefer) or S.create_series(genre, data, complete, used_names)
     part = ser["parts_done"] + 1
     final = part >= ser["parts_total"]
     opening = next_opening(rows)
     log.info("%s %s -> %s part %d/%d (%s)", day, day.strftime("%a"), ser["title_en"], part,
              ser["parts_total"], why)
     series_names = {c["name"] for c in ser.get("characters") or []}
-    plan = plan_story(genre, opening, premises, used_names - series_names, series_brief=S.episode_brief(ser))
+    plan = plan_story(genre, opening, premises, used_names - series_names, series_brief=S.episode_brief(ser),
+                      minutes=mins, words=approx)
     plan["characters"] = (ser.get("characters") or []) + [c for c in plan.get("characters", [])
                                                            if c["name"] not in series_names]
     names = [c["name"] for c in plan["characters"]]
     final_note = (None if final else "End on a strong cliffhanger: the main conflict continues in the next part.")
     text = ""
-    for p in range(PARTS):
-        text += "\n" + write_part(plan, p, text, final_note=final_note)
+    for p in range(n_parts):
+        text += "\n" + write_part(plan, p, text, final_note=final_note, parts=n_parts, part_words=part_words)
     sentences = fix_long_sentences(to_sentences(text))
-    sentences = fix_long_sentences(adjust_length(plan, sentences))
-    sentences = _trim(sentences)
-    words, problems = self_check(plan, sentences)
+    sentences = fix_long_sentences(adjust_length(plan, sentences, lo=lo, hi=hi))
+    sentences = _trim(sentences, hi)
+    words, problems = self_check(plan, sentences, lo, hi)
     problems += originality_and_ending_check(plan, sentences, must_resolve=final,
                                              true_story=(genre == "real lives"))
     if problems:
@@ -414,12 +429,15 @@ def write_story(rows):
     title = plan["title_ta"].strip()
     title = (title[:100 - len(suffix)].rstrip() + suffix) if len(title) + len(suffix) > 100 else title + suffix
     desc = plan.get("description_ta", "")
+    if genre == "doomsday":
+        desc += ("\n\n⏳ டூம்ஸ்டே தொடர்: ஒவ்வொரு சனி, ஞாயிறு மதியம் 12 மணிக்கு புதிய பகுதி!"
+                 "\n(இது முழுக்க கற்பனைக் கதை / This is a work of fiction)")
     if genre == "real lives":
         desc += "\n\n(நிஜ வாழ்க்கை நிகழ்வுகளை அடிப்படையாகக் கொண்ட நாடகமாக்கல் / Dramatised from documented real events)"
     row = {"id": str(next_id), "genre": genre, "title_ta": title,
            "title_en": f"{plan['title_en']} | {ser['title_en']} Part {part}", "script_ta": script,
            "scene_prompts": prompts_field,
-           "publish_at": S.publish_at(day), "status": "pending", "video_id": "", "fail_reason": "",
+           "publish_at": S.publish_at(day, DOOM_HOUR if doomsday else None), "status": "pending", "video_id": "", "fail_reason": "",
            "description_ta": desc, "series_id": ser["id"], "part": str(part),
            "thumb_quote_ta": plan.get("thumb_line1_ta", ""), "thumb_hook_ta": plan.get("thumb_line2_ta", ""),
            "thumb_text": json.dumps({k: plan.get(f"thumb_{k}_ta", "") for k in
@@ -470,6 +488,18 @@ def main():
         save_rows(rows)
         append_index(row["id"], row["genre"], row["title_en"], premise, names)
         written += 1
+    if args.auto and not stopped_early and os.environ.get("DOOMSDAY", "on") != "off":
+        import series as S
+        doom_pending = sum(r["status"] == "pending" and S.is_doom(r) for r in rows)
+        if doom_pending < 2:
+            try:
+                row, premise, names = write_story(rows, doomsday=True)
+                rows.append(row)
+                save_rows(rows)
+                append_index(row["id"], row["genre"], row["title_en"], premise, names)
+                written += 1
+            except LLMError as e:
+                log.warning("Doomsday part not written this run: %s", str(e)[:200])
     log.info("Wrote %d stories", written)
     # quota / busy servers are temporary: not a failure, the next run continues
     return 0 if written or want == 0 or stopped_early else 1
