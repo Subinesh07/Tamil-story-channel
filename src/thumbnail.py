@@ -103,7 +103,7 @@ def make_drama_thumbnail(bg_png, quote, hook, out_path, variant=0):
     d = ImageDraw.Draw(img)
 
     # top: quoted dialogue on a solid band (max 2 lines)
-    quote = f"“{quote.strip().strip('“”\"')}”"
+    quote = "“" + quote.strip().strip('“”"') + "”"
     size = 62
     while size > 40:
         f = _font(size)
