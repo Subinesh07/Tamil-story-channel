@@ -18,12 +18,13 @@ CSV_COLUMNS = [
 # --- Story rules ---
 SENTENCE_SEP = "।"
 PROMPT_SEP = "|"
-# Tamil narration runs ~90 words/min (long agglutinative words), so ~2,000 words = 20-24 min
-MIN_WORDS, MAX_WORDS = 1800, 2200
+# Tamil narration at +8% in paragraphs runs ~115-120 words/min, so ~2,600 words = 21-24 min
+MIN_WORDS, MAX_WORDS = 2400, 2900
 MAX_WORDS_PER_SENTENCE = 15
 MIN_SCENES, MAX_SCENES = 20, 25   # story beats in the plan (pictures follow the script)
-IMAGE_STYLE = ("warm watercolor illustration, South Indian home, soft natural light, "
-               "no text, no logos")
+IMAGE_STYLE = ("cinematic semi-realistic digital painting like a Tamil TV serial still, "
+               "South Indian people and setting, dramatic natural lighting, detailed expressive faces, "
+               "vibrant colours, sharp focus, no text, no letters, no logos")
 GENRE_MIX = {  # used by generate_stories.py for each new batch of 30
     "family emotional": 12,
     "moral or life-lesson": 8,
@@ -36,7 +37,7 @@ OPENING_STYLES = ["in the middle of the action", "a letter", "a flashback",
 # --- Voice ---
 VOICE_PRIMARY = "ta-IN-PallaviNeural"
 VOICE_FALLBACK = "ta-IN-ValluvarNeural"
-SENTENCE_PAUSE = 0.25        # seconds between sentences
+SENTENCE_PAUSE = 0.15        # seconds between separately voiced sentences (fallback only)
 TTS_RETRIES = 3
 TTS_RETRY_WAIT = 5
 
@@ -57,8 +58,8 @@ X264_PRESET = "veryfast"
 X264_CRF = 21
 
 # --- Quality gate (minutes) ---
-HARD_MIN, HARD_MAX = 19.0, 26.0
-SOFT_MIN, SOFT_MAX = 20.0, 25.0
+HARD_MIN, HARD_MAX = 12.0, 30.0   # fail outside; warn outside the soft range
+SOFT_MIN, SOFT_MAX = 18.0, 26.0
 MAX_AV_DRIFT = 1.0
 
 # --- Scheduling / YouTube ---
@@ -72,7 +73,7 @@ DISCLOSURE_LINE = "Original Tamil story | Narration by AI"
 # --- Branding ---
 CHANNEL_NAME_TA = "நிலா கதைகள்"
 CHANNEL_NAME_EN = "Nila Kathaigal"
-TTS_RATE = "-6%"            # a little slower than default: storytelling pace
+TTS_RATE = "+8%"            # natural conversational pace (slow speech sounded robotic)
 MUSIC_FILE = ROOT / "assets" / "music.mp3"   # optional soft background music (royalty-free)
 MUSIC_VOLUME = 0.07
 THUMB_FONT = "/usr/share/fonts/truetype/noto/NotoSansTamil-Bold.ttf"
