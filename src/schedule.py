@@ -30,9 +30,10 @@ def assign_dates(rows, start):
     tz = ZoneInfo(TIMEZONE)
     taken = {datetime.fromisoformat(r["publish_at"]).date() for r in rows if r["publish_at"]}
     day = max(taken) + timedelta(days=1) if taken else start
-    # never schedule today or earlier: the video needs time to be produced and uploaded
-    tomorrow = datetime.now(tz).date() + timedelta(days=1)
-    day = max(day, start, tomorrow)
+    # today is allowed only before 15:00 IST (time to write, produce and upload by 19:00)
+    now = datetime.now(tz)
+    earliest = now.date() if now.hour < 15 else now.date() + timedelta(days=1)
+    day = max(day, start, earliest)
     for r in rows:
         if not r["publish_at"] and r["status"] == "pending":
             r["publish_at"] = datetime.combine(day, time(publish_hour()), tz).isoformat()
