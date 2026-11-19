@@ -57,10 +57,17 @@ def gemini_models(key):
     found = []
     for m in r.json().get("models", []):
         name = m["name"].split("/")[-1]
-        kind = re.fullmatch(r"gemini-([\d.]+)-(flash|flash-lite|pro)", name)
-        if kind and "generateContent" in m.get("supportedGenerationMethods", []):
-            rank = {"flash": 0, "flash-lite": 1, "pro": 2}[kind.group(2)]
+        if "generateContent" not in m.get("supportedGenerationMethods", []):
+            continue
+        if re.search(r"image|tts|audio|live|embed|vision|robotics|computer|learnlm|gemma", name):
+            continue
+        kind = re.match(r"gemini-([\d.]+)-(flash-lite|flash|pro)", name)
+        if kind:
+            # plain names first (gemini-3.8-flash), then -preview/-exp variants
+            rank = {"flash": 0, "flash-lite": 1, "pro": 2}[kind.group(2)] * 2 + (name != kind.group(0))
             found.append((rank, _version_key(kind.group(1)), name))
+        elif re.fullmatch(r"gemini-(flash|flash-lite|pro)-latest", name):
+            found.append((7, [0], name))
     return [n for _, _, n in sorted(found)]
 
 
@@ -179,7 +186,7 @@ _last_good = None
 
 
 def _candidates():
-    order = [p.strip() for p in os.environ.get("LLM_ORDER", DEFAULT_ORDER).split(",") if p.strip()]
+    order = [p.strip() for p in (os.environ.get("LLM_ORDER") or DEFAULT_ORDER).split(",") if p.strip()]
     out = []
     for p in order:
         get_key, list_models, call = PROVIDERS[p]
@@ -196,7 +203,8 @@ def _candidates():
         for m in _model_cache[p]:
             out.append((p, m, key, call))
     if not out:
-        raise LLMError("No AI provider key is set (LLM_API_KEY / OPENROUTER_API_KEY / GROQ_API_KEY)")
+        raise LLMError("No AI model available: check the keys (LLM_API_KEY / OPENROUTER_API_KEY / "
+                       "GROQ_API_KEY) and the model lists above")
     return out
 
 
