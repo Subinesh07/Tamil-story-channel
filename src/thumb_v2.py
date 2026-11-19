@@ -102,7 +102,7 @@ def ribbon(d, x, y, text, f, bg=RED, fg=WHITE, pad=22, slant=18):
 
 def ribbons(d, x, y, text, max_w, start=66, min_size=44, bg=RED, fg=WHITE):
     """Setup line as 1-2 stacked ribbons, as big as fits."""
-    lines, f = _split_lines(d, text, max_w - 60, start, 2, min_size)
+    lines, f = _split_lines(d, text, max_w - 120, start, 2, min_size)
     for ln in lines:
         _, h = ribbon(d, x, y, ln, f, bg=bg, fg=fg)
         y += h + 10
