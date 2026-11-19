@@ -105,9 +105,12 @@ The part opens with {opening}.
 Return JSON with exactly these keys:
 {{
  "title_ta": "YouTube title in casual Tamil, 50-90 characters: a conflict or a shocking line plus a concrete detail (an age, a number of days, a status contrast like auto driver vs IPS officer) and a curiosity ending (…என்ன நடந்தது? / கடைசியில் அதிர்ச்சி!). No ending spoilers.",
- "thumb_quote_ta": "the most shocking line a character says in the story, casual Tamil, max 10 words",
- "thumb_hook_ta": "thumbnail hook, max 6 Tamil words, ending in a punch word like அதிர்ச்சி! / ரகசியம்! / என்ன?",
- "thumb_scene_en": "the thumbnail picture: 2-3 named characters in the story's key confrontation, with clear positions, faces and strong emotions (e.g. young woman crying on the left, angry mother-in-law pointing at her on the right)",
+ "thumb_line1_ta": "thumbnail SETUP line, casual Tamil, 4-7 words ending with … (e.g. டிரைவர் என்று காதலித்தாள்… / அம்மாவை தனியாக தவிக்கவிட்ட மகன்…)",
+ "thumb_line2_ta": "thumbnail REVEAL tease, 3-6 Tamil words that cut off before the answer, ending ..! or ? (e.g. அவன் யார் என்று தெரிந்ததும்..! / கடைசியில் நடந்தது என்ன?)",
+ "thumb_ribbon_ta": "optional extra ribbon, 3-5 Tamil words of shocking contrast (e.g. கோடீஸ்வரியாக திரும்பி வந்த அம்மா!), or empty",
+ "thumb_title_ta": "HORROR ONLY: a 1-3 word big Tamil title (e.g. கடைசி பேருந்து), else empty",
+ "thumb_tagline_ta": "HORROR ONLY: a 4-7 word mystery tagline with a clue (e.g. 14 பயணிகள்… 15 டிக்கெட் யாருக்கு?), else empty",
+ "thumb_scene_en": "the thumbnail PICTURE that makes people ask 'how is this possible?'. Family/moral/real-life: a SPLIT composition: LEFT half = the setup moment, RIGHT half = the surprising twist (e.g. left: old mother crying alone at an airport with a suitcase; right: same mother smiling, richly dressed beside a luxury car). Horror: one dark night scene with the scared main character in close-up in the foreground, an eerie figure in the background and a clue object or place sign. Adventure: the hero small in front of a huge danger or discovery. Name the characters and give their positions, faces and strong emotions.",
  "title_en": "English title",
  "premise_en": "one-line English premise",
  "description_ta": "2-3 line Tamil YouTube description that hooks the viewer without spoiling the ending",
@@ -418,7 +421,9 @@ def write_story(rows):
            "scene_prompts": prompts_field,
            "publish_at": S.publish_at(day), "status": "pending", "video_id": "", "fail_reason": "",
            "description_ta": desc, "series_id": ser["id"], "part": str(part),
-           "thumb_quote_ta": plan.get("thumb_quote_ta", ""), "thumb_hook_ta": plan.get("thumb_hook_ta", ""),
+           "thumb_quote_ta": plan.get("thumb_line1_ta", ""), "thumb_hook_ta": plan.get("thumb_line2_ta", ""),
+           "thumb_text": json.dumps({k: plan.get(f"thumb_{k}_ta", "") for k in
+                                     ("line1", "line2", "ribbon", "title", "tagline")}, ensure_ascii=False),
            "thumb_prompt": thumb_prompt(plan)}
     ser["so_far"].append(plan.get("episode_summary_en") or plan.get("premise_en", ""))
     ser["parts_done"] = part

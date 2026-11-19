@@ -170,37 +170,50 @@ def previous_part_link(row):
 
 
 def drama_thumbnail(row, provider, work, out_path, n):
-    """Realistic emotional thumbnail + quoted dialogue + hook. Old stories without the fields get
-    them from one small AI request."""
-    from thumbnail import THUMB_STYLE, make_drama_thumbnail
-    quote, hook, prompt = row.get("thumb_quote_ta"), row.get("thumb_hook_ta"), row.get("thumb_prompt")
-    if not (quote and hook and prompt):
+    """Viral-style thumbnail (thumb_v2): curiosity picture + huge yellow/red/white Tamil text.
+    Older stories without thumbnail text get it from one small AI request (title fallback if busy)."""
+    import random
+
+    import thumb_v2
+    from thumbnail import THUMB_STYLE
+    texts, prompt = {}, row.get("thumb_prompt")
+    if row.get("thumb_text"):
+        try:
+            texts = json.loads(row["thumb_text"])
+        except ValueError:
+            texts = {}
+    if not texts.get("line1") and row.get("thumb_quote_ta"):
+        texts = {"line1": row["thumb_quote_ta"], "line2": row.get("thumb_hook_ta", "")}
+    if not (texts.get("line1") and texts.get("line2") and prompt):
         try:
             from llm import complete
             story = " ".join(split_sentences(row["script_ta"])[:120])
             d = complete(
-                "From this Tamil story, return JSON {\"quote\": \"the most shocking line a character "
-                "says, casual Tamil, max 10 words\", \"hook\": \"max 6 Tamil words ending in a punch word "
-                "like அதிர்ச்சி! or ரகசியம்! or என்ன?\", \"scene\": \"English: 2-3 characters in the key "
-                "confrontation with positions and strong emotions\"}\n\n" + story,
-                want_json=True, max_tokens=1500, rounds=1)
-            quote, hook = d["quote"], d["hook"]
+                "From this Tamil story, write YouTube thumbnail text and picture. Return JSON "
+                "{\"line1\": \"setup, casual Tamil, 4-7 words ending with …\", \"line2\": \"reveal tease, 3-6 Tamil "
+                "words ending ..! or ?\", \"ribbon\": \"optional 3-5 word shocking contrast or empty\", "
+                "\"title\": \"horror only: 1-3 word title else empty\", \"tagline\": \"horror only: 4-7 word clue "
+                "tagline else empty\", \"scene\": \"English: a 'how is this possible?' picture; split before/after "
+                "for family stories, dark scene with a clue for horror; characters, positions, strong emotions\"}"
+                "\n\n" + story, want_json=True, max_tokens=1500, rounds=1)
+            texts = {k: d.get(k, "") for k in ("line1", "line2", "ribbon", "title", "tagline")}
             prompt = f"{d['scene']}. South Indian setting. {THUMB_STYLE}"
         except Exception as e:
-            log.warning("Thumbnail text AI busy (%s); using the title as the quote", str(e)[:120])
-            import random
-            quote = re.sub(r"\s*\(.*?\)\s*$", "", row["title_ta"]).strip()
-            hook = random.Random(n).choice(["கடைசியில் நடந்த அதிர்ச்சி!", "அடுத்து நடந்தது என்ன?",
-                                            "யாரும் எதிர்பார்க்காத திருப்பம்!", "அந்த ரகசியம் என்ன?",
-                                            "கண்ணீர் வர வைக்கும் முடிவு!"])
+            log.warning("Thumbnail text AI busy (%s); using the title", str(e)[:120])
+            texts = {"line1": re.sub(r"\s*\(.*?\)\s*$", "", row["title_ta"].split("|")[0]).strip() + "…",
+                     "line2": random.Random(n).choice(["கடைசியில் நடந்தது என்ன?", "அடுத்து நடந்தது என்ன?",
+                                                       "அந்த ரகசியம் என்ன?", "யாரும் எதிர்பார்க்காத திருப்பம்..!"])}
             prompt = None
     bg = work / "images" / "thumb_bg.png"
     if prompt:
         bg.write_bytes(provider.generate(prompt, seed=n * 1000 + 999))
-    else:   # no scene description: use the most dramatic story picture with people in it
+    else:
         pics = sorted((work / "images").glob("scene_*.png"))
         bg.write_bytes(pics[min(len(pics) - 1, max(0, len(pics) // 2))].read_bytes())
-    return make_drama_thumbnail(bg, quote, hook, out_path, variant=n, part=row.get("part") or "")
+    path, layout = thumb_v2.make(bg, texts, out_path, genre=row.get("genre", ""), variant=n,
+                                 part=row.get("part") or "")
+    log.info("Thumbnail layout: %s", layout)
+    return path
 
 
 CHAPTER_MARKS = [(0.0, "கதை ஆரம்பம்"), (0.35, "கதை நகர்கிறது"), (0.6, "திருப்புமுனை"),

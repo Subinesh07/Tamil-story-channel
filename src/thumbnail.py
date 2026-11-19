@@ -126,9 +126,9 @@ def make_thumbnail(scene_png, title, out_path, variant=0):
 # ---------------------------------------------------------------------------
 # "Drama" thumbnail: what top Tamil family-story channels use.
 # Realistic emotional scene + quoted shocking dialogue on top + curiosity hook at the bottom.
-THUMB_STYLE = ("cinematic semi-realistic digital painting like a Tamil TV serial poster, "
-               "dramatic lighting, highly detailed expressive faces, strong emotions, "
-               "vibrant saturated colours, sharp focus, no text, no letters, no logos")
+THUMB_STYLE = ("viral YouTube thumbnail art, cinematic semi-realistic digital painting like a Tamil TV serial "
+               "poster, extremely dramatic moment, large close-up faces with intense emotion, high contrast, "
+               "vivid saturated colours, sharp focus, no text, no letters, no logos, no watermark")
 BANDS = [((200, 20, 20), (255, 255, 255), (255, 214, 0)),     # red band, white quote, yellow hook
          ((255, 214, 0), (150, 0, 0), (255, 255, 255)),       # yellow band, dark red quote
          ((20, 20, 20), (255, 214, 0), (255, 60, 60))]        # black band, yellow quote, red hook
