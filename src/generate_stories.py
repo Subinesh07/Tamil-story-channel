@@ -22,14 +22,20 @@ from stories import load_rows, save_rows, word_count
 
 log = logging.getLogger("generate")
 
-RULES = f"""Hard rules:
+RULES = """Hard rules:
 - The story must be completely ORIGINAL. Do not copy or closely paraphrase any YouTube channel,
   book, film, TV serial, folk tale or song. No song lyrics at all.
-- Natural spoken Tamil as a warm storyteller would narrate it at home, not textbook Tamil.
+- SPOKEN Tamil (பேச்சுத் தமிழ்), the way a grandmother tells a story at home in Tamil Nadu.
+  NOT written/literary Tamil. Use colloquial verb forms:
+    இருக்கு (not உள்ளது), போனா (not சென்றாள்), வந்தான் (not வருகை தந்தான்),
+    சொன்னாங்க (not கூறினார்கள்), பார்த்தா (not கண்டாள்), என்ன பண்றது (not என்ன செய்வது),
+    ரொம்ப (not மிகவும்), அப்புறம் (not பின்னர்), இல்ல (not இல்லை) in dialogue.
   Light everyday Tamil-English mixing is fine where people really talk that way.
-- Every sentence must have fewer than {MAX_WORDS_PER_SENTENCE} words, so subtitles stay readable.
+- Sentences of 6-14 words: natural spoken rhythm, not choppy fragments. Never 15 or more.
+- Show feelings through small actions and dialogue, not by naming the emotion.
 - Hook in the first 30 seconds, rising tension, a turning point around 60%, emotional climax,
-  and a satisfying ending that resolves the main conflict.
+  and a satisfying ending that resolves the main conflict with a specific, earned moment
+  (not a generic "everything ended well" summary).
 - Family-friendly. No graphic violence."""
 
 
