@@ -1,4 +1,4 @@
-# Tamil Story Channel — automated pipeline
+# Nila Kathaigal (நிலா கதைகள்) — automated Tamil story channel
 
 Writes original Tamil family/emotional stories, narrates them with a female Tamil voice,
 illustrates 20–25 scenes, renders a 20–25 minute video with Tamil subtitles, checks it, and
@@ -15,6 +15,37 @@ Generate stories (twice daily)          Produce video (daily 11:00 IST, or "Run 
                                           ─► stories.csv status "done" + video id
 ```
 
+
+## Everyday use: one tap from your phone
+Install the **GitHub** app (Play Store or App Store), sign in, open **Tamil-story-channel → Actions**,
+pick a workflow, then tap **Run workflow**.
+
+| Workflow | When it runs by itself | What you get |
+|---|---|---|
+| **Generate stories** | every 6 hours | new stories in `stories.csv` and the schedule in `SCHEDULE.md` |
+| **Produce video** | daily 11:00 IST | next story uploaded as private, scheduled for 19:00, plus a **community post issue** |
+| **Competitor report** | Mondays 09:00 IST | `reports/competitors-DATE.md` plus a notification issue |
+| **Test pipeline** | only when you run it | a short test video; tick *upload* to send it to YouTube as private |
+
+**Community post and poll:** YouTube doesn't let apps publish these, so each day the automation
+opens a GitHub issue with a ready-made post and poll. Copy it into **YouTube Studio → Create → Post**.
+It takes about 30 seconds, and the human touch also helps against the "reused content" flag.
+
+**Competitors:** list channel links or @handles in `competitors.txt` (one per line). The token
+must include the `youtube.readonly` permission.
+
+**Background music (optional):** put a royalty-free track at `assets/music.mp3` (for example from
+YouTube Studio → Audio Library). It's mixed in quietly under the narration.
+
+**Branding:** logo and banner are in `assets/brand/` (made with `python src/brand_assets.py`).
+Upload them in YouTube Studio → Customisation → Branding.
+
+## What every video contains
+Intro title card (the channel name and story title, plus a spoken welcome; 5 rotating versions),
+the narrated story with Tamil subtitles, an outro card with a spoken subscribe request (5 rotating
+versions), chapters in the description, an auto thumbnail (3 rotating layouts), and a unique Tamil
+description. Every picture is checked by a vision model and redrawn if broken.
+
 ## Files
 
 | Path | What it does |
@@ -29,7 +60,12 @@ Generate stories (twice daily)          Produce video (daily 11:00 IST, or "Run 
 | `src/quality.py` | Phase 5 gate |
 | `src/youtube_upload.py` | Phase 6 upload |
 | `src/schedule.py` | Phase 8. Assigns publish dates and writes `SCHEDULE.md` |
-| `src/make_video.py` | Runs phases 2–6 for one story |
+| `src/make_video.py` | Runs phases 2–6 for one story: intro, outro, chapters, thumbnail, community post |
+| `src/image_check.py` | Vision checker that rejects broken or wrong images |
+| `src/thumbnail.py` | Auto thumbnail with the Tamil title |
+| `src/community.py` | Daily community post and poll draft |
+| `src/competitors.py` | Weekly competitor report |
+| `src/brand_assets.py` | Draws the logo and banner |
 | `tests/test_sample.py` | Offline 10-second render test. Runs before every production job |
 | `get_refresh_token.py` | One-time YouTube login helper |
 
