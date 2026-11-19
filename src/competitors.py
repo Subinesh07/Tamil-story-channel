@@ -167,7 +167,8 @@ def main():
     ids = []
     if LIST_FILE.exists():
         for line in LIST_FILE.read_text(encoding="utf-8").splitlines():
-            if line.strip() and not line.startswith("#"):
+            line = line.split("#")[0].strip()   # allow trailing comments
+            if line:
                 cid = resolve(yt, line)
                 if cid:
                     ids.append(cid)
