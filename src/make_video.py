@@ -15,7 +15,7 @@ import re
 
 from config import CHANNEL_NAME_EN, CHANNEL_NAME_TA, INTRO_LINES, OUTPUT_DIR, OUTRO_LINES, WORK_DIR
 from ffutil import run
-from image_provider import generate_all, get_provider, make_card
+from image_provider import generate_all, get_provider, make_card, make_outro_card
 from quality import quality_gate
 from render import render_video
 from scenes import plan_scenes
@@ -82,7 +82,7 @@ def produce(row, upload=True, check_duration=True):
             images.append(intro_background(card) if ART.exists()
                           else make_card(story_imgs[0], card))
         elif s["kind"] == "outro":
-            images.append(make_card(story_imgs[-1], work / "images" / "outro_card.png"))
+            images.append(make_outro_card(story_imgs[-1], work / "images" / "outro_card.png"))
         else:
             images.append(next(it))
 
@@ -97,7 +97,13 @@ def produce(row, upload=True, check_duration=True):
     ass = work / "subs.ass"
     build_ass(timings, ass, cards)
     video = work / f"story_{rid}.mp4"
-    render_video(scenes, images, narration, ass, timings["total"], work, video)
+    sfx = []
+    for s in scenes:
+        if s["kind"] == "intro":
+            sfx.append(("chime", s["start"] + 0.2))
+        elif s["kind"] == "outro":
+            sfx.append(("bell", s["start"] + 1.0))
+    render_video(scenes, images, narration, ass, timings["total"], work, video, sfx=sfx)
 
     log.info("== Quality gate ==")
     frame = out / f"story_{rid}_subtitle_frame.png"

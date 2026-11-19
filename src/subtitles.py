@@ -52,9 +52,10 @@ def build_ass(timings, out_path, cards=()):
         if brand:
             lines.append(f"Dialogue: 1,{_ts(start)},{_ts(end)},Brand,,0,0,0,,{fade}{_escape(brand)}\n")
         if title:
-            lines.append(f"Dialogue: 1,{_ts(start)},{_ts(end)},Title,,0,0,0,,{fade}{{\\pos(640,320)}}{_escape(title)}\n")
+            grow = r"{\fscx70\fscy70\t(0,700,\fscx100\fscy100)}"
+            lines.append(f"Dialogue: 1,{_ts(start)},{_ts(end)},Title,,0,0,0,,{fade}{grow}{{\\pos(640,300)}}{_escape(title)}\n")
         if sub:
-            lines.append(f"Dialogue: 1,{_ts(start)},{_ts(end)},Sub,,0,0,0,,{fade}{{\\pos(640,420)}}{_escape(sub)}\n")
+            lines.append(f"Dialogue: 1,{_ts(start)},{_ts(end)},Sub,,0,0,0,,{fade}{{\\pos(640,400)}}{_escape(sub)}\n")
     out_path.write_text("".join(lines), encoding="utf-8-sig")
     return len(timings["sentences"])
 

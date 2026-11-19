@@ -97,6 +97,34 @@ def make_card(png_path, out_path, darken=0.45, blur=6):
     return out_path
 
 
+def make_outro_card(png_path, out_path):
+    """Darkened last scene + a red SUBSCRIBE button with a bell icon."""
+    from PIL import ImageFont
+    make_card(png_path, out_path, darken=0.4)
+    img = Image.open(out_path).convert("RGB")
+    d = ImageDraw.Draw(img)
+    bw, bh = 420, 92
+    x0, y0 = (WIDTH - bw) // 2 - 40, 500
+    d.rounded_rectangle([x0, y0, x0 + bw, y0 + bh], radius=16, fill=(204, 0, 0))
+    try:
+        f = ImageFont.truetype("/usr/share/fonts/truetype/noto/NotoSans-Bold.ttf", 46)
+    except OSError:
+        f = ImageFont.load_default()
+    tw = d.textlength("SUBSCRIBE", font=f)
+    d.text((x0 + (bw - tw) / 2, y0 + 16), "SUBSCRIBE", font=f, fill=(255, 255, 255))
+    # bell icon in a white circle to the right of the button
+    cx, cy, r = x0 + bw + 70, y0 + bh // 2, 46
+    d.ellipse([cx - r, cy - r, cx + r, cy + r], fill=(255, 255, 255))
+    gold = (60, 60, 60)
+    d.pieslice([cx - 24, cy - 30, cx + 24, cy + 18], 180, 360, fill=gold)      # bell dome
+    d.rectangle([cx - 24, cy - 6, cx + 24, cy + 14], fill=gold)                # bell body
+    d.polygon([(cx - 32, cy + 18), (cx + 32, cy + 18), (cx + 24, cy + 8), (cx - 24, cy + 8)], fill=gold)
+    d.ellipse([cx - 8, cy + 18, cx + 8, cy + 30], fill=gold)                   # clapper
+    d.ellipse([cx - 5, cy - 38, cx + 5, cy - 28], fill=gold)                   # top knob
+    img.save(out_path, "PNG")
+    return out_path
+
+
 def generate_all(provider, prompts, out_dir, check=True, base_seed=1000):
     """Generate every scene image.
 

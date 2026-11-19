@@ -20,7 +20,11 @@ def render_scene_clip(image, duration, zoom_in, out_path):
          "-crf", "16", "-pix_fmt", "yuv420p", str(out_path)])
 
 
-def render_video(scenes, images, narration, ass_path, total, work_dir, out_path):
+SFX_DIR = MUSIC_FILE.parent / "sfx"
+SFX_VOLUME = 0.35
+
+
+def render_video(scenes, images, narration, ass_path, total, work_dir, out_path, sfx=()):
     clip_dir = work_dir / "clips"
     clip_dir.mkdir(parents=True, exist_ok=True)
     clips = []
@@ -37,8 +41,22 @@ def render_video(scenes, images, narration, ass_path, total, work_dir, out_path)
     inputs += ["-i", str(narration)]
     a_idx = len(clips)
     music = MUSIC_FILE.exists()
+    extra = []   # labels of extra audio streams to mix with the narration
+    next_in = a_idx + 1
     if music:
         inputs += ["-stream_loop", "-1", "-i", str(MUSIC_FILE)]
+        music_idx = next_in
+        next_in += 1
+    sfx_parts = []
+    for k, (name, at) in enumerate(sfx):
+        f = SFX_DIR / f"{name}.wav"
+        if not f.exists():
+            continue
+        inputs += ["-i", str(f)]
+        ms = int(max(0, at) * 1000)
+        sfx_parts.append(f"[{next_in}:a]volume={SFX_VOLUME},adelay={ms}|{ms}[sfx{k}]")
+        extra.append(f"[sfx{k}]")
+        next_in += 1
 
     parts, prev = [], "[0:v]"
     for k in range(1, len(clips)):
@@ -51,9 +69,12 @@ def render_video(scenes, images, narration, ass_path, total, work_dir, out_path)
                  f"ass={ass_path.name},format=yuv420p[v]")
     if music:
         log.info("Mixing background music from %s", MUSIC_FILE.name)
-        parts.append(f"[{a_idx + 1}:a]aformat=sample_rates=44100:channel_layouts=stereo,"
+        parts.append(f"[{music_idx}:a]aformat=sample_rates=44100:channel_layouts=stereo,"
                      f"volume={MUSIC_VOLUME},atrim=0:{total:.3f}[m]")
-        parts.append(f"[{a_idx}:a][m]amix=inputs=2:duration=first:normalize=0,"
+        extra.insert(0, "[m]")
+    parts.extend(sfx_parts)
+    if extra:
+        parts.append(f"[{a_idx}:a]{''.join(extra)}amix=inputs={1 + len(extra)}:duration=first:normalize=0,"
                      f"afade=t=in:st=0:d=0.5,afade=t=out:st={fade_out_start:.3f}:d={FADE_OUT}[a]")
     else:
         parts.append(f"[{a_idx}:a]afade=t=in:st=0:d=0.5,afade=t=out:st={fade_out_start:.3f}:d={FADE_OUT}[a]")

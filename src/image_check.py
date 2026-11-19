@@ -14,6 +14,7 @@ import requests
 
 log = logging.getLogger(__name__)
 _model = None
+_disabled = False   # set after Gemini says "too many requests": stop checking for this run
 
 QUESTION = """You are checking an illustration for a family story video.
 The illustration was requested with this description:
@@ -40,9 +41,14 @@ def _pick_model(key):
 
 def check(png_bytes, prompt):
     """Return (ok, reason)."""
+    global _disabled
     key = os.environ.get("LLM_API_KEY", "")
     if not key or os.environ.get("IMAGE_CHECK", "on") == "off":
         return True, "check skipped (no key)"
+    if _disabled:
+        return True, "check skipped (Gemini limit reached this run)"
+    if "No people in the picture" in prompt:
+        return True, "check skipped (no people: low risk)"   # save Gemini quota
     try:
         model = _pick_model(key)
         if not model:
@@ -56,13 +62,16 @@ def check(png_bytes, prompt):
             "generationConfig": {"temperature": 0, "responseMimeType": "application/json",
                                  "maxOutputTokens": 300},
         }
-        for attempt in range(3):
+        for attempt in range(2):
             r = requests.post(
                 f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent",
                 headers={"x-goog-api-key": key}, json=body, timeout=45)
             if r.status_code not in (429, 503):
                 break
-            time.sleep(25 * (attempt + 1))   # free tier: a few requests per minute
+            time.sleep(30)   # free tier: a few requests per minute
+        if r.status_code == 429:
+            _disabled = True
+            log.warning("Gemini image-check limit reached; remaining images are not checked")
         if r.status_code != 200:
             return True, f"check skipped (HTTP {r.status_code})"
         text = "".join(p.get("text", "") for p in

@@ -13,6 +13,7 @@ import random
 import re
 import sys
 from collections import Counter
+from pathlib import Path
 
 from config import (GENRE_MIX, IMAGE_STYLE, MAX_SCENES, MAX_WORDS, MAX_WORDS_PER_SENTENCE,
                     MIN_PENDING, MIN_SCENES, MIN_WORDS, OPENING_STYLES, PROMPT_SEP,
@@ -85,12 +86,13 @@ def next_opening(rows):
 
 # ---------------- LLM steps ----------------
 
-def plan_story(genre, opening, premises, used_names):
+def plan_story(genre, opening, premises, used_names, topic=None):
     n_beats = random.randint(MIN_SCENES + 1, MAX_SCENES)
     avoid = "\n".join(premises[-80:]) or "(none yet)"
     prompt = f"""You are planning an original Tamil {genre} story for a YouTube narration channel.
 It will be narrated for 20-25 minutes (about 2,000 Tamil words).
 The story opens with {opening}.
+{('STORY IDEA (build the whole story on this idea, with your own original characters and twists): ' + topic) if topic else ''}
 {RULES}
 - Do NOT make it a mother-sacrifice plot unless the genre truly needs it, and vary the setting
   (village, Chennai flat, small town, bus depot, school, market, hospital, farm, coastal town ...).
@@ -333,12 +335,34 @@ def adjust_length(plan, sentences, passes=3):
     return _trim(sentences)
 
 
+TOPICS = Path(__file__).resolve().parent.parent / "topics.json"
+
+
+def next_topic():
+    """Next unused hand-picked topic from topics.json (None when the list is used up)."""
+    if not TOPICS.exists():
+        return None
+    for i, t in enumerate(json.loads(TOPICS.read_text(encoding="utf-8"))):
+        if not t.get("used"):
+            return i, t
+    return None
+
+
+def mark_topic_used(i):
+    data = json.loads(TOPICS.read_text(encoding="utf-8"))
+    data[i]["used"] = True
+    TOPICS.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
 def write_story(rows):
     premises, used_names = read_index()
-    genre, opening = next_genre(rows), next_opening(rows)
+    picked = next_topic()
+    genre = picked[1]["genre"] if picked else next_genre(rows)
+    opening = next_opening(rows)
+    topic = picked[1]["topic"] if picked else None
     log.info("Planning a %s story opening with %s", genre, opening)
     for attempt in range(2):
-        plan = plan_story(genre, opening, premises, used_names)
+        plan = plan_story(genre, opening, premises, used_names, topic)
         names = [c["name"] for c in plan["characters"]]
         if not set(names) & used_names:
             break
@@ -370,6 +394,8 @@ def write_story(rows):
            "description_ta": plan.get("description_ta", "")}
     log.info("Story %s ok: %d words, %d sentences, %d pictures", next_id, words, len(sentences),
              n_pics)
+    if picked:
+        mark_topic_used(picked[0])
     return row, plan["premise_en"], names
 
 
