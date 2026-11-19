@@ -6,7 +6,8 @@ One video a day at 19:00 Asia/Kolkata. Updated automatically.
 |---|---|---|---|---|
 | 2026-11-19 | 3 | The Secret Mother Never Knew | done | [d606fCaZt70](https://youtu.be/d606fCaZt70) |
 | 2026-11-20 | 4 | The Old Servant Maid's Inheritance | done | [E6tKQT7EwDA](https://youtu.be/E6tKQT7EwDA) |
-| 2026-11-21 | 5 | The Treasure Behind the Locked Door | pending |  |
-| 2026-11-22 | 6 | The House Mother Built | pending |  |
+| 2026-11-21 | 7 | Doomsday: The Last 7 Days - Part 1: The Discovery | Doomsday: The Last 7 Days Part 1 | pending |  |
+| 2026-11-21 | 5 | If The Shadow Becomes Real: Part 1 | If The Shadow Becomes Real Part 1 | pending |  |
+| 2026-11-22 | 6 | The Palm-Leaf Trail Part 1: Secret in the Hollow Tamarind | Sea, Forest, Temple: The Palm-Leaf Trail Part 1 | pending |  |
 
-Pending stories: **2** ⚠️ below 10, the Generate stories workflow will top this up.
+Pending stories: **3** ⚠️ below 10, the Generate stories workflow will top this up.
