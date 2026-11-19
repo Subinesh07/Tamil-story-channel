@@ -224,6 +224,12 @@ def main():
         log.info("No pending stories yet - nothing to produce today.")
         return 0
     row = pick_row(rows, args.row_id or None)
+    if not args.row_id and row.get("publish_at"):
+        from datetime import datetime, timedelta, timezone
+        due = datetime.fromisoformat(row["publish_at"])
+        if due - datetime.now(timezone.utc) > timedelta(days=3):
+            log.info("Next story is due %s (more than 3 days away) - nothing to make yet.", row["publish_at"])
+            return 0
     update_row(row["id"], status="processing", fail_reason="")
     try:
         upload = args.test_upload if args.test else not args.no_upload

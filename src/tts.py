@@ -30,19 +30,19 @@ def _end_punct(s):
     return s if re.search(r"[.!?…]$", s) else s + "."
 
 
-async def _synth(text, voice, out_path, want_boundaries=False):
-    """Save audio for text; return [(offset_s, duration_s, text)] sentence boundaries."""
+async def _synth(text, voice, out_path, boundary="WordBoundary"):
+    """Save audio for text; return [(offset_s, duration_s, text)] word (or sentence) boundaries."""
     import edge_tts  # imported lazily so tests run without it
     last = None
     for attempt in range(1, TTS_RETRIES + 1):
         try:
             bounds = []
             with open(out_path, "wb") as f:
-                comm = edge_tts.Communicate(text, voice, rate=TTS_RATE, boundary="SentenceBoundary")
+                comm = edge_tts.Communicate(text, voice, rate=TTS_RATE, boundary=boundary)
                 async for chunk in comm.stream():
                     if chunk["type"] == "audio":
                         f.write(chunk["data"])
-                    elif chunk["type"] == "SentenceBoundary":
+                    elif chunk["type"] in ("WordBoundary", "SentenceBoundary"):
                         bounds.append((chunk["offset"] / 1e7, chunk["duration"] / 1e7, chunk.get("text", "")))
             if out_path.stat().st_size > 1000:
                 return bounds
@@ -69,15 +69,49 @@ def make_chunks(sentences):
     return chunks
 
 
+def _letters(text):
+    """Letters and digits only (Tamil vowel signs and virama included), for alignment."""
+    return re.sub(r"[^\w\u0B80-\u0BFF]|_", "", text)
+
+
+def align_words(words, sentences):
+    """Map word timings to sentence spans by matching cumulative letters (robust to the
+    service splitting or joining words differently). Returns [(start, end)] or None."""
+    targets, acc = [], 0
+    for s in sentences:
+        acc += len(_letters(s))
+        targets.append(acc)
+    total_words = sum(len(_letters(w)) for _, _, w in words)
+    if not words or not acc or abs(total_words - acc) > 0.12 * acc:
+        return None
+    scale = acc / total_words
+    spans, cum, w = [], 0.0, 0
+    for i, tgt in enumerate(targets):
+        if w >= len(words):
+            return None
+        start = words[w][0]
+        end = words[w][0] + words[w][1]
+        while w < len(words):
+            n = len(_letters(words[w][2])) * scale
+            if cum + n / 2 > tgt and i < len(targets) - 1:
+                break   # this word belongs to the next sentence
+            cum += n
+            end = words[w][0] + words[w][1]
+            w += 1
+        spans.append((start, end))
+    return spans
+
+
 async def _voice_chunk(k, idxs, sentences, voice, clip_dir):
     """Returns a list of pieces: (audio_path, [(sentence_idx, rel_start, rel_end_or_None)])."""
     path = clip_dir / f"c{k:04d}.mp3"
     text = " ".join(_end_punct(sentences[i]) for i in idxs)
-    bounds = await _synth(text, voice, path)
-    if len(bounds) == len(idxs):
-        return [(path, [(i, off, off + dur) for i, (off, dur, _) in zip(idxs, bounds)])]
-    log.info("Paragraph %d: %d boundaries for %d sentences; voicing sentences one by one",
-             k, len(bounds), len(idxs))
+    words = await _synth(text, voice, path, boundary="WordBoundary")
+    spans = align_words(words, [sentences[i] for i in idxs])
+    if spans and all(e > s for s, e in spans):
+        return [(path, [(i, s, e) for i, (s, e) in zip(idxs, spans)])]
+    log.info("Paragraph %d: word timings didn't line up (%d words); voicing sentences one by one",
+             k, len(words))
     pieces = []
     for i in idxs:
         p = clip_dir / f"s{i:04d}.mp3"

@@ -12,8 +12,9 @@ on:
         type: boolean
         default: true
   schedule:
-    # every day 05:30 UTC (11:00 IST). Uploads the next story as private with its 19:00 publish time.
-    - cron: "30 5 * * *"
+    # every 6 hours (GitHub can delay schedules by hours). Each run makes the next story that is
+    # due within 3 days and uploads it already scheduled for its 19:00 IST slot.
+    - cron: "40 */6 * * *"
 
 permissions:
   contents: write
