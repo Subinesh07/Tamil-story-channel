@@ -134,14 +134,14 @@ BANDS = [((200, 20, 20), (255, 255, 255), (255, 214, 0)),     # red band, white 
          ((20, 20, 20), (255, 214, 0), (255, 60, 60))]        # black band, yellow quote, red hook
 
 
-def make_drama_thumbnail(bg_png, quote, hook, out_path, variant=0):
+def make_drama_thumbnail(bg_png, quote, hook, out_path, variant=0, part=""):
     """Bold rotating designs (thumb_designs.py); falls back to the simple banner on any error."""
     if not features.check("raqm"):
         log.warning("Pillow has no Tamil text shaping (libraqm); skipping thumbnail")
         return None
     try:
         import thumb_designs
-        return thumb_designs.make(bg_png, quote, hook, out_path, variant)
+        return thumb_designs.make(bg_png, quote, hook, out_path, variant, part)
     except Exception as e:  # never lose the thumbnail over a design bug
         log.warning("Thumbnail design failed (%s); using the simple banner", e)
     return _simple_banner(bg_png, quote, hook, out_path, variant)

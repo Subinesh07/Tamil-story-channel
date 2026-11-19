@@ -212,7 +212,22 @@ def banner(bg, quote, hook):
 DESIGNS = [bubble, bars, split, shock, banner]
 
 
-def make(bg, quote, hook, out_path, variant=0):
+def part_badge(img, part):
+    """Round red 'பகுதி N' sticker on the right side (clear of the text in every design)."""
+    d = ImageDraw.Draw(img)
+    cx, cy, r = WIDTH - 150, int(HEIGHT * 0.47), 88
+    d.ellipse([cx - r - 6, cy - r - 6, cx + r + 6, cy + r + 6], fill=YELLOW)
+    d.ellipse([cx - r, cy - r, cx + r, cy + r], fill=RED)
+    f1, f2 = _font(34), _font(84)
+    t1, t2 = "பகுதி", str(part)
+    draw_mixed(d, (cx - text_w(d, t1, f1) / 2, cy - 70), t1, f1, fill=WHITE)
+    draw_mixed(d, (cx - text_w(d, t2, f2) / 2, cy - 40), t2, f2, fill=YELLOW, stroke_width=4, stroke_fill=(90, 0, 0))
+    return img
+
+
+def make(bg, quote, hook, out_path, variant=0, part=""):
     img = DESIGNS[variant % len(DESIGNS)](bg, quote, hook)
+    if part:
+        img = part_badge(img, part)
     img.save(out_path, "JPEG", quality=90, optimize=True)
     return out_path

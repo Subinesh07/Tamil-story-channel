@@ -40,6 +40,21 @@ YouTube Studio → Audio Library). It's mixed in quietly under the narration.
 **Branding:** logo and banner are in `assets/brand/` (made with `python src/brand_assets.py`).
 Upload them in YouTube Studio → Customisation → Branding.
 
+## Weekly series plan
+| Day | Series |
+|---|---|
+| Mon | Adventure serial (சாகசத் தொடர், 5 parts) |
+| Tue | Horror serial (திகில் தொடர், 4 parts, no gore) |
+| Wed | Family drama serial (குடும்பத் தொடர், 8 parts) |
+| Thu | Real lives: true story of a famous person (நிஜ வாழ்க்கைக் கதை, 4 parts) |
+| Fri | Family moral stories (நீதிக் கதைகள், 6 parts) |
+| Sat, Sun | Next part of the series gaining views fastest |
+
+`series.json` holds each series' characters, planned arc and story so far, so every part continues
+the last one: a recap at the start, a cliffhanger at the end, and the final part wraps it all up.
+Titles end with "| series name - பகுதி N", thumbnails get a பகுதி sticker, and each description
+links the previous part. When a series ends, a new one of the same genre starts automatically.
+
 ## What every video contains
 Intro title card (the channel name and story title, plus a spoken welcome; 5 rotating versions),
 the narrated story with Tamil subtitles, an outro card with a spoken subscribe request (5 rotating

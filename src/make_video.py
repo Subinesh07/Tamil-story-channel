@@ -50,7 +50,10 @@ def produce(row, upload=True, check_duration=True):
         log.warning("%d sentences exceed the word limit", len(long_sentences(story)))
 
     # intro + story + outro; the wording rotates by story id so videos don't sound templated
-    title = re.sub(r"\s*\(.*?\)\s*$", "", row["title_ta"]).strip() or row["title_ta"]
+    title = re.sub(r"\s*\(.*?\)\s*$", "", row["title_ta"].split("|")[0]).strip() or row["title_ta"]
+    part = row.get("part") or ""
+    if part:
+        title = f"{title}, பகுதி {part}"
     n = int(rid) if rid.isdigit() else 0
     intro = split_sentences(INTRO_LINES[n % len(INTRO_LINES)].format(title=title))
     from strategy import load as load_strategy
@@ -142,7 +145,9 @@ def produce(row, upload=True, check_duration=True):
     log.info("== Upload ==")
     from youtube_upload import set_thumbnail
     from youtube_upload import upload as yt_upload
-    video_id = yt_upload(out / video.name, {**row, "chapters": chapters(scenes)})
+    prev = previous_part_link(row)
+    desc = row.get("description_ta", "") + (f"\n\n👉 முந்தைய பகுதி: {prev}" if prev else "")
+    video_id = yt_upload(out / video.name, {**row, "description_ta": desc, "chapters": chapters(scenes)})
     if thumb:
         set_thumbnail(video_id, thumb)
     try:
@@ -151,6 +156,17 @@ def produce(row, upload=True, check_duration=True):
     except Exception as e:
         log.warning("Community post draft failed: %s", e)
     return video_id
+
+
+def previous_part_link(row):
+    """Link to the previous part of the same series (keeps viewers watching the whole series)."""
+    if not row.get("series_id") or not (row.get("part") or "").isdigit():
+        return ""
+    want = str(int(row["part"]) - 1)
+    for r in load_rows():
+        if r.get("series_id") == row["series_id"] and r.get("part") == want and r.get("video_id"):
+            return f"https://youtu.be/{r['video_id']}"
+    return ""
 
 
 def drama_thumbnail(row, provider, work, out_path, n):
@@ -184,7 +200,7 @@ def drama_thumbnail(row, provider, work, out_path, n):
     else:   # no scene description: use the most dramatic story picture with people in it
         pics = sorted((work / "images").glob("scene_*.png"))
         bg.write_bytes(pics[min(len(pics) - 1, max(0, len(pics) // 2))].read_bytes())
-    return make_drama_thumbnail(bg, quote, hook, out_path, variant=n)
+    return make_drama_thumbnail(bg, quote, hook, out_path, variant=n, part=row.get("part") or "")
 
 
 CHAPTER_MARKS = [(0.0, "கதை ஆரம்பம்"), (0.35, "கதை நகர்கிறது"), (0.6, "திருப்புமுனை"),

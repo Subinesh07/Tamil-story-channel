@@ -16,7 +16,7 @@ from collections import Counter
 from pathlib import Path
 
 from config import (GENRE_MIX, IMAGE_STYLE, MAX_SCENES, MAX_WORDS, MAX_WORDS_PER_SENTENCE,
-                    MIN_PENDING, MIN_SCENES, MIN_WORDS, OPENING_STYLES, PROMPT_SEP,
+                    MIN_SCENES, MIN_WORDS, OPENING_STYLES, PROMPT_SEP,
                     SENTENCE_SEP, STORY_INDEX)
 from llm import LLMError, complete
 from strategy import load as load_strategy
@@ -86,21 +86,21 @@ def next_opening(rows):
 
 # ---------------- LLM steps ----------------
 
-def plan_story(genre, opening, premises, used_names, topic=None):
+def plan_story(genre, opening, premises, used_names, topic=None, series_brief=None):
     n_beats = random.randint(MIN_SCENES + 1, MAX_SCENES)
     avoid = "\n".join(premises[-80:]) or "(none yet)"
-    prompt = f"""You are planning an original Tamil {genre} story for a YouTube narration channel.
+    prompt = f"""You are planning {'one part of a Tamil story series' if series_brief else 'an original Tamil ' + genre + ' story'} for a YouTube narration channel.
 It will be narrated for 20-25 minutes (about 2,650 Tamil words).
-The story opens with {opening}.
+{series_brief or ''}
+The part opens with {opening}.
 {('STORY IDEA (build the whole story on this idea, with your own original characters and twists): ' + topic) if topic else ''}
 {RULES}
 - Do NOT make it a mother-sacrifice plot unless the genre truly needs it, and vary the setting
   (village, Chennai flat, small town, bus depot, school, market, hospital, farm, coastal town ...).
-- Use fresh Tamil character names. Do not use any of these names: {', '.join(sorted(used_names)) or 'none'}.
+- {'Keep the series characters; any NEW characters need fresh names.' if series_brief else 'Use fresh Tamil character names.'} Do not use any of these names: {', '.join(sorted(used_names)) or 'none'}.
 - Themes viewers are enjoying right now (use loosely as inspiration, never copy anyone's story):
   {', '.join(load_strategy().get('trending_themes', [])) or 'any'}
-- The premise must be clearly different from every premise already used:
-{avoid}
+{'' if series_brief else '- The premise must be clearly different from every premise already used:' + chr(10) + avoid}
 
 Return JSON with exactly these keys:
 {{
@@ -111,6 +111,7 @@ Return JSON with exactly these keys:
  "title_en": "English title",
  "premise_en": "one-line English premise",
  "description_ta": "2-3 line Tamil YouTube description that hooks the viewer without spoiling the ending",
+ "episode_summary_en": "3-4 sentence summary of what happens in this story/part, including how it ends",
  "characters": [{{"name": "...", "role": "...", "age": 0,
                   "appearance_en": "fixed look: face, hair, clothes, so images stay consistent"}}],
  "beats": [{{"summary_en": "what happens", "characters": ["names in scene"],
@@ -118,7 +119,7 @@ Return JSON with exactly these keys:
              "emotion": "dominant feeling"}}]
 }}
 Give exactly {n_beats} beats in story order, covering hook, rising tension, turning point
-around beat {round(n_beats * 0.6)}, climax and ending.
+around beat {round(n_beats * 0.6)}, climax and {'the ending or cliffhanger the series brief asks for' if series_brief else 'ending'}.
 Each beat becomes ONE illustration, so describe a simple, paintable moment:
 - at most 2 people in the picture, named in "characters"; list [] if nobody is in it
 - no small objects held in hands, no vehicles or bicycles in close-up, no written text
@@ -132,7 +133,7 @@ Each beat becomes ONE illustration, so describe a simple, paintable moment:
 PARTS = 4  # smaller pieces suit free models with short output limits
 
 
-def write_part(plan, part, previous_text=""):
+def write_part(plan, part, previous_text="", final_note=None):
     beats = plan["beats"]
     size = -(-len(beats) // PARTS)
     chunk = beats[part * size:(part + 1) * size]
@@ -141,7 +142,7 @@ def write_part(plan, part, previous_text=""):
     context = ("" if part == 0 else
                "The story so far ends like this; continue seamlessly from it:\n" + previous_text[-1200:])
     last = part == PARTS - 1
-    ending = ("Finish the story with these beats and give it a satisfying, complete ending."
+    ending = ((final_note or "Finish the story with these beats and give it a satisfying, complete ending.")
               if last else "Stop at the end of these beats, mid-story; do not conclude.")
     prompt = f"""Write part {part + 1} of {PARTS} of this Tamil story script, in Tamil.
 Title: {plan['title_ta']} ({plan['title_en']})
@@ -290,7 +291,7 @@ def self_check(plan, sentences):
     return words, problems
 
 
-def originality_and_ending_check(plan, sentences):
+def originality_and_ending_check(plan, sentences, must_resolve=True, true_story=False):
     ending = " ".join(sentences[-25:])
     verdict = complete(
         "Answer as JSON {\"resolves_conflict\": true/false, \"resembles_known_work\": "
@@ -298,9 +299,9 @@ def originality_and_ending_check(plan, sentences):
         f"Premise: {plan['premise_en']}\nEnding (Tamil): {ending}",
         want_json=True, max_tokens=1000)
     problems = []
-    if not verdict.get("resolves_conflict", False):
+    if must_resolve and not verdict.get("resolves_conflict", False):
         problems.append("ending does not resolve the conflict")
-    if verdict.get("resembles_known_work"):
+    if verdict.get("resembles_known_work") and not true_story:
         problems.append(f"too close to: {verdict['resembles_known_work']}")
     return problems
 
@@ -365,26 +366,34 @@ def mark_topic_used(i):
 
 
 def write_story(rows):
+    """Write the next part of whichever series owns the next publish date."""
+    import series as S
     premises, used_names = read_index()
-    picked = next_topic()
-    genre = picked[1]["genre"] if picked else next_genre(rows)
+    data = S.load()
+    day = S.next_publish_date(rows)
+    genre, why = S.genre_for(day, rows, data)
+    prefer = why.split(":", 1)[1] if why.startswith("weekend:") else None
+    ser = S.active_series(data, genre, prefer) or S.create_series(genre, data, complete, used_names)
+    part = ser["parts_done"] + 1
+    final = part >= ser["parts_total"]
     opening = next_opening(rows)
-    topic = picked[1]["topic"] if picked else None
-    log.info("Planning a %s story opening with %s", genre, opening)
-    for attempt in range(2):
-        plan = plan_story(genre, opening, premises, used_names, topic)
-        names = [c["name"] for c in plan["characters"]]
-        if not set(names) & used_names:
-            break
-        log.warning("Plan reused names %s, re-planning", set(names) & used_names)
+    log.info("%s %s -> %s part %d/%d (%s)", day, day.strftime("%a"), ser["title_en"], part,
+             ser["parts_total"], why)
+    series_names = {c["name"] for c in ser.get("characters") or []}
+    plan = plan_story(genre, opening, premises, used_names - series_names, series_brief=S.episode_brief(ser))
+    plan["characters"] = (ser.get("characters") or []) + [c for c in plan.get("characters", [])
+                                                           if c["name"] not in series_names]
+    names = [c["name"] for c in plan["characters"]]
+    final_note = (None if final else "End on a strong cliffhanger: the main conflict continues in the next part.")
     text = ""
-    for part in range(PARTS):
-        text += "\n" + write_part(plan, part, text)
+    for p in range(PARTS):
+        text += "\n" + write_part(plan, p, text, final_note=final_note)
     sentences = fix_long_sentences(to_sentences(text))
     sentences = fix_long_sentences(adjust_length(plan, sentences))
     sentences = _trim(sentences)
     words, problems = self_check(plan, sentences)
-    problems += originality_and_ending_check(plan, sentences)
+    problems += originality_and_ending_check(plan, sentences, must_resolve=final,
+                                             true_story=(genre == "real lives"))
     if problems:
         raise LLMError("self-check failed: " + "; ".join(problems))
     next_id = max([int(r["id"]) for r in rows if r["id"].isdigit()] or [0]) + 1
@@ -397,18 +406,28 @@ def write_story(rows):
         log.warning("Scene segmentation failed (%s); using beat-based pictures", str(e)[:120])
         prompts_field = f" {PROMPT_SEP} ".join(scene_prompts(plan))
         n_pics = len(plan["beats"])
-    row = {"id": str(next_id), "genre": genre, "title_ta": plan["title_ta"],
-           "title_en": plan["title_en"], "script_ta": script,
+    gta = S.GENRES[genre]["ta"]
+    suffix = f" | {ser['title_ta']} - பகுதி {part}"
+    title = plan["title_ta"].strip()
+    title = (title[:100 - len(suffix)].rstrip() + suffix) if len(title) + len(suffix) > 100 else title + suffix
+    desc = plan.get("description_ta", "")
+    if genre == "real lives":
+        desc += "\n\n(நிஜ வாழ்க்கை நிகழ்வுகளை அடிப்படையாகக் கொண்ட நாடகமாக்கல் / Dramatised from documented real events)"
+    row = {"id": str(next_id), "genre": genre, "title_ta": title,
+           "title_en": f"{plan['title_en']} | {ser['title_en']} Part {part}", "script_ta": script,
            "scene_prompts": prompts_field,
-           "publish_at": "", "status": "pending", "video_id": "", "fail_reason": "",
-           "description_ta": plan.get("description_ta", ""),
+           "publish_at": S.publish_at(day), "status": "pending", "video_id": "", "fail_reason": "",
+           "description_ta": desc, "series_id": ser["id"], "part": str(part),
            "thumb_quote_ta": plan.get("thumb_quote_ta", ""), "thumb_hook_ta": plan.get("thumb_hook_ta", ""),
            "thumb_prompt": thumb_prompt(plan)}
-    log.info("Story %s ok: %d words, %d sentences, %d pictures", next_id, words, len(sentences),
-             n_pics)
-    if picked:
-        mark_topic_used(picked[0])
-    return row, plan["premise_en"], names
+    ser["so_far"].append(plan.get("episode_summary_en") or plan.get("premise_en", ""))
+    ser["parts_done"] = part
+    if final:
+        ser["status"] = "done"
+    S.save(data)
+    log.info("Story %s ok (%s %s part %d): %d words, %d sentences, %d pictures", next_id, gta,
+             ser["title_en"], part, words, len(sentences), n_pics)
+    return row, f"[{ser['title_en']} part {part}] " + plan["premise_en"], names
 
 
 def main():
@@ -423,12 +442,8 @@ def main():
     rows = load_rows()
     pending = sum(r["status"] == "pending" for r in rows)
     if args.auto:
-        if len(rows) < 30:
-            want = 30 - len(rows)
-        elif pending < MIN_PENDING:
-            want = 20 - pending
-        else:
-            want = 0
+        # keep about a week of parts written ahead (each part depends on the one before)
+        want = max(0, 7 - pending)
     else:
         want = args.count
     want = min(want, args.max_per_run)
