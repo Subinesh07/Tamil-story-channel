@@ -171,10 +171,19 @@ def drama_thumbnail(row, provider, work, out_path, n):
             quote, hook = d["quote"], d["hook"]
             prompt = f"{d['scene']}. South Indian setting. {THUMB_STYLE}"
         except Exception as e:
-            log.warning("No thumbnail text (%s); using the simple thumbnail", str(e)[:120])
-            return None
+            log.warning("Thumbnail text AI busy (%s); using the title as the quote", str(e)[:120])
+            import random
+            quote = re.sub(r"\s*\(.*?\)\s*$", "", row["title_ta"]).strip()
+            hook = random.Random(n).choice(["கடைசியில் நடந்த அதிர்ச்சி!", "அடுத்து நடந்தது என்ன?",
+                                            "யாரும் எதிர்பார்க்காத திருப்பம்!", "அந்த ரகசியம் என்ன?",
+                                            "கண்ணீர் வர வைக்கும் முடிவு!"])
+            prompt = None
     bg = work / "images" / "thumb_bg.png"
-    bg.write_bytes(provider.generate(prompt, seed=n * 1000 + 999))
+    if prompt:
+        bg.write_bytes(provider.generate(prompt, seed=n * 1000 + 999))
+    else:   # no scene description: use the most dramatic story picture with people in it
+        pics = sorted((work / "images").glob("scene_*.png"))
+        bg.write_bytes(pics[min(len(pics) - 1, max(0, len(pics) // 2))].read_bytes())
     return make_drama_thumbnail(bg, quote, hook, out_path, variant=n)
 
 

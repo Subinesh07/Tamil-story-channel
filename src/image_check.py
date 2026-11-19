@@ -15,6 +15,7 @@ import requests
 log = logging.getLogger(__name__)
 _model = None
 _disabled = False   # set after Gemini says "too many requests": stop checking for this run
+_fails = 0          # consecutive failures; after 3 the checker switches off for this run
 
 QUESTION = """You are checking an illustration for a family story video.
 The illustration was requested with this description:
@@ -41,7 +42,7 @@ def _pick_model(key):
 
 def check(png_bytes, prompt):
     """Return (ok, reason)."""
-    global _disabled
+    global _disabled, _fails
     key = os.environ.get("LLM_API_KEY", "")
     if not key or os.environ.get("IMAGE_CHECK", "on") == "off":
         return True, "check skipped (no key)"
@@ -62,10 +63,10 @@ def check(png_bytes, prompt):
             "generationConfig": {"temperature": 0, "responseMimeType": "application/json",
                                  "maxOutputTokens": 300},
         }
-        for attempt in range(2):
+        for attempt in range(1):
             r = requests.post(
                 f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent",
-                headers={"x-goog-api-key": key}, json=body, timeout=45)
+                headers={"x-goog-api-key": key}, json=body, timeout=20)
             if r.status_code not in (429, 503):
                 break
             time.sleep(30)   # free tier: a few requests per minute
@@ -73,11 +74,19 @@ def check(png_bytes, prompt):
             _disabled = True
             log.warning("Gemini image-check limit reached; remaining images are not checked")
         if r.status_code != 200:
+            _fails += 1
+            if _fails >= 3:
+                _disabled = True
+                log.warning("Gemini busy: image checks switched off for the rest of this run")
             return True, f"check skipped (HTTP {r.status_code})"
+        _fails = 0
         text = "".join(p.get("text", "") for p in
                        r.json()["candidates"][0]["content"]["parts"])
         verdict = json.loads(re.sub(r"^```(?:json)?|```$", "", text.strip()))
         return bool(verdict.get("ok", True)), verdict.get("problem", "")
     except Exception as e:  # never block a video because the checker failed
+        _fails += 1
+        if _fails >= 3:
+            _disabled = True
         log.warning("Image check skipped: %s", str(e)[:120])
         return True, "check skipped (error)"

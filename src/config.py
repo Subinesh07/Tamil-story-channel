@@ -18,8 +18,8 @@ CSV_COLUMNS = [
 # --- Story rules ---
 SENTENCE_SEP = "।"
 PROMPT_SEP = "|"
-# Leda (sped up 1.15x) narrates ~100 Tamil words/min, so ~2,200 words = 20-24 min
-MIN_WORDS, MAX_WORDS = 2000, 2450
+# Leda (1.08x) narrates ~118 Tamil words/min (measured: 1,892 words = 14.9 min at 1.15x), so ~2,600 words = 21-24 min
+MIN_WORDS, MAX_WORDS = 2450, 2850
 MAX_WORDS_PER_SENTENCE = 15
 MIN_SCENES, MAX_SCENES = 20, 25   # story beats in the plan (pictures follow the script)
 IMAGE_STYLE = ("cinematic semi-realistic digital painting like a Tamil TV serial still, "
@@ -101,6 +101,6 @@ GEMINI_VOICE = "Leda"
 GEMINI_STYLE = ("Read this Tamil story aloud like a warm, emotional storyteller from Tamil Nadu. "
                 "Natural, slightly brisk conversational pace; short pauses between sentences; "
                 "expressive: rising on questions, softer on sad lines, lively on dialogue")
-GEMINI_TEMPO = 1.15            # gentle speed-up after synthesis (pitch unchanged)
-GEMINI_CHUNK_CHARS = 3200      # long passages = few requests (free daily limit is small)
+GEMINI_TEMPO = 1.08            # gentle speed-up after synthesis (pitch unchanged); close to the reference voice
+GEMINI_CHUNK_CHARS = 4000      # long passages = few requests (free daily limit is small)
 TTS_CACHE = ROOT / "cache" / "tts"   # voiced chunks survive between runs (quota pauses)
