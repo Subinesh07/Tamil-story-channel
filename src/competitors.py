@@ -129,7 +129,7 @@ def suggestions(ours, others):
     return tips
 
 
-def write_report(ours, others):
+def write_report(ours, others, applied=None):
     REPORT_DIR.mkdir(exist_ok=True)
     today = datetime.now(IST).strftime("%Y-%m-%d")
     lines = [f"# Competitor report — {today}", "",
@@ -145,7 +145,10 @@ def write_report(ours, others):
     for name, v in best:
         lines.append(f"- {v['title']} — *{name}* — {v['per_day']:,.0f} views/day, {v['minutes']:.0f} min "
                      f"([watch](https://youtu.be/{v['id']}))")
-    lines += ["", "## Suggestions", ""] + [f"- {t}" for t in suggestions(ours, others)]
+    if applied:
+        lines += ["", "## ✅ Changes applied automatically this week", ""] + [f"- {c}" for c in applied]
+        lines += ["", "_To undo or freeze these, edit `channel_strategy.json` (set `\"auto\": false`)._"]
+    lines += ["", "## Observations", ""] + [f"- {t}" for t in suggestions(ours, others)]
     lines += ["", "_Generated automatically every Monday. Use competitors for themes and timing "
               "ideas only: never copy their stories, titles or thumbnails (reused-content risk)._"]
     path = REPORT_DIR / f"competitors-{today}.md"
@@ -187,7 +190,10 @@ def main():
                 others.append(rep)
         except Exception as e:
             log.warning("Skipping %s: %s", cid, str(e)[:150])
-    path = write_report(ours, others)
+    from stories import load_rows
+    from strategy import update
+    _, applied = update(ours, others, load_rows(), datetime.now(IST).strftime("%Y-%m-%d"))
+    path = write_report(ours, others, applied)
     log.info("Report written: %s (%d competitors)", path, len(others))
     print(path)
     return 0

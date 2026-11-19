@@ -14,6 +14,11 @@ from config import MIN_PENDING, PUBLISH_HOUR, ROOT, SCHEDULE_MD, TIMEZONE
 from stories import load_rows, save_rows
 
 log = logging.getLogger("schedule")
+
+
+def publish_hour():
+    from strategy import load
+    return int(load().get("publish_hour", PUBLISH_HOUR))
 CHANNEL_JSON = ROOT / "channel.json"
 
 
@@ -30,14 +35,14 @@ def assign_dates(rows, start):
     day = max(day, start, tomorrow)
     for r in rows:
         if not r["publish_at"] and r["status"] == "pending":
-            r["publish_at"] = datetime.combine(day, time(PUBLISH_HOUR), tz).isoformat()
+            r["publish_at"] = datetime.combine(day, time(publish_hour()), tz).isoformat()
             day += timedelta(days=1)
     return rows
 
 
 def write_schedule_md(rows):
     lines = ["# Publishing schedule", "",
-             f"One video a day at {PUBLISH_HOUR}:00 {TIMEZONE}. Updated automatically.", "",
+             f"One video a day at {publish_hour()}:00 {TIMEZONE}. Updated automatically.", "",
              "| Date | ID | Title | Status | Video |", "|---|---|---|---|---|"]
     for r in sorted(rows, key=lambda r: r["publish_at"] or "9999"):
         d = r["publish_at"][:10] if r["publish_at"] else "unscheduled"

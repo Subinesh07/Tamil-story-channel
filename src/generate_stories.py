@@ -18,6 +18,7 @@ from config import (GENRE_MIX, IMAGE_STYLE, MAX_SCENES, MAX_WORDS, MAX_WORDS_PER
                     MIN_PENDING, MIN_SCENES, MIN_WORDS, OPENING_STYLES, PROMPT_SEP,
                     SENTENCE_SEP, STORY_INDEX)
 from llm import LLMError, complete
+from strategy import load as load_strategy
 from stories import load_rows, save_rows, word_count
 
 log = logging.getLogger("generate")
@@ -64,11 +65,13 @@ def append_index(row_id, genre, title_en, premise, names):
 # ---------------- choosing what to write ----------------
 
 def next_genre(rows):
-    """Keep every block of 30 at 12 / 8 / 5 / 5."""
+    """Keep every block of 30 at the strategy's genre mix (starts at 12 / 8 / 5 / 5)."""
+    from strategy import load
+    mix = load().get("genre_mix") or GENRE_MIX
     block = rows[-(len(rows) % 30):] if len(rows) % 30 else []
     have = Counter(r["genre"] for r in block)
-    need = [g for g, n in GENRE_MIX.items() for _ in range(max(0, n - have[g]))]
-    return random.choice(need or list(GENRE_MIX))
+    need = [g for g, n in mix.items() for _ in range(max(0, n - have[g]))]
+    return random.choice(need or list(mix))
 
 
 def next_opening(rows):
@@ -89,6 +92,8 @@ The story opens with {opening}.
 - Do NOT make it a mother-sacrifice plot unless the genre truly needs it, and vary the setting
   (village, Chennai flat, small town, bus depot, school, market, hospital, farm, coastal town ...).
 - Use fresh Tamil character names. Do not use any of these names: {', '.join(sorted(used_names)) or 'none'}.
+- Themes viewers are enjoying right now (use loosely as inspiration, never copy anyone's story):
+  {', '.join(load_strategy().get('trending_themes', [])) or 'any'}
 - The premise must be clearly different from every premise already used:
 {avoid}
 

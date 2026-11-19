@@ -37,6 +37,6 @@ jobs:
         run: |
           git config user.name "story-bot"
           git config user.email "story-bot@users.noreply.github.com"
-          git add reports/
+          git add reports/ channel_strategy.json
           git diff --cached --quiet || { git commit -m "Weekly competitor report [skip ci]"; git pull --rebase; git push; }
           gh issue create --title "📊 Weekly competitor report ($(date +%d-%b))" --body-file "${{ steps.rep.outputs.path }}"

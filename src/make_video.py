@@ -48,7 +48,11 @@ def produce(row, upload=True, check_duration=True):
     title = re.sub(r"\s*\(.*?\)\s*$", "", row["title_ta"]).strip() or row["title_ta"]
     n = int(rid) if rid.isdigit() else 0
     intro = split_sentences(INTRO_LINES[n % len(INTRO_LINES)].format(title=title))
-    outro = split_sentences(OUTRO_LINES[n % len(OUTRO_LINES)])
+    from strategy import load as load_strategy
+    outro_pool = OUTRO_LINES
+    if load_strategy().get("engagement_push"):
+        outro_pool = [o for o in OUTRO_LINES if "?" in o or "கமெண்ட்" in o] or OUTRO_LINES
+    outro = split_sentences(outro_pool[n % len(outro_pool)])
     sentences = intro + story + outro
     log.info("Row %s '%s': %d story sentences (+%d intro, +%d outro), %d prompts", rid,
              row["title_en"], len(story), len(intro), len(outro), len(prompts))
