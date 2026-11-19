@@ -51,7 +51,7 @@ def test_sample_render():
     narration, timings = build_narration(clips, sentences, OUT)
     assert len(timings["sentences"]) == 5
     gaps = [b["start"] - a["end"] for a, b in zip(timings["sentences"], timings["sentences"][1:])]
-    assert all(abs(g - 0.25) < 0.02 for g in gaps), gaps
+    assert all(0 <= g < 0.05 for g in gaps), gaps   # subtitles bridge the short pause to the next line
 
     scenes = plan_scenes(timings, len(prompts), n_scenes=3)
     assert len(scenes) == 3 and abs(sum(s["duration"] for s in scenes) - timings["total"]) < 0.01
