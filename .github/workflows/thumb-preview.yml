@@ -3,6 +3,11 @@ name: Thumbnail preview
 # Makes 4 sample thumbnails with real AI pictures into previews/ to judge the style.
 on:
   workflow_dispatch:
+    inputs:
+      sample:
+        description: "Which samples (blank = standard, doomsday = Doomsday series)"
+        required: false
+        default: ""
 
 permissions:
   contents: write
@@ -22,6 +27,7 @@ jobs:
       - name: Make previews
         env:
           IMAGE_API_KEY: ${{ secrets.IMAGE_API_KEY }}
+          SAMPLE: ${{ inputs.sample }}
         run: cd src && python thumb_preview.py
       - name: Save previews
         run: |

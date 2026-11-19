@@ -19,13 +19,24 @@ SAMPLES = [
 ]
 
 
+DOOMSDAY = [
+    ("horror", "1", "Chennai Marina beach at night, the whole sky blood red and violet with a gigantic glowing solar storm swirling above the sea, city buildings going dark one by one, close-up in the foreground of a terrified young Tamil woman scientist with glasses holding a tablet and her scared little brother clutching her arm, epic disaster movie scale",
+     {"title": "டூம்ஸ்டே", "tagline": "சென்னைக்கு இன்னும் 7 நாள் தான்!"}),
+    ("family serial", "", "Split composition: LEFT half: a normal busy Chennai street in bright daylight with buses and people; RIGHT half: the same street at night completely dark and empty, a red sky, one Tamil family with torches standing together in fear",
+     {"line1": "உலகம் இருட்டாக 7 நாள்…", "line2": "யாருக்கும் தெரியாத ரகசியம்!", "ribbon": "டூம்ஸ்டே தொடர் ஆரம்பம்!"}),
+]
+
+
 def main():
     OUT.mkdir(exist_ok=True)
     prov = get_provider()
-    for i, (genre, part, scene, texts) in enumerate(SAMPLES):
+    import os
+    samples = DOOMSDAY if os.environ.get("SAMPLE") == "doomsday" else SAMPLES
+    for i, (genre, part, scene, texts) in enumerate(samples):
         bg = OUT / f"bg_{i}.png"
         bg.write_bytes(prov.generate(f"{scene}. South Indian setting. {THUMB_STYLE}", seed=4242 + i))
-        path, layout = thumb_v2.make(bg, texts, OUT / f"thumb_{i}_{layout_name(genre, i)}.jpg", genre, i, part)
+        prefix = "doomsday" if samples is DOOMSDAY else "thumb"
+        path, layout = thumb_v2.make(bg, texts, OUT / f"{prefix}_{i}.jpg", genre, i, part)
         bg.unlink()
         print("made", path, layout)
     return 0
