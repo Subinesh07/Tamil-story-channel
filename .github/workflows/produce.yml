@@ -45,6 +45,13 @@ jobs:
       - name: Install Python packages
         run: pip install -r requirements.txt
 
+      - name: Restore saved Leda voice parts
+        uses: actions/cache@v5
+        with:
+          path: cache/tts
+          key: leda-${{ github.run_id }}
+          restore-keys: leda-
+
       - name: Sample test (must pass before any API use)
         run: python tests/test_sample.py
 

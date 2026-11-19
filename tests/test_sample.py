@@ -102,6 +102,22 @@ def test_scene_plan_follows_story_marks():
     assert scenes[0]["kind"] == "intro" and scenes[-1]["kind"] == "outro"
 
 
+def test_leda_alignment_snaps_to_pauses():
+    """Sentence boundaries land in the real pauses of a passage (no Gemini call)."""
+    from gemini_voice import align_by_pauses, chunks_for
+    OUT.mkdir(parents=True, exist_ok=True)
+    wav = OUT / "pauses.wav"
+    # 3 "sentences" of 2.0 s, 1.0 s and 3.0 s of tone, separated by 0.4 s silences
+    run(["ffmpeg", "-y", "-f", "lavfi", "-i", "sine=f=300:r=44100:d=2", "-f", "lavfi",
+         "-i", "anullsrc=r=44100:cl=mono:d=0.4", "-f", "lavfi", "-i", "sine=f=300:r=44100:d=1",
+         "-f", "lavfi", "-i", "anullsrc=r=44100:cl=mono:d=0.4", "-f", "lavfi", "-i", "sine=f=300:r=44100:d=3",
+         "-filter_complex", "[0][1][2][3][4]concat=n=5:v=0:a=1", "-ac", "2", str(wav)])
+    spans = align_by_pauses(wav, ["ஒன்று இரண்டு மூன்று நான்கு", "ஐந்து ஆறு", "ஏழு எட்டு ஒன்பது பத்து பதினொன்று பன்னிரண்டு"])
+    assert abs(spans[0][1] - 2.0) < 0.15 and abs(spans[1][0] - 2.4) < 0.15, spans
+    assert abs(spans[1][1] - 3.4) < 0.15 and abs(spans[2][0] - 3.8) < 0.15, spans
+    assert len(chunks_for(["அ" * 1000] * 10)) >= 3
+
+
 def test_upload_metadata():
     from youtube_upload import build_metadata
     row = {"title_ta": "த" * 150, "script_ta": SCRIPT * 5,
@@ -115,6 +131,7 @@ def test_upload_metadata():
 
 
 if __name__ == "__main__":
+    test_leda_alignment_snaps_to_pauses()
     test_scene_plan_follows_story_marks()
     test_scene_plan_full_length()
     test_upload_metadata()

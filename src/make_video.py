@@ -14,7 +14,7 @@ import traceback
 import re
 
 from config import (CHANNEL_NAME_EN, CHANNEL_NAME_TA, IMAGE_STYLE, INTRO_LINES, OUTPUT_DIR,
-                    OUTRO_LINES, WORK_DIR)
+                    OUTRO_LINES, TTS_ENGINE, WORK_DIR)
 from ffutil import run
 from image_provider import generate_all, get_provider, make_card, make_outro_card
 from quality import quality_gate
@@ -63,7 +63,11 @@ def produce(row, upload=True, check_duration=True):
              row["title_en"], len(story), len(intro), len(outro), len(prompts))
 
     log.info("== Voice ==")
-    clips, voice = synthesize(sentences, work / "tts")
+    if TTS_ENGINE == "gemini":
+        from gemini_voice import synthesize as leda
+        clips, voice = leda(sentences, cache_key=f"row_{rid}"), "Leda (Gemini)"
+    else:
+        clips, voice = synthesize(sentences, work / "tts")
     narration, timings = build_narration(clips, sentences, work)
     log.info("Narration %.1f min", timings["total"] / 60)
 
@@ -236,6 +240,10 @@ def main():
         video_id = produce(row, upload=upload,
                            check_duration=not args.test)
     except Exception as e:
+        if type(e).__name__ == "GeminiQuota":
+            log.warning("Paused: %s. Voiced parts are saved; the next run continues with Leda.", e)
+            update_row(row["id"], status="pending", fail_reason="waiting for Gemini voice daily limit")
+            return 0
         log.error("Row %s failed: %s", row["id"], e)
         log.debug(traceback.format_exc())
         update_row(row["id"], status="failed", fail_reason=str(e)[:500].replace("\n", " "))

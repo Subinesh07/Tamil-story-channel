@@ -5,3 +5,4 @@ google-auth-oauthlib>=1.2
 pillow>=10.3
 requests>=2.32
 fonttools>=4.53
+numpy>=1.26

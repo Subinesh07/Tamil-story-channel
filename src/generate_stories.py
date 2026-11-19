@@ -90,7 +90,7 @@ def plan_story(genre, opening, premises, used_names, topic=None):
     n_beats = random.randint(MIN_SCENES + 1, MAX_SCENES)
     avoid = "\n".join(premises[-80:]) or "(none yet)"
     prompt = f"""You are planning an original Tamil {genre} story for a YouTube narration channel.
-It will be narrated for 20-25 minutes (about 2,600 Tamil words).
+It will be narrated for 20-25 minutes (about 2,200 Tamil words).
 The story opens with {opening}.
 {('STORY IDEA (build the whole story on this idea, with your own original characters and twists): ' + topic) if topic else ''}
 {RULES}
@@ -152,7 +152,7 @@ Beats for this part:
 {beat_text}
 {context}
 {RULES}
-Length: about 650-720 Tamil words for this part (count carefully). Write the full narration, not an outline.
+Length: about 550-610 Tamil words for this part (count carefully). Write the full narration, not an outline.
 Format: ONE sentence per line. No numbering, no headings, no stage directions, no English
 translation. Dialogue is fine inside a sentence. {ending}"""
     return complete(prompt, max_tokens=16000)
