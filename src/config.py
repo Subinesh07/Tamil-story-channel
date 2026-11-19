@@ -12,6 +12,7 @@ OUTPUT_DIR = ROOT / "output"      # final mp4 / timings / logs (git-ignored)
 CSV_COLUMNS = [
     "id", "genre", "title_ta", "title_en", "script_ta", "scene_prompts",
     "publish_at", "status", "video_id", "fail_reason", "description_ta",
+    "thumb_quote_ta", "thumb_hook_ta", "thumb_prompt",
 ]
 
 # --- Story rules ---

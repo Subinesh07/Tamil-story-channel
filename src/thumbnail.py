@@ -80,3 +80,75 @@ def make_thumbnail(scene_png, title, out_path, variant=0):
            stroke_fill=(0, 0, 0), language="ta")
     img.save(out_path, "JPEG", quality=90, optimize=True)
     return out_path
+
+
+# ---------------------------------------------------------------------------
+# "Drama" thumbnail: what top Tamil family-story channels use.
+# Realistic emotional scene + quoted shocking dialogue on top + curiosity hook at the bottom.
+THUMB_STYLE = ("cinematic semi-realistic digital painting like a Tamil TV serial poster, "
+               "dramatic lighting, highly detailed expressive faces, strong emotions, "
+               "vibrant saturated colours, sharp focus, no text, no letters, no logos")
+BANDS = [((200, 20, 20), (255, 255, 255), (255, 214, 0)),     # red band, white quote, yellow hook
+         ((255, 214, 0), (150, 0, 0), (255, 255, 255)),       # yellow band, dark red quote
+         ((20, 20, 20), (255, 214, 0), (255, 60, 60))]        # black band, yellow quote, red hook
+
+
+def make_drama_thumbnail(bg_png, quote, hook, out_path, variant=0):
+    if not features.check("raqm"):
+        log.warning("Pillow has no Tamil text shaping (libraqm); skipping thumbnail")
+        return None
+    band_col, quote_col, hook_col = BANDS[variant % len(BANDS)]
+    img = Image.open(bg_png).convert("RGB").resize((WIDTH, HEIGHT))
+    img = ImageEnhance.Color(ImageEnhance.Contrast(img).enhance(1.2)).enhance(1.3)
+    d = ImageDraw.Draw(img)
+
+    # top: quoted dialogue on a solid band (max 2 lines)
+    quote = f"“{quote.strip().strip('“”\"')}”"
+    size = 62
+    while size > 40:
+        f = _font(size)
+        lines = _wrap(d, quote, f, WIDTH - 80)
+        if len(lines) <= 2:
+            break
+        size -= 4
+    band_h = int(len(lines) * size * 1.35 + 30)
+    d.rectangle([0, 0, WIDTH, band_h], fill=band_col)
+    y = 14
+    for ln in lines:
+        w = d.textlength(ln, font=f)
+        d.text(((WIDTH - w) / 2, y), ln, font=f, fill=quote_col, stroke_width=3,
+               stroke_fill=(0, 0, 0), language="ta")
+        y += size * 1.35
+
+    # bottom: dark gradient + big curiosity hook (last word highlighted)
+    shade = Image.new("L", (WIDTH, HEIGHT))
+    sd = ImageDraw.Draw(shade)
+    for yy in range(int(HEIGHT * 0.55), HEIGHT):
+        sd.line([(0, yy), (WIDTH, yy)], fill=int(230 * (yy - HEIGHT * 0.55) / (HEIGHT * 0.45)))
+    img = Image.composite(Image.new("RGB", img.size, (0, 0, 0)), img, shade)
+    d = ImageDraw.Draw(img)
+    size = 84
+    while size > 52:
+        hf = _font(size)
+        if d.textlength(hook, font=hf) <= WIDTH - 100:
+            break
+        size -= 4
+    words = hook.split()
+    first, last = " ".join(words[:-1]), words[-1] if words else ""
+    total = d.textlength(hook, font=hf)
+    x, y = (WIDTH - total) / 2, HEIGHT - size * 1.5 - 30
+    if first:
+        d.text((x, y), first + " ", font=hf, fill=hook_col, stroke_width=7, stroke_fill=(0, 0, 0),
+               language="ta")
+        x += d.textlength(first + " ", font=hf)
+    d.text((x, y), last, font=hf, fill=(255, 40, 40) if hook_col != (255, 60, 60) else (255, 214, 0),
+           stroke_width=7, stroke_fill=(0, 0, 0), language="ta")
+
+    # small channel badge
+    bf = _font(30)
+    bw = d.textlength(CHANNEL_NAME_TA, font=bf)
+    d.rounded_rectangle([WIDTH - bw - 50, band_h + 16, WIDTH - 18, band_h + 66], radius=12,
+                        fill=(15, 15, 40))
+    d.text((WIDTH - bw - 34, band_h + 20), CHANNEL_NAME_TA, font=bf, fill=(255, 205, 92), language="ta")
+    img.save(out_path, "JPEG", quality=90, optimize=True)
+    return out_path

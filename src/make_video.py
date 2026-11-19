@@ -119,8 +119,10 @@ def produce(row, upload=True, check_duration=True):
          "-frames:v", "1", str(out / f"story_{rid}_intro_frame.png")], check=False)
     thumb = None
     try:
-        thumb = make_thumbnail(story_imgs[min(1, len(story_imgs) - 1)], title,
-                               out / f"story_{rid}_thumbnail.jpg", variant=n)
+        thumb = drama_thumbnail(row, provider, work, out / f"story_{rid}_thumbnail.jpg", n)
+        if not thumb:
+            thumb = make_thumbnail(story_imgs[min(1, len(story_imgs) - 1)], title,
+                                   out / f"story_{rid}_thumbnail.jpg", variant=n)
     except Exception as e:
         log.warning("Thumbnail failed: %s", e)
     if not ok:
@@ -141,6 +143,31 @@ def produce(row, upload=True, check_duration=True):
     except Exception as e:
         log.warning("Community post draft failed: %s", e)
     return video_id
+
+
+def drama_thumbnail(row, provider, work, out_path, n):
+    """Realistic emotional thumbnail + quoted dialogue + hook. Old stories without the fields get
+    them from one small AI request."""
+    from thumbnail import THUMB_STYLE, make_drama_thumbnail
+    quote, hook, prompt = row.get("thumb_quote_ta"), row.get("thumb_hook_ta"), row.get("thumb_prompt")
+    if not (quote and hook and prompt):
+        try:
+            from llm import complete
+            story = " ".join(split_sentences(row["script_ta"])[:120])
+            d = complete(
+                "From this Tamil story, return JSON {\"quote\": \"the most shocking line a character "
+                "says, casual Tamil, max 10 words\", \"hook\": \"max 6 Tamil words ending in a punch word "
+                "like அதிர்ச்சி! or ரகசியம்! or என்ன?\", \"scene\": \"English: 2-3 characters in the key "
+                "confrontation with positions and strong emotions\"}\n\n" + story,
+                want_json=True, max_tokens=1500, rounds=1)
+            quote, hook = d["quote"], d["hook"]
+            prompt = f"{d['scene']}. South Indian setting. {THUMB_STYLE}"
+        except Exception as e:
+            log.warning("No thumbnail text (%s); using the simple thumbnail", str(e)[:120])
+            return None
+    bg = work / "images" / "thumb_bg.png"
+    bg.write_bytes(provider.generate(prompt, seed=n * 1000 + 999))
+    return make_drama_thumbnail(bg, quote, hook, out_path, variant=n)
 
 
 CHAPTER_MARKS = [(0.0, "கதை ஆரம்பம்"), (0.35, "கதை நகர்கிறது"), (0.6, "திருப்புமுனை"),

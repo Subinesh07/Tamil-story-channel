@@ -104,7 +104,10 @@ The story opens with {opening}.
 
 Return JSON with exactly these keys:
 {{
- "title_ta": "Tamil title, under 60 characters",
+ "title_ta": "YouTube title in casual Tamil, 50-90 characters: a conflict or a shocking line plus a concrete detail (an age, a number of days, a status contrast like auto driver vs IPS officer) and a curiosity ending (…என்ன நடந்தது? / கடைசியில் அதிர்ச்சி!). No ending spoilers.",
+ "thumb_quote_ta": "the most shocking line a character says in the story, casual Tamil, max 10 words",
+ "thumb_hook_ta": "thumbnail hook, max 6 Tamil words, ending in a punch word like அதிர்ச்சி! / ரகசியம்! / என்ன?",
+ "thumb_scene_en": "the thumbnail picture: 2-3 named characters in the story's key confrontation, with clear positions, faces and strong emotions (e.g. young woman crying on the left, angry mother-in-law pointing at her on the right)",
  "title_en": "English title",
  "premise_en": "one-line English premise",
  "description_ta": "2-3 line Tamil YouTube description that hooks the viewer without spoiling the ending",
@@ -250,6 +253,13 @@ Return JSON: [{{"start": 0, "characters": ["Name"], "setting": "...", "time_of_d
     return fixed
 
 
+def thumb_prompt(plan):
+    from thumbnail import THUMB_STYLE
+    looks = "; ".join(f"{c['name']}: {c.get('age', '')}, {c['appearance_en']}" for c in plan["characters"])
+    scene = plan.get("thumb_scene_en", "")
+    return f"{scene}. Characters look: {looks}. South Indian setting. {THUMB_STYLE}".replace(PROMPT_SEP, "/") if scene else ""
+
+
 def scene_prompts(plan):
     looks = {c["name"]: f"{c['name']} ({c.get('age', '')}, {c['appearance_en']})"
              for c in plan["characters"]}
@@ -391,7 +401,9 @@ def write_story(rows):
            "title_en": plan["title_en"], "script_ta": script,
            "scene_prompts": prompts_field,
            "publish_at": "", "status": "pending", "video_id": "", "fail_reason": "",
-           "description_ta": plan.get("description_ta", "")}
+           "description_ta": plan.get("description_ta", ""),
+           "thumb_quote_ta": plan.get("thumb_quote_ta", ""), "thumb_hook_ta": plan.get("thumb_hook_ta", ""),
+           "thumb_prompt": thumb_prompt(plan)}
     log.info("Story %s ok: %d words, %d sentences, %d pictures", next_id, words, len(sentences),
              n_pics)
     if picked:
