@@ -20,7 +20,7 @@ PROMPT_SEP = "|"
 # Tamil narration runs ~90 words/min (long agglutinative words), so ~2,000 words = 20-24 min
 MIN_WORDS, MAX_WORDS = 1800, 2200
 MAX_WORDS_PER_SENTENCE = 15
-MIN_SCENES, MAX_SCENES = 20, 25
+MIN_SCENES, MAX_SCENES = 20, 25   # story beats in the plan (pictures follow the script)
 IMAGE_STYLE = ("warm watercolor illustration, South Indian home, soft natural light, "
                "no text, no logos")
 GENRE_MIX = {  # used by generate_stories.py for each new batch of 30
@@ -42,7 +42,7 @@ TTS_RETRY_WAIT = 5
 # --- Images ---
 WIDTH, HEIGHT = 1280, 720
 IMAGE_RETRIES = 2
-SECONDS_PER_IMAGE_MIN, SECONDS_PER_IMAGE_MAX = 40, 60
+SECONDS_PER_IMAGE_MIN, SECONDS_PER_IMAGE_MAX = 25, 40   # fallback when a story has no scene marks
 
 # --- Video ---
 FPS = 25

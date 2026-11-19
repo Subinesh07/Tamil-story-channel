@@ -14,7 +14,7 @@ def _cut_time(sents, i):
     return (sents[i - 1]["end"] + sents[i]["start"]) / 2
 
 
-def plan_scenes(timings, n_prompts, n_scenes=None, intro=0, outro=0):
+def plan_scenes(timings, n_prompts, n_scenes=None, intro=0, outro=0, marks=None, min_secs=8.0):
     """Return dicts: kind (intro/story/outro), prompt_index, first, last, start, end, duration."""
     sents, total = timings["sentences"], timings["total"]
     # intro / outro = how many leading / trailing sentences are the intro / outro
@@ -24,6 +24,21 @@ def plan_scenes(timings, n_prompts, n_scenes=None, intro=0, outro=0):
     story_end = total if hi == len(sents) else _cut_time(sents, hi)
     story_len = story_end - story_start
 
+    if marks:
+        # picture changes chosen from the story itself: marks[k] = story-sentence index
+        cuts, prompt_ids = [], []
+        for k, m in enumerate(marks):
+            idx = lo + m
+            if idx >= hi or (cuts and idx <= cuts[-1]):
+                continue
+            if cuts and sents[idx]["start"] - sents[cuts[-1]]["start"] < min_secs:
+                continue  # too short to show: keep the previous picture
+            cuts.append(idx)
+            prompt_ids.append(k)
+        if not cuts or cuts[0] != lo:
+            cuts, prompt_ids = [lo] + cuts, [0] + prompt_ids
+        n_scenes = len(cuts)
+        return _assemble(sents, total, lo, hi, story_start, story_end, cuts, prompt_ids)
     if n_scenes is None:
         n_scenes = round(story_len / ((SECONDS_PER_IMAGE_MIN + SECONDS_PER_IMAGE_MAX) / 2))
     n_scenes = max(1, min(n_scenes, n_prompts, hi - lo))
@@ -41,6 +56,10 @@ def plan_scenes(timings, n_prompts, n_scenes=None, intro=0, outro=0):
     prompt_ids = ([0] if n_scenes == 1 else
                   [round(k * (n_prompts - 1) / (n_scenes - 1)) for k in range(n_scenes)])
 
+    return _assemble(sents, total, lo, hi, story_start, story_end, cuts, prompt_ids)
+
+
+def _assemble(sents, total, lo, hi, story_start, story_end, cuts, prompt_ids):
     scenes = []
     if lo:
         scenes.append({"kind": "intro", "prompt_index": prompt_ids[0], "first": 0,

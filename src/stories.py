@@ -65,7 +65,20 @@ def split_sentences(script):
 
 
 def split_prompts(prompts):
-    return [p.strip() for p in prompts.split(PROMPT_SEP) if p.strip()]
+    """Prompt texts only (strips an optional 'sentence_index::' prefix)."""
+    return [m[1] for m in prompt_marks(prompts)]
+
+
+def prompt_marks(prompts):
+    """[(start_sentence_index or None, prompt)] - new stories mark where each picture starts."""
+    out = []
+    for p in prompts.split(PROMPT_SEP):
+        p = p.strip()
+        if not p:
+            continue
+        m = re.match(r"^(\d+)::\s*(.*)$", p, flags=re.S)
+        out.append((int(m.group(1)), m.group(2).strip()) if m else (None, p))
+    return out
 
 
 def word_count(text):

@@ -19,7 +19,8 @@ from image_provider import generate_all, get_provider, make_card
 from quality import quality_gate
 from render import render_video
 from scenes import plan_scenes
-from stories import load_rows, long_sentences, pick_row, split_prompts, split_sentences, update_row
+from stories import (load_rows, long_sentences, pick_row, prompt_marks, split_prompts,
+                     split_sentences, update_row)
 from subtitles import build_ass
 from thumbnail import make_thumbnail
 from tts import build_narration, synthesize
@@ -63,7 +64,11 @@ def produce(row, upload=True, check_duration=True):
     log.info("Narration %.1f min", timings["total"] / 60)
 
     log.info("== Images ==")
-    scenes = plan_scenes(timings, len(prompts), intro=len(intro), outro=len(outro))
+    marks = [i for i, _ in prompt_marks(row["scene_prompts"])]
+    marks = marks if all(i is not None for i in marks) else None
+    scenes = plan_scenes(timings, len(prompts), intro=len(intro), outro=len(outro), marks=marks)
+    log.info("%d pictures (%s)", sum(s["kind"] == "story" for s in scenes),
+             "follow the story's scene changes" if marks else "evenly timed")
     story_scenes = [s for s in scenes if s["kind"] == "story"]
     provider = get_provider()
     story_imgs, img_warnings = generate_all(provider, [prompts[s["prompt_index"]] for s in story_scenes],

@@ -26,8 +26,11 @@ log = logging.getLogger("generate")
 RULES = """Hard rules:
 - The story must be completely ORIGINAL. Do not copy or closely paraphrase any YouTube channel,
   book, film, TV serial, folk tale or song. No song lyrics at all.
-- SPOKEN Tamil (பேச்சுத் தமிழ்), the way a grandmother tells a story at home in Tamil Nadu.
-  NOT written/literary Tamil. Use colloquial verb forms:
+- CASUAL everyday Tamil, the way people in Tamil Nadu actually talk today (light "Tanglish").
+  Mix in common English words naturally, as real people do, but WRITE THEM IN TAMIL LETTERS:
+    ஆபீஸ், டென்ஷன், சாரி, ஓகே, போன், பிராப்ளம், தேங்க்ஸ், ஹாஸ்பிடல், பஸ், ஸ்கூல், ஆக்சுவலா,
+    சூப்பர், ஃப்ரெண்ட், லவ், மிஸ் பண்றேன், கால் பண்ணு, வெயிட் பண்ணு.
+  Never pure literary Tamil; never English in Latin letters. Use colloquial verb forms:
     இருக்கு (not உள்ளது), போனா (not சென்றாள்), வந்தான் (not வருகை தந்தான்),
     சொன்னாங்க (not கூறினார்கள்), பார்த்தா (not கண்டாள்), என்ன பண்றது (not என்ன செய்வது),
     ரொம்ப (not மிகவும்), அப்புறம் (not பின்னர்), இல்ல (not இல்லை) in dialogue.
@@ -199,6 +202,52 @@ def to_sentences(text):
     return sents
 
 
+SEG_MIN, SEG_MAX = 4, 7       # sentences per picture (~20-40 s of narration at ~5 s per sentence)
+
+
+def segment_scenes(plan, sentences):
+    """Ask the model where the picture must change (new place, time or characters) and
+    what each picture shows, based on the ACTUAL script. Returns [(start_idx, prompt)]."""
+    looks = {c["name"]: f"{c['name']} ({c.get('age', '')}, {c['appearance_en']})"
+             for c in plan["characters"]}
+    numbered = "\n".join(f"{i}: {x}" for i, x in enumerate(sentences))
+    data = complete(
+        f"""Below is a Tamil story script, one numbered sentence per line.
+Split it into picture segments for an illustrated video. Start a NEW segment whenever the
+place, time of day or the people present change (e.g. beach -> house), and otherwise every
+{SEG_MIN}-{SEG_MAX} sentences. The first segment starts at sentence 0.
+Characters (keep their look identical in every picture): {json.dumps(looks, ensure_ascii=False)}
+For each segment return the sentence number where it starts and an English description of ONE
+simple, paintable moment from that part: who is visible (max 2 people, by name), the place,
+time of day and the mood. No text, no small objects held in hands, no vehicles in close-up.
+Return JSON: [{{"start": 0, "characters": ["Name"], "setting": "...", "time_of_day": "...",
+"moment": "...", "mood": "..."}}]
+
+{numbered}""", want_json=True, max_tokens=12000)
+    segs, last = [], -1
+    for d in data:
+        st = int(d.get("start", -1))
+        if st <= last or st >= len(sentences):
+            continue
+        names = (d.get("characters") or [])[:2]
+        who = (f"Only these people in the picture: {', '.join(looks.get(n, n) for n in names)}. "
+               "No other people") if names else "No people in the picture"
+        p = (f"{d.get('moment', '')}. {who}. Setting: {d.get('setting', '')}, "
+             f"{d.get('time_of_day', '')}. Mood: {d.get('mood', '')}. "
+             f"Simple composition, natural hands and faces. {IMAGE_STYLE}")
+        segs.append((st, p.replace(PROMPT_SEP, "/").replace("::", ":")))
+        last = st
+    if not segs or segs[0][0] != 0:
+        raise LLMError("scene segmentation returned no usable segments")
+    # split segments that are too long so a picture never stays more than SEG_MAX sentences
+    fixed = []
+    for k, (st, p) in enumerate(segs):
+        end = segs[k + 1][0] if k + 1 < len(segs) else len(sentences)
+        for sub in range(st, end, SEG_MAX):
+            fixed.append((sub, p))
+    return fixed
+
+
 def scene_prompts(plan):
     looks = {c["name"]: f"{c['name']} ({c.get('age', '')}, {c['appearance_en']})"
              for c in plan["characters"]}
@@ -306,13 +355,21 @@ def write_story(rows):
         raise LLMError("self-check failed: " + "; ".join(problems))
     next_id = max([int(r["id"]) for r in rows if r["id"].isdigit()] or [0]) + 1
     script = " ".join(f"{i + 1}. {s}{SENTENCE_SEP}" for i, s in enumerate(sentences))
+    try:
+        segs = segment_scenes(plan, sentences)
+        prompts_field = f" {PROMPT_SEP} ".join(f"{st}::{p}" for st, p in segs)
+        n_pics = len(segs)
+    except (LLMError, ValueError, TypeError) as e:
+        log.warning("Scene segmentation failed (%s); using beat-based pictures", str(e)[:120])
+        prompts_field = f" {PROMPT_SEP} ".join(scene_prompts(plan))
+        n_pics = len(plan["beats"])
     row = {"id": str(next_id), "genre": genre, "title_ta": plan["title_ta"],
            "title_en": plan["title_en"], "script_ta": script,
-           "scene_prompts": f" {PROMPT_SEP} ".join(scene_prompts(plan)),
+           "scene_prompts": prompts_field,
            "publish_at": "", "status": "pending", "video_id": "", "fail_reason": "",
            "description_ta": plan.get("description_ta", "")}
-    log.info("Story %s ok: %d words, %d sentences, %d scenes", next_id, words, len(sentences),
-             len(plan["beats"]))
+    log.info("Story %s ok: %d words, %d sentences, %d pictures", next_id, words, len(sentences),
+             n_pics)
     return row, plan["premise_en"], names
 
 

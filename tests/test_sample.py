@@ -86,6 +86,22 @@ def test_scene_plan_full_length():
     assert all(35 <= s["duration"] <= 65 for s in scenes), [s["duration"] for s in scenes]
 
 
+def test_scene_plan_follows_story_marks():
+    """Pictures change exactly where the story's scene marks say (beach -> house -> hospital)."""
+    from stories import prompt_marks
+    t, sents = 0.0, []
+    for i in range(2 + 60 + 2):
+        sents.append({"index": i, "start": t, "end": t + 5.0, "text": "x"})
+        t += 5.25
+    field = "0::beach | 12::house | 30::hospital | 31::too soon | 50::garden"
+    marks = [i for i, _ in prompt_marks(field)]
+    scenes = plan_scenes({"total": t, "sentences": sents}, len(marks), intro=2, outro=2, marks=marks)
+    story = [s for s in scenes if s["kind"] == "story"]
+    assert [s["first"] - 2 for s in story] == [0, 12, 30, 50]       # 31 dropped: under 8 s
+    assert [s["prompt_index"] for s in story] == [0, 1, 2, 4]
+    assert scenes[0]["kind"] == "intro" and scenes[-1]["kind"] == "outro"
+
+
 def test_upload_metadata():
     from youtube_upload import build_metadata
     row = {"title_ta": "த" * 150, "script_ta": SCRIPT * 5,
@@ -99,6 +115,7 @@ def test_upload_metadata():
 
 
 if __name__ == "__main__":
+    test_scene_plan_follows_story_marks()
     test_scene_plan_full_length()
     test_upload_metadata()
     test_sample_render()
