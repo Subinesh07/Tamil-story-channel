@@ -55,6 +55,8 @@ def _fit_line(d, text, max_w, start, min_size=46):
 def _split_lines(d, text, max_w, start, max_lines=2, min_size=46):
     """Split text over up to max_lines lines with the biggest font that fits."""
     words = text.split()
+    if not words:
+        return [""], _font(start)
     best = None
     for n in range(1, max_lines + 1):
         if n > len(words):
@@ -268,6 +270,14 @@ GENRE_LAYOUTS = {
 def make(bg, texts, out_path, genre="", variant=0, part=""):
     choices = GENRE_LAYOUTS.get(genre, list(LAYOUTS))
     name = choices[variant % len(choices)]
+    texts = {k: (v or "").strip() for k, v in texts.items()}
+    # any layout works with any texts: horror title/tagline and setup/reveal stand in for each other
+    texts.setdefault("line1", "")
+    texts.setdefault("line2", "")
+    texts["line1"] = texts["line1"] or texts.get("title", "") or texts.get("tagline", "") or "யாரும் எதிர்பார்க்காத கதை…"
+    texts["line2"] = texts["line2"] or texts.get("tagline", "") or "கடைசியில் நடந்தது என்ன?"
+    if genre == "horror" and texts.get("title"):
+        name = "horror_title"
     texts = {**texts, "_reserve": 340 if part else 100}
     img = LAYOUTS[name](_prep(bg, horror=(genre == "horror")), texts)
     if part:
