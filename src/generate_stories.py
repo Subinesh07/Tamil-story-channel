@@ -133,7 +133,7 @@ Beats for this part:
 {beat_text}
 {context}
 {RULES}
-Length: about 950 Tamil words for this part. Write the full narration, not an outline.
+Length: about 1,000-1,100 Tamil words for this part (count carefully; do not stop early). Write the full narration, not an outline.
 Format: ONE sentence per line. No numbering, no headings, no stage directions, no English
 translation. Dialogue is fine inside a sentence. {ending}"""
     return complete(prompt, max_tokens=16000)
@@ -233,24 +233,44 @@ def originality_and_ending_check(plan, sentences):
     return problems
 
 
-def adjust_length(plan, sentences):
-    """One repair pass if the script is too short or too long."""
-    words = sum(word_count(s) for s in sentences)
-    if words < MIN_WORDS:
-        need = MIN_WORDS + 150 - words
-        cut = int(len(sentences) * 0.55)
-        extra = complete(
-            f"This Tamil story is {need} words too short. Write about {need} more Tamil words of "
-            "new scene detail and dialogue that fit naturally right after the passage below "
-            "(before the turning point). Same characters, same style, one sentence per line, "
-            f"every sentence under {MAX_WORDS_PER_SENTENCE} words.\n\n"
-            + "\n".join(sentences[cut - 30:cut]), max_tokens=16000)
-        sentences = sentences[:cut] + fix_long_sentences(to_sentences(extra)) + sentences[cut:]
-    elif words > MAX_WORDS:
-        # drop whole sentences from the middle section, never the hook or the ending
-        while sum(word_count(s) for s in sentences) > MAX_WORDS - 50:
-            del sentences[int(len(sentences) * 0.45)]
+def _expand(plan, sentences, need):
+    cut = int(len(sentences) * 0.55)
+    extra = complete(
+        f"This Tamil story needs about {need} more words. Write about {need} Tamil words of new "
+        "scene detail, feelings and dialogue that fit naturally right after the passage below "
+        "(before the turning point). Same characters, same style, one sentence per line, "
+        f"every sentence under {MAX_WORDS_PER_SENTENCE} words. Do not end the story.\n\n"
+        + "\n".join(sentences[max(0, cut - 30):cut]), max_tokens=16000)
+    new = fix_long_sentences(to_sentences(extra))
+    # never let one expansion overshoot wildly
+    budget, kept = need + 300, []
+    for x in new:
+        if sum(word_count(k) for k in kept) + word_count(x) > budget:
+            break
+        kept.append(x)
+    return sentences[:cut] + kept + sentences[cut:]
+
+
+def _trim(sentences):
+    """Drop whole sentences from the middle, never the hook (first 10%) or the ending (last 25%)."""
+    lo, hi = int(len(sentences) * 0.10), int(len(sentences) * 0.75)
+    step = 0
+    while sum(word_count(x) for x in sentences) > MAX_WORDS - 50 and hi - lo > 5:
+        idx = lo + (step * 7) % (hi - lo)   # spread the cuts out instead of one big hole
+        del sentences[idx]
+        hi -= 1
+        step += 1
     return sentences
+
+
+def adjust_length(plan, sentences, passes=3):
+    """Expand (up to `passes` times) until long enough, then trim to the maximum."""
+    for _ in range(passes):
+        words = sum(word_count(x) for x in sentences)
+        if words >= MIN_WORDS:
+            break
+        sentences = _expand(plan, sentences, MIN_WORDS + 150 - words)
+    return _trim(sentences)
 
 
 def write_story(rows):
@@ -267,8 +287,8 @@ def write_story(rows):
     for part in range(PARTS):
         text += "\n" + write_part(plan, part, text)
     sentences = fix_long_sentences(to_sentences(text))
-    sentences = adjust_length(plan, sentences)
-    sentences = fix_long_sentences(sentences)
+    sentences = fix_long_sentences(adjust_length(plan, sentences))
+    sentences = _trim(sentences)
     words, problems = self_check(plan, sentences)
     problems += originality_and_ending_check(plan, sentences)
     if problems:

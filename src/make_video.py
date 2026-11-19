@@ -68,7 +68,10 @@ def produce(row, upload=True, check_duration=True):
     images = []
     for s in scenes:
         if s["kind"] == "intro":
-            images.append(make_card(story_imgs[0], work / "images" / "intro_card.png"))
+            from brand_assets import ART, intro_background
+            card = work / "images" / "intro_card.png"
+            images.append(intro_background(card) if ART.exists()
+                          else make_card(story_imgs[0], card))
         elif s["kind"] == "outro":
             images.append(make_card(story_imgs[-1], work / "images" / "outro_card.png"))
         else:

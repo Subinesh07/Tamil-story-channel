@@ -110,8 +110,64 @@ def banner(path=None):
     return out
 
 
+ART = OUT / "logo_art.png"
+
+
+def logo_from_art(path=None):
+    """Profile picture from the channel artwork, with the Tamil name on the clouds."""
+    S = 800
+    img = Image.open(ART).convert("RGBA").resize((S, S), Image.LANCZOS)
+    shade = Image.new("L", (S, S), 0)
+    ImageDraw.Draw(shade).rectangle([0, int(S * 0.72), S, S], fill=120)
+    img.paste(Image.new("RGBA", (S, S), (10, 10, 30, 255)), (0, 0), shade.filter(ImageFilter.GaussianBlur(30)))
+    d = ImageDraw.Draw(img)
+    f = font(64)
+    text = "நிலா கதைகள்"
+    w = d.textlength(text, font=f)
+    d.text(((S - w) / 2, 600), text, font=f, fill=GOLD, stroke_width=5, stroke_fill=(15, 12, 35),
+           language="ta")
+    img.convert("RGB").save(path or OUT / "logo.png")
+
+
+def banner_from_art(path=None):
+    W, H = 2560, 1440
+    img = sky(W, H, seed=11, stars=520).convert("RGBA")
+    art = Image.open(ART).convert("RGBA").resize((520, 520), Image.LANCZOS)
+    mask = Image.new("L", art.size, 0)
+    ImageDraw.Draw(mask).ellipse([10, 10, 510, 510], fill=255)
+    img.paste(art, (W // 2 - 790, H // 2 - 260), mask.filter(ImageFilter.GaussianBlur(14)))
+    d = ImageDraw.Draw(img)
+    f1, f2 = font(150), font(58, bold=False)
+    d.text((W // 2 - 230, H // 2 - 150), "நிலா கதைகள்", font=f1, fill=GOLD, stroke_width=5,
+           stroke_fill=(15, 12, 35), language="ta")
+    d.text((W // 2 - 225, H // 2 + 50), "தினமும் மாலை 7 மணிக்கு ஒரு புது கதை", font=f2, fill=CREAM,
+           language="ta")
+    d.text((W // 2 - 223, H // 2 + 130), "Nila Kathaigal  •  Original Tamil Stories",
+           font=ImageFont.truetype("/usr/share/fonts/truetype/noto/NotoSans-Regular.ttf", 40),
+           fill=(200, 190, 230))
+    img.convert("RGB").save(path or OUT / "banner.png")
+
+
+def intro_background(path):
+    """Intro card background for videos: the channel artwork, softly darkened, 1280x720."""
+    from PIL import ImageEnhance
+    art = Image.open(ART).convert("RGB")
+    bg = art.resize((1280, 1280), Image.LANCZOS).filter(ImageFilter.GaussianBlur(22))
+    bg = ImageEnhance.Brightness(bg.crop((0, 280, 1280, 1000))).enhance(0.45)
+    side = art.resize((560, 560), Image.LANCZOS)
+    m = Image.new("L", side.size, 0)
+    ImageDraw.Draw(m).ellipse([0, 0, 559, 559], fill=255)
+    bg.paste(ImageEnhance.Brightness(side).enhance(0.42), (360, 80), m.filter(ImageFilter.GaussianBlur(25)))
+    bg.save(path)
+    return path
+
+
 if __name__ == "__main__":
     OUT.mkdir(parents=True, exist_ok=True)
-    logo()
-    banner()
+    if ART.exists():
+        logo_from_art()
+        banner_from_art()
+    else:
+        logo()
+        banner()
     print("saved", OUT)

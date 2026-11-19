@@ -72,7 +72,8 @@ def gemini_models(key):
 
 
 def gemini_call(prompt, model, key, want_json, max_tokens):
-    cfg = {"temperature": 0.9, "maxOutputTokens": max_tokens}
+    # Gemini 3 "thinking" models spend output tokens on thinking first: give them room
+    cfg = {"temperature": 0.9, "maxOutputTokens": max(max_tokens, 60000)}
     if want_json:
         cfg["responseMimeType"] = "application/json"
     r = requests.post(
