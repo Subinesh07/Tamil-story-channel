@@ -1,32 +1,152 @@
 [
-  {"genre": "family emotional", "topic": "A daughter-in-law secretly pays off her mother-in-law's old debts for years; the day the mother-in-law finds the receipts, their cold war ends", "used": false},
-  {"genre": "family emotional", "topic": "A rich family fights over the father's property, but the will leaves the house to their old servant maid, and the reason shocks everyone", "used": false},
-  {"genre": "suspense or mystery", "topic": "A new bride notices one room in her in-laws' house is always locked; what she finds inside is a family secret, not a horror", "used": false},
-  {"genre": "family emotional", "topic": "A son puts his mother in an old-age home, then discovers she has been secretly paying his house EMI from her pension", "used": false},
-  {"genre": "moral or life-lesson", "topic": "A tea-shop boy returns a lost bag with ten lakh rupees; what the owner does next changes the boy's whole life", "used": false},
-  {"genre": "friendship or romance", "topic": "Two school friends promised to meet under the village banyan tree after 25 years; only one of them comes, carrying a letter", "used": false},
-  {"genre": "family emotional", "topic": "An auto driver raises a baby left in his auto; twenty years later, the birth mother comes back on the day of the girl's wedding", "used": false},
-  {"genre": "moral or life-lesson", "topic": "A millionaire pretends to go bankrupt to see which of his three sons truly loves him", "used": false},
-  {"genre": "family emotional", "topic": "A father who never said 'I love you' leaves a voice recording on his old keypad phone, found after his retirement party", "used": false},
-  {"genre": "suspense or mystery", "topic": "Every night at 2 AM the old landline in grandmother's house rings, and the caller knows things only the family knows", "used": false},
-  {"genre": "family emotional", "topic": "A mother-in-law stands against the whole village to get her widowed daughter-in-law remarried", "used": false},
-  {"genre": "moral or life-lesson", "topic": "A teacher fails a student for cheating; fifteen years later that student returns as the district collector", "used": false},
-  {"genre": "family emotional", "topic": "A village postman keeps writing letters 'from' a soldier son to his mother after the son is gone, until she finds out", "used": false},
-  {"genre": "friendship or romance", "topic": "Pen-pals for ten years who never met; she joins his office as his new manager and he doesn't know it's her", "used": false},
-  {"genre": "family emotional", "topic": "A daughter becomes a doctor to keep her illiterate father's promise, and her first patient is the man who once humiliated him", "used": false},
-  {"genre": "moral or life-lesson", "topic": "A bride refuses dowry and starts a small business with her wedding gold; the in-laws who mocked her end up depending on it", "used": false},
-  {"genre": "suspense or mystery", "topic": "A diary found in a second-hand almirah seems to describe tomorrow's events in a small town", "used": false},
-  {"genre": "family emotional", "topic": "A brother and sister who stopped speaking after her love marriage meet again at their father's hospital bed", "used": false},
-  {"genre": "moral or life-lesson", "topic": "A temple gold chain goes missing and everyone blames the poor flower seller; a child's honesty reveals the truth", "used": false},
-  {"genre": "friendship or romance", "topic": "A blind flower seller and the man who buys all her flowers every evening without saying who he is", "used": false},
-  {"genre": "family emotional", "topic": "A grandmother losing her memory teaches her grandson her last secret recipe before she forgets him", "used": false},
-  {"genre": "moral or life-lesson", "topic": "Two farmers share one well; in the year of drought, one chooses greed and the other kindness", "used": false},
-  {"genre": "suspense or mystery", "topic": "The last town bus at night always has one extra passenger the conductor can never find in the morning count", "used": false},
-  {"genre": "family emotional", "topic": "Twin sisters separated at a temple festival meet again as a bride and her wedding photographer", "used": false},
-  {"genre": "moral or life-lesson", "topic": "A schoolboy lies that his father is a police officer; the day his class visits the station, the truth comes out", "used": false},
-  {"genre": "friendship or romance", "topic": "An arranged-marriage couple discover they were the biggest enemies in their college", "used": false},
-  {"genre": "family emotional", "topic": "A retired bus conductor receives a letter from a passenger he once saved, now a famous surgeon", "used": false},
-  {"genre": "suspense or mystery", "topic": "A temple jewel is stolen during the festival, and the only witness is a deaf boy who saw everything", "used": false},
-  {"genre": "moral or life-lesson", "topic": "A greedy landlord's lie about a cursed well becomes the village legend that finally exposes him", "used": false},
-  {"genre": "friendship or romance", "topic": "A wrong-number phone call becomes the daily lifeline between a lonely old man and a college girl", "used": false}
+  {
+    "genre": "family emotional",
+    "topic": "A daughter-in-law secretly pays off her mother-in-law's old debts for years; the day the mother-in-law finds the receipts, their cold war ends",
+    "used": true
+  },
+  {
+    "genre": "family emotional",
+    "topic": "A rich family fights over the father's property, but the will leaves the house to their old servant maid, and the reason shocks everyone",
+    "used": true
+  },
+  {
+    "genre": "suspense or mystery",
+    "topic": "A new bride notices one room in her in-laws' house is always locked; what she finds inside is a family secret, not a horror",
+    "used": false
+  },
+  {
+    "genre": "family emotional",
+    "topic": "A son puts his mother in an old-age home, then discovers she has been secretly paying his house EMI from her pension",
+    "used": false
+  },
+  {
+    "genre": "moral or life-lesson",
+    "topic": "A tea-shop boy returns a lost bag with ten lakh rupees; what the owner does next changes the boy's whole life",
+    "used": false
+  },
+  {
+    "genre": "friendship or romance",
+    "topic": "Two school friends promised to meet under the village banyan tree after 25 years; only one of them comes, carrying a letter",
+    "used": false
+  },
+  {
+    "genre": "family emotional",
+    "topic": "An auto driver raises a baby left in his auto; twenty years later, the birth mother comes back on the day of the girl's wedding",
+    "used": false
+  },
+  {
+    "genre": "moral or life-lesson",
+    "topic": "A millionaire pretends to go bankrupt to see which of his three sons truly loves him",
+    "used": false
+  },
+  {
+    "genre": "family emotional",
+    "topic": "A father who never said 'I love you' leaves a voice recording on his old keypad phone, found after his retirement party",
+    "used": false
+  },
+  {
+    "genre": "suspense or mystery",
+    "topic": "Every night at 2 AM the old landline in grandmother's house rings, and the caller knows things only the family knows",
+    "used": false
+  },
+  {
+    "genre": "family emotional",
+    "topic": "A mother-in-law stands against the whole village to get her widowed daughter-in-law remarried",
+    "used": false
+  },
+  {
+    "genre": "moral or life-lesson",
+    "topic": "A teacher fails a student for cheating; fifteen years later that student returns as the district collector",
+    "used": false
+  },
+  {
+    "genre": "family emotional",
+    "topic": "A village postman keeps writing letters 'from' a soldier son to his mother after the son is gone, until she finds out",
+    "used": false
+  },
+  {
+    "genre": "friendship or romance",
+    "topic": "Pen-pals for ten years who never met; she joins his office as his new manager and he doesn't know it's her",
+    "used": false
+  },
+  {
+    "genre": "family emotional",
+    "topic": "A daughter becomes a doctor to keep her illiterate father's promise, and her first patient is the man who once humiliated him",
+    "used": false
+  },
+  {
+    "genre": "moral or life-lesson",
+    "topic": "A bride refuses dowry and starts a small business with her wedding gold; the in-laws who mocked her end up depending on it",
+    "used": false
+  },
+  {
+    "genre": "suspense or mystery",
+    "topic": "A diary found in a second-hand almirah seems to describe tomorrow's events in a small town",
+    "used": false
+  },
+  {
+    "genre": "family emotional",
+    "topic": "A brother and sister who stopped speaking after her love marriage meet again at their father's hospital bed",
+    "used": false
+  },
+  {
+    "genre": "moral or life-lesson",
+    "topic": "A temple gold chain goes missing and everyone blames the poor flower seller; a child's honesty reveals the truth",
+    "used": false
+  },
+  {
+    "genre": "friendship or romance",
+    "topic": "A blind flower seller and the man who buys all her flowers every evening without saying who he is",
+    "used": false
+  },
+  {
+    "genre": "family emotional",
+    "topic": "A grandmother losing her memory teaches her grandson her last secret recipe before she forgets him",
+    "used": false
+  },
+  {
+    "genre": "moral or life-lesson",
+    "topic": "Two farmers share one well; in the year of drought, one chooses greed and the other kindness",
+    "used": false
+  },
+  {
+    "genre": "suspense or mystery",
+    "topic": "The last town bus at night always has one extra passenger the conductor can never find in the morning count",
+    "used": false
+  },
+  {
+    "genre": "family emotional",
+    "topic": "Twin sisters separated at a temple festival meet again as a bride and her wedding photographer",
+    "used": false
+  },
+  {
+    "genre": "moral or life-lesson",
+    "topic": "A schoolboy lies that his father is a police officer; the day his class visits the station, the truth comes out",
+    "used": false
+  },
+  {
+    "genre": "friendship or romance",
+    "topic": "An arranged-marriage couple discover they were the biggest enemies in their college",
+    "used": false
+  },
+  {
+    "genre": "family emotional",
+    "topic": "A retired bus conductor receives a letter from a passenger he once saved, now a famous surgeon",
+    "used": false
+  },
+  {
+    "genre": "suspense or mystery",
+    "topic": "A temple jewel is stolen during the festival, and the only witness is a deaf boy who saw everything",
+    "used": false
+  },
+  {
+    "genre": "moral or life-lesson",
+    "topic": "A greedy landlord's lie about a cursed well becomes the village legend that finally exposes him",
+    "used": false
+  },
+  {
+    "genre": "friendship or romance",
+    "topic": "A wrong-number phone call becomes the daily lifeline between a lonely old man and a college girl",
+    "used": false
+  }
 ]
