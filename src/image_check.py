@@ -8,6 +8,7 @@ import json
 import logging
 import os
 import re
+import time
 
 import requests
 
@@ -55,9 +56,13 @@ def check(png_bytes, prompt):
             "generationConfig": {"temperature": 0, "responseMimeType": "application/json",
                                  "maxOutputTokens": 300},
         }
-        r = requests.post(
-            f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent",
-            headers={"x-goog-api-key": key}, json=body, timeout=45)
+        for attempt in range(3):
+            r = requests.post(
+                f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent",
+                headers={"x-goog-api-key": key}, json=body, timeout=45)
+            if r.status_code not in (429, 503):
+                break
+            time.sleep(25 * (attempt + 1))   # free tier: a few requests per minute
         if r.status_code != 200:
             return True, f"check skipped (HTTP {r.status_code})"
         text = "".join(p.get("text", "") for p in

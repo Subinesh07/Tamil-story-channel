@@ -17,7 +17,8 @@ CSV_COLUMNS = [
 # --- Story rules ---
 SENTENCE_SEP = "।"
 PROMPT_SEP = "|"
-MIN_WORDS, MAX_WORDS = 3500, 4000
+# Tamil narration runs ~90 words/min (long agglutinative words), so ~2,000 words = 20-24 min
+MIN_WORDS, MAX_WORDS = 1800, 2200
 MAX_WORDS_PER_SENTENCE = 15
 MIN_SCENES, MAX_SCENES = 20, 25
 IMAGE_STYLE = ("warm watercolor illustration, South Indian home, soft natural light, "
