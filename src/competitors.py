@@ -122,7 +122,7 @@ def suggestions(ours, others):
     if common:
         tips.append("Words that keep appearing in their best-performing titles: " + ", ".join(common)
                     + ". Use the themes as inspiration only. Never copy titles or stories.")
-    if ours and ours["videos"]:
+    if ours and len(ours["videos"]) >= 5:
         if ours["engagement"] < statistics.median(o["engagement"] for o in others):
             tips.append("Our likes+comments per view are below the competitor median: ask a question "
                         "in the outro and pin a comment with a poll-style question.")
@@ -141,8 +141,10 @@ def write_report(ours, others, applied=None):
                      f"{c['median_views']:,.0f} | {c['per_week']} | {c['avg_minutes']} min | "
                      f"{c['top_hour']}:00 | {c['engagement']} |")
     lines += ["", "## Their best recent videos (views per day)", ""]
-    best = sorted(((o["name"], v) for o in others for v in o["videos"]), key=lambda x: -x[1]["per_day"])[:10]
-    for name, v in best:
+    from strategy import top_videos
+    names = {id(v): o["name"] for o in others for v in o["videos"]}
+    for v in top_videos(others, 10):
+        name = names[id(v)]
         lines.append(f"- {v['title']} — *{name}* — {v['per_day']:,.0f} views/day, {v['minutes']:.0f} min "
                      f"([watch](https://youtu.be/{v['id']}))")
     if applied:

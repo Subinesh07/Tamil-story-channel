@@ -14,6 +14,10 @@ from config import GENRE_MIX, PUBLISH_HOUR, ROOT
 PATH = ROOT / "channel_strategy.json"
 HOUR_RANGE = (17, 21)          # evening family-viewing window we allow
 MIN_PER_GENRE = 3              # every genre keeps at least 3 of 30, for variety
+STOPWORDS = {"ஒரு", "இந்த", "அந்த", "எந்த", "என்ன", "ஏன்", "வரை", "மட்டும்", "உன்", "என்", "நான்",
+             "நீ", "அவள்", "அவன்", "இது", "அது", "எப்படி", "யார்", "எல்லாம்", "கூட", "தான்", "ஊரே",
+             "இவள", "இவன்", "இருக்க", "பண்ண", "சொல்லும்", "என்று", "இல்லை", "வேண்டும்", "கதை", "கதைகள்",
+             "தமிழ்", "story", "tamil"}
 DEFAULT = {"auto": True, "publish_hour": PUBLISH_HOUR, "genre_mix": dict(GENRE_MIX),
            "trending_themes": [], "engagement_push": False, "history": []}
 
@@ -35,6 +39,18 @@ def load():
 
 def save(data):
     PATH.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
+def top_videos(others, n, per_channel=3):
+    """Best videos by views/day, at most `per_channel` from any one channel (no single channel dominates)."""
+    picked, count = [], Counter()
+    for name, v in sorted(((o["name"], v) for o in others for v in o["videos"]), key=lambda x: -x[1]["per_day"]):
+        if count[name] < per_channel:
+            picked.append(v)
+            count[name] += 1
+        if len(picked) >= n:
+            break
+    return picked
 
 
 def _genre_of_title(title):
@@ -64,7 +80,7 @@ def update(ours, others, stories, today):
 
     # 2. genres: what works for competitors (weight 1) and for us (weight 2)
     signal = Counter()
-    best = sorted((v for o in others for v in o["videos"]), key=lambda v: -v["per_day"])[:20]
+    best = top_videos(others, 20)
     for v in best:
         g = _genre_of_title(v["title"])
         if g:
@@ -97,7 +113,7 @@ def update(ours, others, stories, today):
                        + ", ".join(themes))
 
     # 4. engagement: if ours is below the competitor median, use question-style outros
-    if ours and ours.get("videos"):
+    if ours and len(ours.get("videos", [])) >= 5 and ours.get("median_views", 0) >= 50:
         med = statistics.median(o["engagement"] for o in others)
         push = ours["engagement"] < med
         if push != s.get("engagement_push"):

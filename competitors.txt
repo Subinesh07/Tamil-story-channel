@@ -3,7 +3,7 @@
 # If fewer than 5 are listed, similar Tamil story channels are found automatically.
 # Top Tamil story channels by subscribers (picked Nov 2026)
 UCSvha2APDCRgZEtdimqYO4A   # Tamil Fairy Tales (~2.1M)
-@mrtamilanstories          # Mr Tamilan Stories (~1.1M)
+# removed: Mr Tamilan Stories (movie voice-over recaps, not our niche)
 UCALHoRZfg5dX-faoLJAm7zA   # Tamil Moral Stories (~1.0M)
 UC_aN-4FNHt_JgJC2IYMgVmg   # Toon Tv Tamil Stories (~650K)
 UC3zNovoMWjStvNxGnt-Wzlw   # Studio Boo Tv Tamil Story (~598K, fast growing)

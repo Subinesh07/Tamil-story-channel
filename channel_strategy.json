@@ -7,24 +7,16 @@
     "suspense or mystery": 6,
     "friendship or romance": 4
   },
-  "trending_themes": [
-    "ஒரு",
-    "ஊரே",
-    "ஏன்",
-    "வரை",
-    "இந்த",
-    "மட்டும்",
-    "எந்த",
-    "முருகனா"
-  ],
-  "engagement_push": true,
+  "trending_themes": [],
+  "engagement_push": false,
   "history": [
     {
       "date": "2026-11-19",
       "changes": [
         "Genre mix: +1 'suspense or mystery', -1 'friendship or romance' per 30 stories (now family emotional 12, moral or life-lesson 8, suspense or mystery 6, friendship or romance 4)",
         "Story writer will lean towards these popular themes (ideas only): ஒரு, ஊரே, ஏன், வரை, இந்த, மட்டும், எந்த, முருகனா",
-        "Outros now ask viewers a question to get more comments"
+        "Outros now ask viewers a question to get more comments",
+        "(Corrected same day: filler-word themes and the test-video engagement switch were reset)"
       ]
     }
   ]
