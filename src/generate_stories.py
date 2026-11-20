@@ -327,7 +327,7 @@ def self_check(plan, sentences, lo=MIN_WORDS, hi=MAX_WORDS):
 def style_check(sentences):
     """Gemini scores a sample of the script; bookish or flowery scripts are rewritten."""
     n = len(sentences)
-    sample = sentences[:35] + ["…"] + sentences[n // 2:n // 2 + 25]
+    sample = sentences[:30] + ["…"] + sentences[n // 2:n // 2 + 20] + ["…"] + sentences[-25:]
     v = write(
         "You judge Tamil YouTube story narration for a casual Tamil Nadu audience. Score 1-10:\n"
         "spoken: casual spoken Tanglish (இருக்கு/போனா/ரொம்ப, English words in Tamil letters), not bookish Tamil;\n"
@@ -496,7 +496,9 @@ def write_story(rows, doomsday=False, redo=None):
     gta = S.GENRES[genre]["ta"]
     suffix = f" | {ser['title_ta']} - பகுதி {part}"
     title = plan["title_ta"].strip()
-    title = (title[:100 - len(suffix)].rstrip() + suffix) if len(title) + len(suffix) > 100 else title + suffix
+    if len(title) + len(suffix) > 100:   # cut at a word boundary, never mid-word
+        title = title[:100 - len(suffix) - 1].rsplit(" ", 1)[0].rstrip(" ,:-") + "…"
+    title += suffix
     desc = plan.get("description_ta", "")
     if genre == "doomsday":
         desc += ("\n\n⏳ டூம்ஸ்டே தொடர்: ஒவ்வொரு சனி, ஞாயிறு காலை 11 மணிக்கு புதிய பகுதி!"
