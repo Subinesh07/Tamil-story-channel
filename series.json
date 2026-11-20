@@ -56,9 +56,10 @@
       "genre": "adventure",
       "status": "active",
       "parts_total": 5,
-      "parts_done": 1,
+      "parts_done": 2,
       "so_far": [
-        "On her deathbed, Sevvali Paati gives Vaanathi a bundle of palm leaves. The siblings and fisher boy Paal decode the first clue pointing to a hollow tamarind tree in a monsoon forest. With forest guide Ilavarasu, they trek through rain and leeches, find the tree, and extract a carved stone marker. As they examine it, Kalai spots fresh footprints and cut marks — Marudhan's men have been there. The episode ends with the group realizing they are being watched from the tree line, and Marudhan himself steps into view, stick raised."
+        "On her deathbed, Sevvali Paati gives Vaanathi a bundle of palm leaves. The siblings and fisher boy Paal decode the first clue pointing to a hollow tamarind tree in a monsoon forest. With forest guide Ilavarasu, they trek through rain and leeches, find the tree, and extract a carved stone marker. As they examine it, Kalai spots fresh footprints and cut marks — Marudhan's men have been there. The episode ends with the group realizing they are being watched from the tree line, and Marudhan himself steps into view, stick raised.",
+        "In Part 2, Ilavarasu guides the children across a roaring flooded river gorge to escape Marudhan. Inside a hidden cliffside rock shelter, Vaanathi copies an ancient coastal survey map carved into the stone wall. However, Marudhan ambushes them from an upper ledge and snatches the original carved marker. A sudden severe landslide seals the cavern mouth, trapping everyone inside while rainwater rapidly floods the cave floor. Fisher boy Paal prepares to dive into a dark submerged sinkhole to locate an underwater sea tunnel out."
       ],
       "title_ta": "கடலும் காடும் கோயிலும்",
       "title_en": "Sea, Forest, Temple: The Palm-Leaf Trail",
@@ -134,9 +135,10 @@
       "genre": "doomsday",
       "status": "active",
       "parts_total": 7,
-      "parts_done": 1,
+      "parts_done": 2,
       "so_far": [
-        "At the Kodaikanal observatory, astronomer Meera analyzes satellite data and calculates a massive solar storm will strike Earth in 7 days, collapsing all power grids. She calls her auto-driver father Selvam in Chennai to prepare. Suddenly, senior official Raghavan and an assistant enter the lab, demanding she halt and surrender the data. Meera secretly copies the files onto a hidden drive, evades their grasp, and sprints into the foggy night, reaching the perimeter fence as a black SUV blocks the mountain road ahead."
+        "At the Kodaikanal observatory, astronomer Meera analyzes satellite data and calculates a massive solar storm will strike Earth in 7 days, collapsing all power grids. She calls her auto-driver father Selvam in Chennai to prepare. Suddenly, senior official Raghavan and an assistant enter the lab, demanding she halt and surrender the data. Meera secretly copies the files onto a hidden drive, evades their grasp, and sprints into the foggy night, reaching the perimeter fence as a black SUV blocks the mountain road ahead.",
+        "Meera manages to evade Raghavan's men in the misty Kodaikanal hills and boards a bus to Chennai. During the journey, she notices electronic glitches and a strange red hue in the sky, confirming the solar storm's approach. She meets her journalist friend Karthik who begins to believe her when his equipment fails. When Meera finally reaches her home in Chennai to warn her father, she finds Raghavan already there, acting like a family friend."
       ],
       "title_ta": "டூம்ஸ்டே: கடைசி 7 நாட்கள்",
       "title_en": "Doomsday: The Last 7 Days",
@@ -182,6 +184,47 @@
         "Day 2: Meera finds the real hope: if the city switches off its grid just before the storm, the transformers survive. She must reach the control centre. Cliffhanger: Raghavan blocks the door.",
         "Day 1 to zero hour: Raghavan finally helps; the switch-off happens seconds before the storm; the whole world goes dark, but Chennai's lights come back first. The family is together, Selvam is a hero, and a final quiet twist about the next storm sets up a possible season 2."
       ]
+    },
+    {
+      "id": "horror-4",
+      "genre": "horror",
+      "status": "active",
+      "parts_total": 4,
+      "parts_done": 1,
+      "so_far": [
+        "Kavin and Oviya arrive in the foggy Sennimalai village to investigate a legendary clapperless bell. Guided by the mysterious Sundaram, they wait until midnight at the ancient clock tower. At the stroke of twelve, the bell vibrates on its own, projecting a giant, moving shadow of a 19th-century soldier onto the mist, which then begins to walk toward them as the tower door slowly creaks open."
+      ],
+      "title_ta": "நிழல் மணியின் ஓசை",
+      "title_en": "Echoes of the Silent Bell",
+      "premise_en": "An acoustic engineer and a historical researcher investigate a foggy mountain village where a clapperless iron bell chimes eerie notes every midnight, projecting phantom shadows. Their quest through mist-shrouded forests uncovers a 19th-century acoustic design built to guard a hidden underground valley.",
+      "characters": [
+        {
+          "name": "Kavin",
+          "role": "Acoustic Engineer",
+          "age": 29,
+          "appearance_en": "Short curly black hair, dark tan skin, round wire-rim glasses, navy blue zipped jacket over a beige linen shirt, dark denim pants."
+        },
+        {
+          "name": "Oviya",
+          "role": "Archivist & Historian",
+          "age": 27,
+          "appearance_en": "Shoulder-length straight black hair tied in a half-up ponytail, olive complexion, forest green cotton kurti with rolled-up sleeves, small silver nose pin."
+        },
+        {
+          "name": "Sundaram",
+          "role": "Village Caretaker",
+          "age": 58,
+          "appearance_en": "Receding gray hair, thick handlebar mustache, weathered dark brown skin, light tan khadi shirt, cream dhoti, holding a antique brass pocket watch."
+        }
+      ],
+      "arc": [
+        "Part 1: Kavin and Oviya arrive in mist-laden Sennimalai village and witness the terrifying midnight phantom chime originating from a clapperless clock tower.",
+        "Part 2: A midnight search inside the abandoned colonial observatory reveals strange acoustic resonance frequency maps that distort human shadows.",
+        "Part 3: Following historical clues, the duo navigates a fog-bound night journey through dense pine forests to locate hidden subterranean basalt caverns.",
+        "Part 4: Kavin proves subterranean wind currents and natural basalt resonance created the infrasound visions, peacefully unlocking the village's lost heritage valley."
+      ],
+      "person": null,
+      "key_facts_en": null
     }
   ]
 }
