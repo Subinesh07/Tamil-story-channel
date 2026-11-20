@@ -1,0 +1,30 @@
+name: Check picture allowance
+
+on:
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pollinations balance and model prices
+        env:
+          KEY: ${{ secrets.IMAGE_API_KEY }}
+        run: |
+          python3 - <<'PY'
+          import json, os, urllib.request
+          def get(path, auth=True):
+              req = urllib.request.Request("https://gen.pollinations.ai" + path)
+              if auth: req.add_header("Authorization", "Bearer " + os.environ["KEY"])
+              try:
+                  return json.loads(urllib.request.urlopen(req, timeout=30).read())
+              except Exception as e:
+                  return {"error": str(e)[:200]}
+          print("BALANCE", json.dumps(get("/account/balance")))
+          p = get("/account/profile")
+          print("PROFILE", json.dumps({k: p.get(k) for k in ("tier", "nextResetAt", "error")}))
+          m = get("/image/models", auth=False)
+          for x in (m if isinstance(m, list) else []):
+              if "image" in json.dumps(x.get("output_modalities", ["image"])):
+                  print("MODEL", x.get("name"), json.dumps(x.get("pricing"))[:200])
+          PY
