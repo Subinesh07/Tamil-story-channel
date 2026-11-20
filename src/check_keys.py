@@ -25,6 +25,29 @@ def main():
         (ok if r.ok else bad)("Gemini", f"{len(names)} models, voice model "
                               f"{'found' if any('tts' in n for n in names) else 'NOT found'}" if r.ok
                               else f"HTTP {r.status_code}")
+    # Extra Leda voice key(s)
+    for name in ("VOICE_API_KEY", "VOICE_API_KEY_2"):
+        v = os.environ.get(name, "").strip()
+        if not v:
+            if name == "VOICE_API_KEY":
+                bad("Leda extra key", "VOICE_API_KEY not set")
+            continue
+        r = requests.get("https://generativelanguage.googleapis.com/v1beta/models",
+                         headers={"x-goog-api-key": v}, params={"pageSize": 200}, timeout=30)
+        names = [m["name"] for m in r.json().get("models", [])] if r.ok else []
+        good = r.ok and any("tts" in n for n in names)
+        (ok if good else bad)(f"Leda extra key ({name})",
+                              "works, Leda voice model found" if good else f"HTTP {r.status_code} / no voice model")
+    # Is the broken early Doomsday upload deleted?
+    if os.environ.get("YT_REFRESH_TOKEN"):
+        try:
+            sys.path.insert(0, os.path.dirname(__file__))
+            from competitors import client
+            items = client().videos().list(part="status", id="6kWHO7Obyek").execute().get("items", [])
+            (bad if items else ok)("Broken Doomsday upload",
+                                   "still on YouTube - delete it in Studio" if items else "deleted")
+        except Exception as e:
+            bad("Broken Doomsday upload", str(e)[:120])
     # OpenRouter: one tiny request to a free model
     k = os.environ.get("OPENROUTER_API_KEY", "").strip()
     if not k:
