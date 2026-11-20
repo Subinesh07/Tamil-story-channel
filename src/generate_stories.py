@@ -316,15 +316,33 @@ def self_check(plan, sentences, lo=MIN_WORDS, hi=MAX_WORDS):
     problems = []
     if not lo <= words <= hi:
         problems.append(f"{words} words (need {lo}-{hi})")
-    latin = [s for s in sentences if re.search(r"[A-Za-z]{2,}", s)]
-    if latin:   # English must be written in Tamil letters, otherwise Leda reads it in English
-        problems.append(f"{len(latin)} sentences contain English letters (e.g. {latin[0][:40]})")
     long_ = [s for s in sentences if word_count(s) > MAX_WORDS_PER_SENTENCE]
     if long_:
         problems.append(f"{len(long_)} sentences over {MAX_WORDS_PER_SENTENCE} words")
     if not MIN_SCENES <= len(plan["beats"]) <= MAX_SCENES:
         problems.append("scene count out of range")
     return words, problems
+
+
+def tamil_letters_for_english(sentences):
+    """Tanglish stays Tanglish: English words written in A-Z letters are rewritten in Tamil letters
+    (office -> ஆபீஸ், phone -> போன்) so Leda says them the Tamil way. Nothing is rejected for this."""
+    idx = [i for i, s in enumerate(sentences) if re.search(r"[A-Za-z]{2,}", s)]
+    if not idx:
+        return sentences
+    try:
+        out = write("Rewrite ONLY the English words that are written in English (A-Z) letters into Tamil letters, "
+                    "the way Tamil people say them (office -> ஆபீஸ், phone -> போன், sorry -> சாரி). Keep every "
+                    "other word exactly the same. Return JSON {\"lines\": [exactly %d strings]}.\n\n" % len(idx)
+                    + "\n".join(sentences[i] for i in idx), want_json=True, max_tokens=4000)
+        new = [str(x).strip() for x in out.get("lines", [])]
+        if len(new) == len(idx) and all(new):
+            sentences = list(sentences)
+            for i, s in zip(idx, new):
+                sentences[i] = s
+    except Exception as e:
+        log.warning("Could not convert English letters (%s); keeping the lines as they are", str(e)[:100])
+    return sentences
 
 
 def style_check(sentences):
@@ -476,6 +494,7 @@ def write_story(rows, doomsday=False, redo=None):
     sentences = fix_long_sentences(to_sentences(text))
     sentences = fix_long_sentences(adjust_length(plan, sentences, lo=lo, hi=hi))
     sentences = _trim(sentences, hi)
+    sentences = tamil_letters_for_english(sentences)
     from text_fix import bad_lines
     garbled = len(bad_lines(sentences))
     if garbled > max(8, len(sentences) * 0.06):

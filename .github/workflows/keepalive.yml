@@ -1,0 +1,24 @@
+name: Keep automation alive
+
+# GitHub pauses scheduled workflows in a repository with no activity for 60 days.
+# This weekly job re-enables every workflow so the channel keeps running even if nobody opens GitHub.
+on:
+  schedule:
+    - cron: "17 3 * * 1"
+  workflow_dispatch:
+
+permissions:
+  actions: write
+
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Re-enable all workflows
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          for id in $(gh api repos/$REPO/actions/workflows --jq '.workflows[].id'); do
+            gh api -X PUT repos/$REPO/actions/workflows/$id/enable >/dev/null && echo "enabled $id"
+          done

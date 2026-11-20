@@ -46,10 +46,12 @@ def verify_passage(wav, text, key):
                     str(mp3)], check=True)
     audio = base64.b64encode(mp3.read_bytes()).decode()
     mp3.unlink(missing_ok=True)
-    prompt = ("You are a strict quality checker for a Tamil YouTube story narration. Listen to the WHOLE "
-              "audio and compare it with the script below. English words that are written in Tamil letters "
-              "in the script (like ஆபீஸ், போன்) are fine. Return JSON: {\"tamil_only\": true/false (false if "
-              "any full English sentence or English narration is spoken), \"english_seconds\": number, "
+    prompt = ("You are a quality checker for a Tamil YouTube story narration in casual Tanglish. Listen to "
+              "the WHOLE audio and compare it with the script below. English WORDS mixed into Tamil sentences "
+              "(office, phone, sorry, tension ...) are normal Tanglish and perfectly fine. Only complete "
+              "sentences spoken in English, or English narration that is not in the script, are a problem. "
+              "Return JSON: {\"tamil_only\": true/false (false only if a complete English sentence or English "
+              "narration is spoken), \"english_seconds\": number (seconds of complete English sentences only), "
               "\"follows_script\": true/false (false if lines are skipped, added, translated or the "
               "instructions are read aloud), \"problem\": \"short description or empty\"}\n\nSCRIPT:\n" + text)
     body = {"contents": [{"parts": [{"inline_data": {"mime_type": "audio/mp3", "data": audio}},
