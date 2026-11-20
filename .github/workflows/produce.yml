@@ -63,6 +63,8 @@ jobs:
           CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
           CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
           LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+          VOICE_API_KEY: ${{ secrets.VOICE_API_KEY }}
+          VOICE_API_KEY_2: ${{ secrets.VOICE_API_KEY_2 }}
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}

@@ -27,11 +27,18 @@ class GeminiQuota(RuntimeError):
     pass
 
 
-def _key():
-    k = os.environ.get("LLM_API_KEY", "").strip()
-    if not k:
-        raise GeminiQuota("LLM_API_KEY not set")
-    return k
+def _keys():
+    """Leda keys in order: VOICE_API_KEY_1..3 (extra accounts), then LLM_API_KEY.
+    The same Leda voice is used on every key, so switching keys never changes how it sounds."""
+    names = ["VOICE_API_KEY", "VOICE_API_KEY_2", "VOICE_API_KEY_3", "LLM_API_KEY"]
+    keys = []
+    for n in names:
+        k = os.environ.get(n, "").strip()
+        if k and k not in keys:
+            keys.append(k)
+    if not keys:
+        raise GeminiQuota("no Gemini key set (VOICE_API_KEY or LLM_API_KEY)")
+    return keys
 
 
 def tts_model(key):
@@ -147,7 +154,8 @@ def align_by_pauses(wav_path, sentences):
 def synthesize(sentences, cache_key):
     """Voice all sentences with Leda. Returns pieces [(wav, [(idx, start, end)])].
     Raises GeminiQuota if the daily limit stops it (finished passages stay cached)."""
-    key = _key()
+    keys = _keys()
+    key = keys.pop(0)
     cache = TTS_CACHE / cache_key
     cache.mkdir(parents=True, exist_ok=True)
     model = None
@@ -157,9 +165,18 @@ def synthesize(sentences, cache_key):
         h = hashlib.sha1(f"{GEMINI_VOICE}|{GEMINI_STYLE}|{GEMINI_TEMPO}|{text}".encode()).hexdigest()[:16]
         wav = cache / f"c{k:03d}_{h}.wav"
         if not wav.exists():
-            model = model or tts_model(key)
-            log.info("Leda: voicing passage %d (%d sentences, %d chars) with %s", k + 1, len(idxs), len(text), model)
-            pcm, rate = _request(model, key, text)
+            while True:
+                try:
+                    model = model or tts_model(key)
+                    log.info("Leda: voicing passage %d (%d sentences, %d chars) with %s", k + 1, len(idxs),
+                             len(text), model)
+                    pcm, rate = _request(model, key, text)
+                    break
+                except GeminiQuota as e:
+                    if not keys:
+                        raise
+                    log.warning("%s; switching to the next Leda key", str(e)[:120])
+                    key, model = keys.pop(0), None
             _pcm_to_wav(pcm, rate, wav)
             made += 1
         spans = align_by_pauses(wav, [sentences[i] for i in idxs])

@@ -22,6 +22,8 @@ jobs:
       - name: Make voice demos
         env:
           LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+          VOICE_API_KEY: ${{ secrets.VOICE_API_KEY }}
+          VOICE_API_KEY_2: ${{ secrets.VOICE_API_KEY_2 }}
         run: python src/voice_demo.py
       - name: Save demos to the repo
         run: |
