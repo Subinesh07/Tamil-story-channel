@@ -16,7 +16,8 @@ from config import SENTENCE_SEP
 log = logging.getLogger("text_fix")
 
 # Tamil block, Latin letters (English words), digits, spaces and common punctuation
-_FOREIGN = re.compile(r"[^஀-௿‌‍\sA-Za-z0-9.,!?\"'’‘“”…:;()\[\]\-–—%/&+*#@₹|।]")
+# (emoji and symbols are fine; only letters of other languages are flagged)
+_FOREIGN = re.compile(r"[\u0080-ɏͰ-୿ఀ-῿　-퟿豈-￯]")
 
 
 def foreign(text):

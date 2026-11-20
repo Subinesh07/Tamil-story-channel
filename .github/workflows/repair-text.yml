@@ -31,6 +31,7 @@ jobs:
           LLM_ORDER: ${{ vars.LLM_ORDER }}
         run: cd src && python text_fix.py
       - name: Commit
+        if: always()
         run: |
           git config user.name "story-bot"
           git config user.email "story-bot@users.noreply.github.com"
