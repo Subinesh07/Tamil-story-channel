@@ -12,5 +12,6 @@ One video a day at 19:00 Asia/Kolkata. Updated automatically.
 | 2026-11-22 | 6 | The Palm-Leaf Trail Part 1: Secret in the Hollow Tamarind | Sea, Forest, Temple: The Palm-Leaf Trail Part 1 | pending |  |
 | 2026-11-23 | 8 | The Trapped Trail: Lost Map in the Mud | Sea, Forest, Temple: The Palm-Leaf Trail Part 2 | pending |  |
 | 2026-11-24 | 9 | Echoes of the Silent Bell: The Midnight Shadow | Echoes of the Silent Bell Part 1 | pending |  |
+| 2026-11-25 | 11 | Shadows of Deceit - Part 2 | If The Shadow Becomes Real Part 2 | pending |  |
 
-Pending stories: **6** ⚠️ below 10, the Generate stories workflow will top this up.
+Pending stories: **7** ⚠️ below 10, the Generate stories workflow will top this up.
