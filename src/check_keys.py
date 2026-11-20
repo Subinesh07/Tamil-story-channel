@@ -92,7 +92,6 @@ def main():
     a, t = os.environ.get("CF_ACCOUNT_ID", "").strip(), os.environ.get("CF_API_TOKEN", "").strip()
     if a and t:
         try:
-            import requests
             r = requests.get(f"https://api.cloudflare.com/client/v4/accounts/{a}/ai/models/search?per_page=1",
                              headers={"Authorization": f"Bearer {t}"}, timeout=30)
             (ok if r.status_code == 200 else bad)("Cloudflare pictures",
