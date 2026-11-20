@@ -226,6 +226,109 @@
       ],
       "person": null,
       "key_facts_en": null
+    },
+    {
+      "id": "real-5",
+      "genre": "real lives",
+      "status": "active",
+      "parts_total": 4,
+      "parts_done": 1,
+      "so_far": [
+        "This first part traces Alexander's birth in Pella, taming Bucephalus at age 12, studying under Aristotle, fighting at Chaeronea, and claiming the throne at age 20 after Philip II's assassination, ending with his historic crossing into Asia Minor."
+      ],
+      "title_ta": "அலெட்சாண்டர்: ஒரு மாமனிதன்",
+      "title_en": "Alexander: The Last Horizon",
+      "premise_en": "A dramatic four-part chronological journey of Alexander the Great, tracing his rise from Macedonian prince to conqueror of the known world, and his untimely death at Babylon based strictly on historical records.",
+      "characters": [
+        {
+          "name": "Alexander III",
+          "role": "King of Macedonia and Conqueror",
+          "age": 32,
+          "appearance_en": "Athletic build, piercing grey-blue eyes, medium-length wavy light-brown hair parted in the center, clean-shaven face, sharp jawline, wearing gleaming bronze Greek muscle cuirass armor and a crimson royal cloak."
+        },
+        {
+          "name": "Aristotle",
+          "role": "Philosopher and Tutor",
+          "age": 50,
+          "appearance_en": "Tall stature, deep-set thoughtful brown eyes, receding grey-brown hair with a short beard, wearing a traditional olive-green Greek chiton and a dark draped cloak."
+        },
+        {
+          "name": "King Porus",
+          "role": "Paurava King of ancient India",
+          "age": 45,
+          "appearance_en": "Tall, muscular build, rich dark complexion, dark piercing eyes, neatly trimmed black beard, wearing elaborate gold and crimson Indian royal armor with traditional jewelry and a royal turban."
+        },
+        {
+          "name": "Olympias",
+          "role": "Queen Mother of Macedonia",
+          "age": 50,
+          "appearance_en": "Regal posture, sharp intense dark eyes, long dark braided hair interwoven with gold threads, wearing rich purple and gold royal Macedonian robes."
+        }
+      ],
+      "arc": [
+        "Part 1: The early years in Pella, tutoring under Aristotle, the assassination of Philip II, and Alexander claiming the Macedonian throne at age 20.",
+        "Part 2: The crossing into Asia Minor, the dramatic cutting of the Gordian Knot, and the massive victories against Darius III at Issus and Gaugamela.",
+        "Part 3: The campaigns through Egypt and Central Asia, founding Alexandria, and the marriage to Roxana.",
+        "Part 4: The grueling Indian campaign, the epic Battle of the Hydaspes against King Porus, the mutiny at the river, and his sudden death in Babylon."
+      ],
+      "person": "Alexander III of Macedon",
+      "key_facts_en": [
+        "Born in Pella, Macedonia in 356 BC to King Philip II and Queen Olympias.",
+        "Tamed the wild horse Bucephalus at around age 12, impressing his father.",
+        "Tutored by the Greek philosopher Aristotle from age 13 to 16 in philosophy, science, and literature.",
+        "Commanded the left wing of the Macedonian cavalry at the decisive Battle of Chaeronea at age 18 in 338 BC.",
+        "Assumed the throne of Macedonia at age 20 in 336 BC following the assassination of his father Philip II.",
+        "Crossed the Hellespont into Asia Minor in 334 BC with an army of approximately 48,000 soldiers.",
+        "Defeated the Persian king Darius III at the Battle of Issus in 333 BC and later at the Battle of Gaugamela in 331 BC.",
+        "Founded the city of Alexandria in Egypt in 331 BC, which became a major cultural and economic hub.",
+        "Married Roxana of Bactria in 327 BC to forge political alliances in Central Asia.",
+        "Invaded the Indian subcontinent and won the fiercely contested Battle of the Hydaspes against King Porus in 326 BC.",
+        "Faced a troop mutiny at the Hyphasis River in 326 BC, forcing his exhausted army to turn back toward Babylon.",
+        "Died in Babylon in June 323 BC at the age of 32 from an unspecified severe illness."
+      ]
+    },
+    {
+      "id": "family-6",
+      "genre": "family moral",
+      "status": "active",
+      "parts_total": 6,
+      "parts_done": 1,
+      "so_far": [
+        "Kadhar rushes his pottery work and breaks his clay bird, leading Periannan to teach him a lesson about patience. Through a guided storytelling session under the banyan tree, Kadhar learns that good things take time. The part ends with a cliffhanger about a missing ancient pottery mould in the village."
+      ],
+      "title_ta": "மழைச்சாரல் தாத்தா கதைகள்",
+      "title_en": "Malaichaaral Grandfather Stories",
+      "premise_en": "Every Saturday evening in a misty hill village, a wise retired pottery maker gathers his two grandchildren under a giant banyan tree. Through gentle storytelling, he helps them navigate childhood dilemmas, village harmony, and timeless moral truths.",
+      "characters": [
+        {
+          "name": "Periannan",
+          "role": "Grandfather and storyteller",
+          "age": 68,
+          "appearance_en": "Wise elderly man with a trimmed white beard, kind smiling eyes with crinkles at the corners, wearing a clean white cotton veshti and a grey woolen shawl draped over his shoulder."
+        },
+        {
+          "name": "Kadhar",
+          "role": "Elder grandson",
+          "age": 11,
+          "appearance_en": "Energetic boy with short curly black hair, expressive brown eyes, wearing a dark blue striped cotton shirt and brown shorts."
+        },
+        {
+          "name": "Poongodi",
+          "role": "Younger granddaughter",
+          "age": 8,
+          "appearance_en": "Curious bright-eyed girl with hair tied in two neat pigtails with yellow ribbons, wearing a simple green and yellow cotton salwar kameez."
+        }
+      ],
+      "arc": [
+        "Part 1: The lost clay bird teaches Kadhar the true value of patience and honest craftsmanship.",
+        "Part 2: A small dispute over a shared mango tree helps Poongodi understand the joy of selfless sharing.",
+        "Part 3: The mystery of the missing village lantern reveals the quiet power of forgiveness and trust.",
+        "Part 4: An accidental tumble into a neighbor's vegetable garden shows the children why teamwork heals old feuds.",
+        "Part 5: A rainy afternoon helping an elderly weaver teaches them to value quiet listening over speaking first.",
+        "Part 6: The annual village pottery fair brings a heartwarming realization that family is life's greatest treasure."
+      ],
+      "person": null,
+      "key_facts_en": null
     }
   ]
 }
