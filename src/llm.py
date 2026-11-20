@@ -186,8 +186,10 @@ _benched = {}   # model -> time it failed; skipped for 10 minutes
 _last_good = None
 
 
-def _candidates():
+def _candidates(providers=None):
     order = [p.strip() for p in (os.environ.get("LLM_ORDER") or DEFAULT_ORDER).split(",") if p.strip()]
+    if providers:
+        order = [p for p in order if p in providers] or list(providers)
     out = []
     for p in order:
         get_key, list_models, call = PROVIDERS[p]
@@ -209,11 +211,12 @@ def _candidates():
     return out
 
 
-def complete(prompt, want_json=False, max_tokens=32000, rounds=3):
-    """Try every available free model; wait and go round again if all are busy."""
+def complete(prompt, want_json=False, max_tokens=32000, rounds=3, providers=None):
+    """Try every available free model; wait and go round again if all are busy.
+    providers=("gemini",) limits a request to strong models (story writing)."""
     global _last_good
     for rnd in range(rounds):
-        cands = _candidates()
+        cands = _candidates(providers)
         if _last_good in [(p, m) for p, m, _, _ in cands]:
             cands.sort(key=lambda c: (c[0], c[1]) != _last_good)
         for provider, model, key, call in cands:

@@ -7,6 +7,7 @@ Each story: plan (JSON) -> script in two halves -> automatic self-check and repa
 The CSV is saved after every story, so a quota stop never loses finished work.
 """
 import argparse
+from datetime import datetime
 import json
 import os
 import logging
@@ -25,6 +26,23 @@ from stories import load_rows, save_rows, word_count
 
 log = logging.getLogger("generate")
 
+def write(prompt, **kw):
+    """Story text is written ONLY by Gemini: the small free models write broken, bookish Tamil.
+    If Gemini is busy the run stops and the next scheduled run tries again."""
+    return complete(prompt, providers=("gemini",), **kw)
+
+
+STYLE_EXAMPLE = """நைட் பதினொன்னே முக்கால் மணி. லேப்ல மீராவைத் தவிர யாருமே இல்ல.
+திடீர்னு ஸ்க்ரீன்ல ஒரு ரெட் லைட் மின்னுச்சு.
+"என்னடா இது…" மீரா காபி கப்பைக் கீழே வச்சா.
+சூரியன் மேல ஒரு பெரிய கரும்புள்ளி. இதுவரை யாருமே பார்க்காத சைஸ்.
+அவ கணக்குப் போட்டா. ஒரு தடவை இல்ல, மூணு தடவை. ஒவ்வொரு தடவையும் அதே ஆன்சர்.
+இன்னும் ஏழு நாள்ல ஒரு பெரிய சோலார் ஸ்டார்ம் பூமியை அடிக்கப் போகுது.
+கரண்ட், போன், இன்டர்நெட், ஹாஸ்பிடல்… எல்லாமே ஒரே செகண்ட்ல ஆஃப் ஆயிடும்.
+மீரா முதல்ல நினைச்சது உலகத்தைப் பத்தி இல்ல. சென்னையில இருக்குற அப்பாவையும் தம்பியையும் தான்.
+போனை எடுத்தா. "அப்பா, நான் சொல்றதை கவனமா கேளுங்க…"
+அப்போ தான் லேப் கதவு மெதுவா திறந்துச்சு."""
+
 RULES = """Hard rules:
 - The story must be completely ORIGINAL. Do not copy or closely paraphrase any YouTube channel,
   book, film, TV serial, folk tale or song. No song lyrics at all.
@@ -38,7 +56,16 @@ RULES = """Hard rules:
     ரொம்ப (not மிகவும்), அப்புறம் (not பின்னர்), இல்ல (not இல்லை) in dialogue.
   Light everyday Tamil-English mixing is fine where people really talk that way.
 - Sentences of 6-14 words: natural spoken rhythm, not choppy fragments. Never 15 or more.
-- Show feelings through small actions and dialogue, not by naming the emotion.
+- Tell it like a friend narrating a gripping story out loud, NOT like a novel:
+  * The PLOT must move in almost every line: something happens, someone speaks, a new problem,
+    a discovery. At least 35% of the lines are dialogue.
+  * NO flowery description: no poetic metaphors, no lines about hair blowing in the wind, mist,
+    shivering, heartbeats, the colour of the sky. At most ONE short line to set a scene, then action.
+  * A feeling is shown in a few words or a line of dialogue ("மீராவுக்கு கை நடுங்க ஆரம்பிச்சுது."),
+    then the story moves on. Never describe the same feeling twice.
+  * Simple words a 12-year-old in Chennai understands. No rare or bookish Tamil words.
+- Write in exactly this voice and rhythm (style sample, do not copy its content):
+""" + "\n".join("    " + x for x in STYLE_EXAMPLE.splitlines()) + """
 - Hook in the first 30 seconds, rising tension, a turning point around 60%, emotional climax,
   and a satisfying ending that resolves the main conflict with a specific, earned moment
   (not a generic "everything ended well" summary).
@@ -129,7 +156,7 @@ Each beat becomes ONE illustration, so describe a simple, paintable moment:
 - at most 2 people in the picture, named in "characters"; list [] if nobody is in it
 - no small objects held in hands, no vehicles or bicycles in close-up, no written text
 - a clear setting and one visible emotion"""
-    plan = complete(prompt, want_json=True, max_tokens=8000)
+    plan = write(prompt, want_json=True, max_tokens=8000)
     if not MIN_SCENES <= len(plan.get("beats", [])) <= MAX_SCENES:
         raise LLMError(f"plan has {len(plan.get('beats', []))} beats")
     return plan
@@ -162,7 +189,7 @@ Beats for this part:
 Length: about {part_words} Tamil words for this part (count carefully). Write the full narration, not an outline.
 Format: ONE sentence per line. No numbering, no headings, no stage directions, no English
 translation. Dialogue is fine inside a sentence. {ending}"""
-    return complete(prompt, max_tokens=16000)
+    return write(prompt, max_tokens=16000)
 
 
 def fix_long_sentences(sentences):
@@ -297,6 +324,25 @@ def self_check(plan, sentences, lo=MIN_WORDS, hi=MAX_WORDS):
     return words, problems
 
 
+def style_check(sentences):
+    """Gemini scores a sample of the script; bookish or flowery scripts are rewritten."""
+    n = len(sentences)
+    sample = sentences[:35] + ["…"] + sentences[n // 2:n // 2 + 25]
+    v = write(
+        "You judge Tamil YouTube story narration for a casual Tamil Nadu audience. Score 1-10:\n"
+        "spoken: casual spoken Tanglish (இருக்கு/போனா/ரொம்ப, English words in Tamil letters), not bookish Tamil;\n"
+        "pace: the plot moves in almost every line, plenty of dialogue, no flowery description;\n"
+        "clear: every sentence is correct, meaningful Tamil a 12-year-old understands.\n"
+        'Return JSON {"spoken": n, "pace": n, "clear": n, "worst_problem": "short reason"}.\n\n'
+        + "\n".join(sample), want_json=True, max_tokens=1500)
+    scores = [int(v.get(k, 0) or 0) for k in ("spoken", "pace", "clear")]
+    problems = []
+    if min(scores) < 7:
+        problems.append(f"style {scores} ({str(v.get('worst_problem', ''))[:100]})")
+    log.info("Style scores spoken/pace/clear: %s", scores)
+    return problems
+
+
 def originality_and_ending_check(plan, sentences, must_resolve=True, true_story=False):
     ending = " ".join(sentences[-25:])
     verdict = complete(
@@ -314,7 +360,7 @@ def originality_and_ending_check(plan, sentences, must_resolve=True, true_story=
 
 def _expand(plan, sentences, need):
     cut = int(len(sentences) * 0.55)
-    extra = complete(
+    extra = write(
         f"This Tamil story needs about {need} more words. Write about {need} Tamil words of new "
         "scene detail, feelings and dialogue that fit naturally right after the passage below "
         "(before the turning point). Same characters, same style, one sentence per line, "
@@ -371,14 +417,23 @@ def mark_topic_used(i):
     TOPICS.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
-def write_story(rows, doomsday=False):
+def write_story(rows, doomsday=False, redo=None):
     """Write the next part of whichever series owns the next publish date
     (doomsday=True: the next weekend 12 PM Doomsday part instead)."""
     import series as S
     from config import DOOM_HOUR, DOOM_MAX_WORDS, DOOM_MIN_WORDS
     premises, used_names = read_index()
     data = S.load()
-    if doomsday:
+    if redo:
+        doomsday = redo["genre"] == "doomsday"
+        ser = next(s for s in data["series"] if s["id"] == redo["series_id"])
+    if redo:
+        day, genre, why = datetime.fromisoformat(redo["publish_at"]).date(), redo["genre"], "rewrite"
+        if doomsday:
+            lo, hi, n_parts, part_words, mins, approx = DOOM_MIN_WORDS, DOOM_MAX_WORDS, 2, "620-700", "10-12", "1,300"
+        else:
+            lo, hi, n_parts, part_words, mins, approx = MIN_WORDS, MAX_WORDS, PARTS, "660-720", "20-25", "2,650"
+    elif doomsday:
         ser = S.doomsday_series(data)
         if not ser:
             raise LLMError("NO_DOOMSDAY: season finished")
@@ -389,15 +444,22 @@ def write_story(rows, doomsday=False):
         genre, why = S.genre_for(day, rows, data)
         lo, hi, n_parts, part_words, mins, approx = MIN_WORDS, MAX_WORDS, PARTS, "660-720", "20-25", "2,650"
     prefer = why.split(":", 1)[1] if why.startswith("weekend:") else None
-    if not doomsday:
+    if not doomsday and not redo:
         ser = S.active_series(data, genre, prefer) or S.create_series(genre, data, complete, used_names)
-    part = ser["parts_done"] + 1
+    part = int(redo["part"]) if redo else ser["parts_done"] + 1
+    brief_ser = ser
+    if redo:   # same part again: same outline and the same events, so later parts still follow on
+        brief_ser = {**ser, "parts_done": part - 1, "so_far": ser["so_far"][:part - 1]}
     final = part >= ser["parts_total"]
     opening = next_opening(rows)
     log.info("%s %s -> %s part %d/%d (%s)", day, day.strftime("%a"), ser["title_en"], part,
              ser["parts_total"], why)
     series_names = {c["name"] for c in ser.get("characters") or []}
-    plan = plan_story(genre, opening, premises, used_names - series_names, series_brief=S.episode_brief(ser),
+    brief = S.episode_brief(brief_ser)
+    if redo and len(ser["so_far"]) >= part:
+        brief += ("\nThis part has ALREADY been outlined. Tell exactly these events, in this order, "
+                  "with the same ending/cliffhanger: " + ser["so_far"][part - 1])
+    plan = plan_story(genre, opening, premises, used_names - series_names, series_brief=brief,
                       minutes=mins, words=approx)
     plan["characters"] = (ser.get("characters") or []) + [c for c in plan.get("characters", [])
                                                            if c["name"] not in series_names]
@@ -414,11 +476,12 @@ def write_story(rows, doomsday=False):
     if garbled > max(8, len(sentences) * 0.06):
         raise LLMError(f"model mixed other scripts into {garbled} sentences; rewriting with a new plan")
     words, problems = self_check(plan, sentences, lo, hi)
+    problems += style_check(sentences)
     problems += originality_and_ending_check(plan, sentences, must_resolve=final,
                                              true_story=(genre == "real lives"))
     if problems:
         raise LLMError("self-check failed: " + "; ".join(problems))
-    next_id = max([int(r["id"]) for r in rows if r["id"].isdigit()] or [0]) + 1
+    next_id = int(redo["id"]) if redo else max([int(r["id"]) for r in rows if r["id"].isdigit()] or [0]) + 1
     script = " ".join(f"{i + 1}. {s}{SENTENCE_SEP}" for i, s in enumerate(sentences))
     try:
         segs = segment_scenes(plan, sentences)
@@ -441,7 +504,8 @@ def write_story(rows, doomsday=False):
     row = {"id": str(next_id), "genre": genre, "title_ta": title,
            "title_en": f"{plan['title_en']} | {ser['title_en']} Part {part}", "script_ta": script,
            "scene_prompts": prompts_field,
-           "publish_at": S.publish_at(day, DOOM_HOUR if doomsday else None), "status": "pending", "video_id": "", "fail_reason": "",
+           "publish_at": redo["publish_at"] if redo else S.publish_at(day, DOOM_HOUR if doomsday else None),
+           "status": "pending", "video_id": "", "fail_reason": "",
            "description_ta": desc, "series_id": ser["id"], "part": str(part),
            "thumb_quote_ta": plan.get("thumb_line1_ta", ""), "thumb_hook_ta": plan.get("thumb_line2_ta", ""),
            "thumb_text": json.dumps({k: plan.get(f"thumb_{k}_ta", "") for k in
@@ -451,6 +515,8 @@ def write_story(rows, doomsday=False):
     repair_row(row, complete)   # fix the few stray foreign-letter words before saving
     if foreign(row["script_ta"]):
         raise LLMError("story still has foreign letters after repair")
+    if redo:
+        return row, None, names
     ser["so_far"].append(plan.get("episode_summary_en") or plan.get("premise_en", ""))
     ser["parts_done"] = part
     if final:
@@ -468,7 +534,35 @@ def main():
     ap.add_argument("--auto", action="store_true",
                     help="30 stories in total at first, then refill to 20 pending when below 10")
     ap.add_argument("--max-per-run", type=int, default=5)
+    ap.add_argument("--redo", default="", help="comma-separated row ids to rewrite in the new style")
     args = ap.parse_args()
+    if args.redo:
+        rows = load_rows()
+        done = 0
+        for rid in [x.strip() for x in args.redo.split(",") if x.strip()]:
+            old = next(r for r in rows if r["id"] == rid)
+            if old["status"] not in ("pending", "hold"):
+                log.info("Row %s is %s: not rewritten", rid, old["status"])
+                continue
+            for attempt in range(3):
+                try:
+                    new, _, _ = write_story(rows, redo=old)
+                    break
+                except LLMError as e:
+                    log.warning("Rewrite of %s failed (%s)", rid, str(e)[:200])
+                    if str(e).startswith(("RATE_LIMIT", "BUSY")):
+                        return 0 if done else 1
+            else:
+                continue
+            keep_hold = "Studio" in (old.get("fail_reason") or "")   # broken upload still to delete
+            new["status"] = "hold" if keep_hold else "pending"
+            new["video_id"] = old.get("video_id", "") if keep_hold else ""
+            new["fail_reason"] = old.get("fail_reason", "") if keep_hold else ""
+            rows[rows.index(old)] = {**old, **new}
+            save_rows(rows)
+            done += 1
+            log.info("Row %s rewritten in the new style", rid)
+        return 0
 
     rows = load_rows()
     pending = sum(r["status"] == "pending" for r in rows)
