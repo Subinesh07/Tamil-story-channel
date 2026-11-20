@@ -1,5 +1,26 @@
 # Nila Kathaigal (நிலா கதைகள்) — automated Tamil story channel
 
+## 🎛️ Control panel (works without Claude)
+
+Everything runs **by itself on GitHub** every 6 hours: stories are written about a week ahead and
+videos are made and scheduled up to 3 days before their slot. You never need to press anything.
+Use these buttons only if you want something to happen **now**. Open the link, press
+**Run workflow** (top right; in the GitHub phone app: ⋯ → Run workflow), then the green button.
+
+| Button | What it does | Time |
+|---|---|---|
+| [▶️ Make the next video now](https://github.com/Subinesh07/Tamil-story-channel/actions/workflows/produce.yml) | Voices (Leda), pictures, renders, checks and schedules the next story | 20–40 min |
+| [✍️ Write stories now](https://github.com/Subinesh07/Tamil-story-channel/actions/workflows/generate.yml) | Writes the next story parts (quality-checked) | 10–30 min |
+| [🔑 Check all keys](https://github.com/Subinesh07/Tamil-story-channel/actions/workflows/check-keys.yml) | Confirms Gemini, Leda, Cloudflare, YouTube work | 1 min |
+| [🖼️ Redo a thumbnail](https://github.com/Subinesh07/Tamil-story-channel/actions/workflows/redo-thumbnail.yml) | Makes the thumbnail of an uploaded story again (enter its id) | 2 min |
+| [📅 Schedule](https://github.com/Subinesh07/Tamil-story-channel/blob/main/SCHEDULE.md) | What goes out when | – |
+| [🛡️ Problems & fixes log](https://github.com/Subinesh07/Tamil-story-channel/blob/main/docs/PROBLEMS_AND_FIXES.md) | Every problem found and the check that now prevents it | – |
+
+If a run fails, GitHub emails the repository owner. Nothing ever costs money: when a free limit is
+used up, the run waits and continues after the daily reset.
+
+---
+
 Writes original Tamil family/emotional stories, narrates them with a female Tamil voice,
 illustrates 20–25 scenes, renders a 20–25 minute video with Tamil subtitles, checks it, and
 uploads it to YouTube as a private video scheduled for 19:00 IST. Everything runs on GitHub

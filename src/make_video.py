@@ -335,7 +335,7 @@ def main():
             log.warning("Paused: %s. Pictures made so far are saved; the next run continues.", e)
             update_row(row["id"], status="pending", fail_reason="waiting for free picture allowance")
             return 0
-        if type(e).__name__ == "GeminiQuota":
+        if type(e).__name__ in ("GeminiQuota", "VoiceCheckFailed"):
             log.warning("Paused: %s. Voiced parts are saved; the next run continues with Leda.", e)
             update_row(row["id"], status="pending", fail_reason="waiting for Gemini voice daily limit")
             return 0

@@ -27,6 +27,56 @@ class GeminiQuota(RuntimeError):
     pass
 
 
+class VoiceCheckFailed(GeminiQuota):
+    """A voiced passage was not clean Tamil matching the script even after re-voicing: wait."""
+
+
+def _listen_models(key):
+    """Text models that can listen to audio (non-lite Flash first)."""
+    from llm import gemini_models
+    names = gemini_models(key)
+    return [n for n in names if "lite" not in n] + [n for n in names if "lite" in n]
+
+
+def verify_passage(wav, text, key):
+    """Gemini listens to the voiced passage. Returns (ok, reason).
+    Catches Leda switching to English, reading the instructions aloud, skipping or adding lines."""
+    mp3 = wav.with_suffix(".check.mp3")
+    subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", str(wav), "-ac", "1", "-ar", "16000", "-b:a", "32k",
+                    str(mp3)], check=True)
+    audio = base64.b64encode(mp3.read_bytes()).decode()
+    mp3.unlink(missing_ok=True)
+    prompt = ("You are a strict quality checker for a Tamil YouTube story narration. Listen to the WHOLE "
+              "audio and compare it with the script below. English words that are written in Tamil letters "
+              "in the script (like ஆபீஸ், போன்) are fine. Return JSON: {\"tamil_only\": true/false (false if "
+              "any full English sentence or English narration is spoken), \"english_seconds\": number, "
+              "\"follows_script\": true/false (false if lines are skipped, added, translated or the "
+              "instructions are read aloud), \"problem\": \"short description or empty\"}\n\nSCRIPT:\n" + text)
+    body = {"contents": [{"parts": [{"inline_data": {"mime_type": "audio/mp3", "data": audio}},
+                                    {"text": prompt}]}],
+            "generationConfig": {"responseMimeType": "application/json", "temperature": 0}}
+    last = ""
+    try:
+        models = _listen_models(key)[:4]
+    except Exception as e:
+        raise GeminiQuota(f"voice check could not list models ({str(e)[:100]}); will retry next run")
+    for model in models:
+        try:
+            r = requests.post(f"{API}/{model}:generateContent", headers={"x-goog-api-key": key},
+                              json=body, timeout=300)
+            if r.status_code != 200:
+                last = f"{model} HTTP {r.status_code}"
+                continue
+            parts = r.json()["candidates"][0]["content"]["parts"]
+            v = json.loads("".join(p.get("text", "") for p in parts if not p.get("thought")))
+            ok = bool(v.get("tamil_only")) and float(v.get("english_seconds") or 0) <= 3 \
+                and bool(v.get("follows_script"))
+            return ok, str(v.get("problem") or "")[:150] if not ok else ""
+        except Exception as e:
+            last = f"{model}: {str(e)[:100]}"
+    raise GeminiQuota(f"voice check could not run ({last}); will retry next run")
+
+
 def _keys():
     """Leda keys in order: VOICE_API_KEY_1..3 (extra accounts), then LLM_API_KEY.
     The same Leda voice is used on every key, so switching keys never changes how it sounds."""
@@ -164,7 +214,10 @@ def synthesize(sentences, cache_key):
         text = " ".join(_punct(sentences[i]) for i in idxs)
         h = hashlib.sha1(f"{GEMINI_VOICE}|{GEMINI_STYLE}|{GEMINI_TEMPO}|{text}".encode()).hexdigest()[:16]
         wav = cache / f"c{k:03d}_{h}.wav"
-        if not wav.exists():
+        checked = wav.with_suffix(".ok")
+        tries = 0
+        while not checked.exists():
+          if not wav.exists():
             while True:
                 try:
                     model = model or tts_model(key)
@@ -179,6 +232,16 @@ def synthesize(sentences, cache_key):
                     key, model = keys.pop(0), None
             _pcm_to_wav(pcm, rate, wav)
             made += 1
+          ok, why = verify_passage(wav, text, key)
+          if ok:
+              checked.write_text("ok")
+              log.info("Leda: passage %d passed the listening check", k + 1)
+              break
+          tries += 1
+          log.warning("Leda: passage %d failed the listening check (%s); voicing it again", k + 1, why)
+          wav.unlink(missing_ok=True)
+          if tries >= 3:
+              raise VoiceCheckFailed(f"passage {k + 1} kept failing the listening check: {why}")
         spans = align_by_pauses(wav, [sentences[i] for i in idxs])
         pieces.append((wav, [(i, s, e) for i, (s, e) in zip(idxs, spans)]))
     log.info("Leda: %d passages (%d new requests, %d from cache)", len(pieces), made, len(pieces) - made)

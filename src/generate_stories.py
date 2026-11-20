@@ -316,6 +316,9 @@ def self_check(plan, sentences, lo=MIN_WORDS, hi=MAX_WORDS):
     problems = []
     if not lo <= words <= hi:
         problems.append(f"{words} words (need {lo}-{hi})")
+    latin = [s for s in sentences if re.search(r"[A-Za-z]{2,}", s)]
+    if latin:   # English must be written in Tamil letters, otherwise Leda reads it in English
+        problems.append(f"{len(latin)} sentences contain English letters (e.g. {latin[0][:40]})")
     long_ = [s for s in sentences if word_count(s) > MAX_WORDS_PER_SENTENCE]
     if long_:
         problems.append(f"{len(long_)} sentences over {MAX_WORDS_PER_SENTENCE} words")
@@ -498,7 +501,7 @@ def write_story(rows, doomsday=False, redo=None):
     title = plan["title_ta"].strip()
     if genre == "doomsday":   # people search "doomsday": the word leads the title and the thumbnail
         suffix = f" | டூம்ஸ்டே பகுதி {part}"
-        title = "DOOMSDAY 😱 " + title
+        title = "டூம்ஸ்டே 😱 " + title
     if len(title) + len(suffix) > 100:   # cut at a word boundary, never mid-word
         title = title[:100 - len(suffix) - 1].rsplit(" ", 1)[0].rstrip(" ,:-") + "…"
     title += suffix
@@ -517,7 +520,7 @@ def write_story(rows, doomsday=False, redo=None):
            "thumb_quote_ta": plan.get("thumb_line1_ta", ""), "thumb_hook_ta": plan.get("thumb_line2_ta", ""),
            "thumb_text": json.dumps({**{k: plan.get(f"thumb_{k}_ta", "") for k in
                                         ("line1", "line2", "ribbon", "title", "tagline")},
-                                     **({"title": "DOOMSDAY"} if genre == "doomsday" else {})},
+                                     **({"title": "டூம்ஸ்டே"} if genre == "doomsday" else {})},
                                     ensure_ascii=False),
            "thumb_prompt": thumb_prompt(plan)}
     from text_fix import foreign, repair_row
@@ -536,6 +539,34 @@ def write_story(rows, doomsday=False, redo=None):
     return row, f"[{ser['title_en']} part {part}] " + plan["premise_en"], names
 
 
+
+def rewrite_rows(rows, ids):
+    """Rewrite held stories in the current style (same events). Returns how many were rewritten."""
+    done = 0
+    for rid in ids:
+        old = next((r for r in rows if r["id"] == rid), None)
+        if not old or old["status"] not in ("pending", "hold"):
+            continue
+        for attempt in range(3):
+            try:
+                new, _, _ = write_story(rows, redo=old)
+                break
+            except LLMError as e:
+                log.warning("Rewrite of %s failed (%s)", rid, str(e)[:200])
+                if str(e).startswith(("RATE_LIMIT", "BUSY")):
+                    return done
+        else:
+            continue
+        keep_hold = "Studio" in (old.get("fail_reason") or "")
+        new["status"] = "hold" if keep_hold else "pending"
+        new["video_id"] = old.get("video_id", "") if keep_hold else ""
+        new["fail_reason"] = old.get("fail_reason", "") if keep_hold else ""
+        rows[rows.index(old)] = {**old, **new}
+        save_rows(rows)
+        done += 1
+        log.info("Row %s rewritten in the new style", rid)
+    return done
+
 def main():
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
     ap = argparse.ArgumentParser()
@@ -546,34 +577,17 @@ def main():
     ap.add_argument("--redo", default="", help="comma-separated row ids to rewrite in the new style")
     args = ap.parse_args()
     if args.redo:
-        rows = load_rows()
-        done = 0
-        for rid in [x.strip() for x in args.redo.split(",") if x.strip()]:
-            old = next(r for r in rows if r["id"] == rid)
-            if old["status"] not in ("pending", "hold"):
-                log.info("Row %s is %s: not rewritten", rid, old["status"])
-                continue
-            for attempt in range(3):
-                try:
-                    new, _, _ = write_story(rows, redo=old)
-                    break
-                except LLMError as e:
-                    log.warning("Rewrite of %s failed (%s)", rid, str(e)[:200])
-                    if str(e).startswith(("RATE_LIMIT", "BUSY")):
-                        return 0 if done else 1
-            else:
-                continue
-            keep_hold = "Studio" in (old.get("fail_reason") or "")   # broken upload still to delete
-            new["status"] = "hold" if keep_hold else "pending"
-            new["video_id"] = old.get("video_id", "") if keep_hold else ""
-            new["fail_reason"] = old.get("fail_reason", "") if keep_hold else ""
-            rows[rows.index(old)] = {**old, **new}
-            save_rows(rows)
-            done += 1
-            log.info("Row %s rewritten in the new style", rid)
+        rewrite_rows(load_rows(), [x.strip() for x in args.redo.split(",") if x.strip()])
         return 0
 
     rows = load_rows()
+    if args.auto:
+        held = sorted((r for r in rows if r["status"] == "hold" and "rewritten" in (r.get("fail_reason") or "")),
+                      key=lambda r: r["publish_at"])
+        if held:
+            n = rewrite_rows(rows, [r["id"] for r in held[:2]])
+            log.info("Rewrote %d held stories this run (%d still waiting)", n, len(held) - n)
+            rows = load_rows()
     pending = sum(r["status"] == "pending" for r in rows)
     if args.auto:
         # keep about a week of parts written ahead (each part depends on the one before)
