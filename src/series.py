@@ -142,12 +142,15 @@ def doomsday_series(data):
 
 
 def publish_at(day, hour=None):
+    """Day-wise time from config.PUBLISH_HOURS, shifted by the weekly auto-tuner (max +-2 h)."""
     if hour is None:
+        from config import PUBLISH_HOURS
         try:
             from strategy import load as load_strategy
-            hour = int(load_strategy().get("publish_hour", PUBLISH_HOUR))
+            shift = int(load_strategy().get("publish_hour", PUBLISH_HOUR)) - PUBLISH_HOUR
         except Exception:
-            hour = PUBLISH_HOUR
+            shift = 0
+        hour = min(21, max(16, PUBLISH_HOURS[day.weekday()] + max(-2, min(2, shift))))
     return datetime.combine(day, time(hour), TZ).isoformat()
 
 

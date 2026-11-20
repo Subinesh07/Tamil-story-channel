@@ -274,6 +274,16 @@ def main():
         if due - datetime.now(timezone.utc) > timedelta(days=3):
             log.info("Next story is due %s (more than 3 days away) - nothing to make yet.", row["publish_at"])
             return 0
+    # safety net: never voice a script with stray Hindi/Malayalam/Korean... letters
+    from text_fix import foreign, repair_row
+    if any(foreign(row.get(k, "")) for k in ("script_ta", "title_ta", "description_ta", "thumb_text")):
+        try:
+            from llm import complete
+            if repair_row(row, complete):
+                update_row(row["id"], **{k: row[k] for k in ("script_ta", "title_ta", "description_ta",
+                                                              "thumb_quote_ta", "thumb_hook_ta", "thumb_text")})
+        except Exception as e:
+            log.warning("Text repair failed: %s", str(e)[:150])
     update_row(row["id"], status="processing", fail_reason="")
     try:
         upload = args.test_upload if args.test else not args.no_upload

@@ -409,6 +409,10 @@ def write_story(rows, doomsday=False):
     sentences = fix_long_sentences(to_sentences(text))
     sentences = fix_long_sentences(adjust_length(plan, sentences, lo=lo, hi=hi))
     sentences = _trim(sentences, hi)
+    from text_fix import bad_lines
+    garbled = len(bad_lines(sentences))
+    if garbled > max(8, len(sentences) * 0.06):
+        raise LLMError(f"model mixed other scripts into {garbled} sentences; rewriting with a new plan")
     words, problems = self_check(plan, sentences, lo, hi)
     problems += originality_and_ending_check(plan, sentences, must_resolve=final,
                                              true_story=(genre == "real lives"))
@@ -430,7 +434,7 @@ def write_story(rows, doomsday=False):
     title = (title[:100 - len(suffix)].rstrip() + suffix) if len(title) + len(suffix) > 100 else title + suffix
     desc = plan.get("description_ta", "")
     if genre == "doomsday":
-        desc += ("\n\n⏳ டூம்ஸ்டே தொடர்: ஒவ்வொரு சனி, ஞாயிறு மதியம் 12 மணிக்கு புதிய பகுதி!"
+        desc += ("\n\n⏳ டூம்ஸ்டே தொடர்: ஒவ்வொரு சனி, ஞாயிறு காலை 11 மணிக்கு புதிய பகுதி!"
                  "\n(இது முழுக்க கற்பனைக் கதை / This is a work of fiction)")
     if genre == "real lives":
         desc += "\n\n(நிஜ வாழ்க்கை நிகழ்வுகளை அடிப்படையாகக் கொண்ட நாடகமாக்கல் / Dramatised from documented real events)"
@@ -443,6 +447,10 @@ def write_story(rows, doomsday=False):
            "thumb_text": json.dumps({k: plan.get(f"thumb_{k}_ta", "") for k in
                                      ("line1", "line2", "ribbon", "title", "tagline")}, ensure_ascii=False),
            "thumb_prompt": thumb_prompt(plan)}
+    from text_fix import foreign, repair_row
+    repair_row(row, complete)   # fix the few stray foreign-letter words before saving
+    if foreign(row["script_ta"]):
+        raise LLMError("story still has foreign letters after repair")
     ser["so_far"].append(plan.get("episode_summary_en") or plan.get("premise_en", ""))
     ser["parts_done"] = part
     if final:

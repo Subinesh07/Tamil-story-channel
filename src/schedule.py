@@ -7,7 +7,7 @@ import argparse
 import json
 import logging
 import sys
-from datetime import date, datetime, time, timedelta
+from datetime import date, datetime, timedelta
 from zoneinfo import ZoneInfo
 
 from config import MIN_PENDING, PUBLISH_HOUR, ROOT, SCHEDULE_MD, TIMEZONE
@@ -37,14 +37,15 @@ def assign_dates(rows, start):
     day = max(day, start, earliest)
     for r in rows:
         if not r["publish_at"] and r["status"] == "pending":
-            r["publish_at"] = datetime.combine(day, time(publish_hour()), tz).isoformat()
+            from series import publish_at
+            r["publish_at"] = publish_at(day)
             day += timedelta(days=1)
     return rows
 
 
 def write_schedule_md(rows):
     lines = ["# Publishing schedule", "",
-             f"One video a day at {publish_hour()}:00 {TIMEZONE}. Updated automatically.", "",
+             "One story a day (time varies by weekday) + Doomsday Sat/Sun 11 AM, IST. Updated automatically.", "",
              "| Date | ID | Title | Status | Video |", "|---|---|---|---|---|"]
     for r in sorted(rows, key=lambda r: r["publish_at"] or "9999"):
         d = r["publish_at"][:10] if r["publish_at"] else "unscheduled"

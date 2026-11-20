@@ -1,6 +1,6 @@
 # Publishing schedule
 
-One video a day at 19:00 Asia/Kolkata. Updated automatically.
+One story a day (time varies by weekday) + Doomsday Sat/Sun 11 AM, IST. Updated automatically.
 
 | Date | ID | Title | Status | Video |
 |---|---|---|---|---|

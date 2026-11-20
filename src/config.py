@@ -64,7 +64,10 @@ SOFT_MIN, SOFT_MAX = 18.0, 26.0
 DOOM_MIN_WORDS, DOOM_MAX_WORDS = 1150, 1450
 DOOM_HARD = (8.0, 16.0)
 DOOM_SOFT = (9.5, 14.0)
-DOOM_HOUR = 12
+DOOM_HOUR = 11
+# 7 PM-slot story time by weekday (Mon=0 ... Sun=6), IST. Published ~1 hour before India's
+# evening viewing peak (7-10 PM) so YouTube has time to start recommending it.
+PUBLISH_HOURS = {0: 18, 1: 20, 2: 18, 3: 18, 4: 19, 5: 19, 6: 17}
 MAX_AV_DRIFT = 1.0
 
 # --- Scheduling / YouTube ---
