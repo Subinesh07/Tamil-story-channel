@@ -250,7 +250,7 @@ def segment_scenes(plan, sentences):
     looks = {c["name"]: f"{c['name']} ({c.get('age', '')}, {c['appearance_en']})"
              for c in plan["characters"]}
     numbered = "\n".join(f"{i}: {x}" for i, x in enumerate(sentences))
-    data = complete(
+    data = write(
         f"""Below is a Tamil story script, one numbered sentence per line.
 Split it into picture segments for an illustrated video. Start a NEW segment whenever the
 place, time of day or the people present change (e.g. beach -> house), and otherwise every
@@ -345,9 +345,11 @@ def style_check(sentences):
 
 def originality_and_ending_check(plan, sentences, must_resolve=True, true_story=False):
     ending = " ".join(sentences[-25:])
-    verdict = complete(
+    verdict = write(
         "Answer as JSON {\"resolves_conflict\": true/false, \"resembles_known_work\": "
-        "\"name of a known film/book/serial/YouTube story it closely copies, or empty\"}.\n"
+        "\"name of a specific film/book/serial whose PLOT AND CHARACTERS this story copies almost "
+        "scene by scene, or empty\"}. Sharing a genre, a common trope or a theme (treasure maps, "
+        "property disputes, haunted villages, family drama) is NOT copying: answer empty for that.\n"
         f"Premise: {plan['premise_en']}\nEnding (Tamil): {ending}",
         want_json=True, max_tokens=1000)
     problems = []
@@ -512,7 +514,7 @@ def write_story(rows, doomsday=False, redo=None):
                                      ("line1", "line2", "ribbon", "title", "tagline")}, ensure_ascii=False),
            "thumb_prompt": thumb_prompt(plan)}
     from text_fix import foreign, repair_row
-    repair_row(row, complete)   # fix the few stray foreign-letter words before saving
+    repair_row(row, write)   # fix the few stray foreign-letter words before saving (Gemini only)
     if foreign(row["script_ta"]):
         raise LLMError("story still has foreign letters after repair")
     if redo:

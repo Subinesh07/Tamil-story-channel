@@ -17,7 +17,8 @@ log = logging.getLogger("text_fix")
 
 # Tamil block, Latin letters (English words), digits, spaces and common punctuation
 # (emoji and symbols are fine; only letters of other languages are flagged)
-_FOREIGN = re.compile(r"[\u0080-ɏͰ-୿ఀ-῿　-퟿豈-￯]")
+# (the Devanagari danda । is our sentence separator, so it is allowed)
+_FOREIGN = re.compile(r"[\u0080-ɏͰ-ॣ०-୿ఀ-῿　-퟿豈-￯]")
 
 
 def foreign(text):
