@@ -89,10 +89,7 @@ class CloudflareProvider(ImageProvider):
     def generate(self, prompt, seed=None):
         import base64
         url = f"https://api.cloudflare.com/client/v4/accounts/{self.account}/ai/run/{self.MODEL}"
-        body = {"prompt": prompt[:2000], "steps": 4}
-        s = seed if seed is not None else self.seed
-        if s is not None:
-            body["seed"] = int(s)
+        body = {"prompt": prompt[:2000], "steps": 4}   # this model takes no seed (random each time)
         r = self.session.post(url, json=body, headers={"Authorization": f"Bearer {self.token}"}, timeout=120)
         text = r.text[:300]
         if r.status_code == 429 or "4006" in text or "allocation" in text.lower() or "neurons" in text.lower():
