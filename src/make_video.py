@@ -215,10 +215,16 @@ def drama_thumbnail(row, provider, work, out_path, n):
                                                        "அந்த ரகசியம் என்ன?", "யாரும் எதிர்பார்க்காத திருப்பம்..!"])}
             prompt = None
     bg = work / "images" / "thumb_bg.png"
+    bg.parent.mkdir(parents=True, exist_ok=True)
     if prompt:
-        bg.write_bytes(provider.generate(prompt, seed=n * 1000 + 999))
-    else:
-        pics = sorted((work / "images").glob("scene_*.png"))
+        try:
+            bg.write_bytes(provider.generate(prompt, seed=n * 1000 + 999))
+        except Exception as e:   # picture allowance used up: use the story's most dramatic picture
+            log.warning("Thumbnail picture failed (%s); using a story picture", str(e)[:100])
+            prompt = None
+    if not prompt:
+        pics = sorted((work / "images").glob("scene_*.png")) or sorted(
+            (ROOT / "cache" / "images" / f"row_{row['id']}").glob("*.png"))
         bg.write_bytes(pics[min(len(pics) - 1, max(0, len(pics) // 2))].read_bytes())
     path, layout = thumb_v2.make(bg, texts, out_path, genre=row.get("genre", ""), variant=n,
                                  part=row.get("part") or "")
