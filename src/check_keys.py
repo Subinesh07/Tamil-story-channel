@@ -38,6 +38,22 @@ def main():
         good = r.ok and any("tts" in n for n in names)
         (ok if good else bad)(f"Leda extra key ({name})",
                               "works, Leda voice model found" if good else f"HTTP {r.status_code} / no voice model")
+    # Recent uploads and their status (what is scheduled on the channel right now)
+    if os.environ.get("YT_REFRESH_TOKEN"):
+        try:
+            sys.path.insert(0, os.path.dirname(__file__))
+            from competitors import client
+            yt = client()
+            pl = yt.channels().list(part="contentDetails", mine=True).execute()["items"][0][
+                "contentDetails"]["relatedPlaylists"]["uploads"]
+            ids = [i["contentDetails"]["videoId"] for i in yt.playlistItems().list(
+                part="contentDetails", playlistId=pl, maxResults=10).execute().get("items", [])]
+            for v in yt.videos().list(part="snippet,status", id=",".join(ids)).execute().get("items", []):
+                st = v["status"]
+                when = st.get("publishAt", "")[:16] or v["snippet"]["publishedAt"][:16]
+                print(f"📺 {v['id']} | {st['privacyStatus']} | {when} | {v['snippet']['title'][:70]}")
+        except Exception as e:
+            bad("Upload list", str(e)[:120])
     # Is the broken early Doomsday upload deleted?
     if os.environ.get("YT_REFRESH_TOKEN"):
         try:
