@@ -22,9 +22,13 @@ PROMPT_SEP = "|"
 MIN_WORDS, MAX_WORDS = 2450, 2850
 MAX_WORDS_PER_SENTENCE = 15
 MIN_SCENES, MAX_SCENES = 20, 25   # story beats in the plan (pictures follow the script)
-IMAGE_STYLE = ("cinematic semi-realistic digital painting like a Tamil TV serial still, "
-               "South Indian people and setting, dramatic natural lighting, detailed expressive faces, "
-               "vibrant colours, sharp focus, no text, no letters, no logos")
+OLD_IMAGE_STYLE = ("cinematic semi-realistic digital painting like a Tamil TV serial still, "
+                   "South Indian people and setting, dramatic natural lighting, detailed expressive faces, "
+                   "vibrant colours, sharp focus, no text, no letters, no logos")
+IMAGE_STYLE = ("photorealistic cinematic film still, South Indian people and setting, intriguing "
+               "mysterious moment that makes you want to know what happens next, dramatic movie lighting "
+               "with strong contrast and rim light, shallow depth of field, rich detail, expressive faces, "
+               "natural skin, sharp focus, 35mm film look, no text, no letters, no logos")
 GENRE_MIX = {  # used by generate_stories.py for each new batch of 30
     "family emotional": 12,
     "moral or life-lesson": 8,

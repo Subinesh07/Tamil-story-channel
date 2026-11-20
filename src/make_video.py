@@ -6,6 +6,7 @@ python src/make_video.py --no-upload     # stop after the quality gate
 """
 import argparse
 import json
+import os
 import logging
 import shutil
 import sys
@@ -40,7 +41,9 @@ def produce(row, upload=True, check_duration=True):
     story = split_sentences(row["script_ta"])
     # older stories were written with the watercolour style: swap in the current picture style
     old_style = "warm watercolor illustration, South Indian home, soft natural light, no text, no logos"
-    row = {**row, "scene_prompts": row["scene_prompts"].replace(old_style, IMAGE_STYLE)}
+    from config import OLD_IMAGE_STYLE
+    row = {**row, "scene_prompts": row["scene_prompts"].replace(old_style, IMAGE_STYLE)
+           .replace(OLD_IMAGE_STYLE, IMAGE_STYLE)}
     prompts = split_prompts(row["scene_prompts"])
     if not story or not prompts:
         raise ValueError("script_ta or scene_prompts is empty")
@@ -289,6 +292,22 @@ def main():
                                                               "thumb_quote_ta", "thumb_hook_ta", "thumb_text")})
         except Exception as e:
             log.warning("Text repair failed: %s", str(e)[:150])
+    # never upload the same story twice (e.g. if a previous run uploaded but could not save its status)
+    if not args.test and not args.no_upload and os.environ.get("YT_REFRESH_TOKEN"):
+        try:
+            from competitors import client
+            yt = client()
+            ch = yt.channels().list(part="contentDetails", mine=True).execute()["items"][0]
+            pl = ch["contentDetails"]["relatedPlaylists"]["uploads"]
+            items = yt.playlistItems().list(part="snippet", playlistId=pl, maxResults=25).execute().get("items", [])
+            same = [i for i in items if i["snippet"]["title"].strip() == row["title_ta"].strip()[:100]]
+            if same:
+                vid = same[0]["snippet"]["resourceId"]["videoId"]
+                log.warning("Row %s is already on YouTube as %s - marking done, not uploading again", row["id"], vid)
+                update_row(row["id"], status="done", video_id=vid, fail_reason="")
+                return 0
+        except Exception as e:
+            log.warning("Duplicate check skipped: %s", str(e)[:150])
     update_row(row["id"], status="processing", fail_reason="")
     try:
         upload = args.test_upload if args.test else not args.no_upload

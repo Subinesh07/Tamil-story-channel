@@ -7,6 +7,7 @@ and again before it is voiced.
 python src/text_fix.py          # repair every pending story that has foreign letters
 """
 import json
+import os
 import logging
 import re
 import sys
@@ -87,6 +88,34 @@ def repair_lines(lines, context, complete, window=6):
     return lines, len(still)
 
 
+FORMAL = re.compile(r"(ினாள்|ினான்|ினார்|கிறாள்|கிறான்|கிறார்|கிறது|ார்கள்|உள்ளது|வில்லை|மிகவும்|"
+                    r"பின்னர்|கொண்டாள்|கொண்டான்|தவறினாள்|விட்டாள்|விட்டான்|போகிறாள்|வேண்டும்)(?=[\s,.!?…\"']|$)")
+
+
+def spoken_polish(lines, complete):
+    """Rewrite bookish lines (…கிறாள், …ினான்) into the casual spoken style of the rest."""
+    lines = list(lines)
+    idx = [i for i, s in enumerate(lines) if FORMAL.search(s)]
+    for k in range(0, len(idx), 50):
+        chunk = idx[k:k + 50]
+        numbered = "\n".join(f"{n + 1}. {lines[i]}" for n, i in enumerate(chunk))
+        try:
+            out = complete(
+                f"Rewrite these {len(chunk)} Tamil narration lines from bookish written Tamil into casual "
+                "SPOKEN Tamil Nadu Tamil (light Tanglish), like a friend telling a story: "
+                "பார்த்தாள்→பார்த்தா, போகிறான்→போறான், இல்லை→இல்ல, மிகவும்→ரொம்ப, பின்னர்→அப்புறம், "
+                "கொண்டிருந்தாள்→கிட்டு இருந்தா. Same meaning, similar length, never merge or split lines.\n"
+                f'Return JSON {{"lines": [exactly {len(chunk)} strings without numbers]}}.\n\n' + numbered,
+                want_json=True, max_tokens=8000)
+            new = [re.sub(r"^\d+\s*[.)]\s*", "", str(x)).strip().rstrip(SENTENCE_SEP) for x in out.get("lines", [])]
+            if len(new) == len(chunk) and all(new) and not any(foreign(x) for x in new):
+                for i, s in zip(chunk, new):
+                    lines[i] = s
+        except Exception as e:
+            log.warning("Spoken polish failed: %s", str(e)[:150])
+    return lines, len(idx)
+
+
 def drop_bad(lines):
     """Last resort for 1-2 stubborn lines: remove the foreign letters' words."""
     out = []
@@ -153,9 +182,20 @@ def repair_row(row, complete):
 
 def main():
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
-    from llm import complete
-    from stories import load_rows, save_rows
+    from llm import complete as _complete
+    from stories import load_rows, save_rows, split_sentences
+
+    def complete(prompt, **kw):
+        return _complete(prompt, providers=("gemini",), **kw)
     rows = load_rows()
+    spoken = [x for x in os.environ.get("SPOKEN_ROWS", "").split(",") if x.strip()]
+    for r in rows:
+        if r["id"] in spoken:
+            lines, n = spoken_polish(split_sentences(r["script_ta"]), complete)
+            r["script_ta"] = " ".join(f"{i + 1}. {s}{SENTENCE_SEP}" for i, s in enumerate(lines))
+            save_rows(rows)
+            left = sum(bool(FORMAL.search(x)) for x in lines)
+            log.info("Row %s: %d bookish lines rewritten in spoken style (%d still bookish)", r["id"], n, left)
     n = 0
     for r in rows:
         if r["status"] == "pending" and repair_row(r, complete):

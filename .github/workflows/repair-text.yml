@@ -3,6 +3,11 @@ name: Repair story text
 # Fixes stray Hindi / Malayalam / Korean ... letters in pending stories (runs only when started).
 on:
   workflow_dispatch:
+    inputs:
+      spoken_rows:
+        description: "Row ids whose bookish lines should be rewritten in spoken style (e.g. 5,7)"
+        required: false
+        default: ""
 
 permissions:
   contents: write
@@ -29,6 +34,7 @@ jobs:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           LLM_PROVIDER: ${{ vars.LLM_PROVIDER || 'gemini' }}
           LLM_ORDER: ${{ vars.LLM_ORDER }}
+          SPOKEN_ROWS: ${{ inputs.spoken_rows }}
         run: cd src && python text_fix.py
       - name: Commit
         if: always()
