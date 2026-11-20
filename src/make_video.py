@@ -88,10 +88,10 @@ def produce(row, upload=True, check_duration=True):
     story_imgs, img_warnings = generate_all(provider, [prompts[s["prompt_index"]] for s in story_scenes],
                                             work / "images", base_seed=n * 1000 + 7,
                                             cache_dir=ROOT / "cache" / "images" / f"row_{rid}")
-    reused = sum("reused previous image" in w for w in img_warnings)
-    if reused > 2:
-        from image_provider import ImageQuota
-        raise ImageQuota(f"{reused} pictures failed; not uploading a video with repeated pictures")
+    from image_provider import PictureFailed, validate_pictures
+    bad_pics = validate_pictures(story_imgs)
+    if bad_pics:
+        raise PictureFailed("picture check failed: " + "; ".join(bad_pics[:5]))
     it = iter(story_imgs)
     images = []
     for s in scenes:
@@ -298,6 +298,17 @@ def main():
                                                               "thumb_quote_ta", "thumb_hook_ta", "thumb_text")})
         except Exception as e:
             log.warning("Text repair failed: %s", str(e)[:150])
+    # a remake waits until the old broken upload has been deleted in YouTube Studio
+    old = re.search(r"replaces:([\w-]{11})", row.get("fail_reason") or "")
+    if old and not args.test and os.environ.get("YT_REFRESH_TOKEN"):
+        try:
+            from competitors import client
+            if client().videos().list(part="id", id=old.group(1)).execute().get("items"):
+                log.warning("Row %s: old video %s is still on YouTube - delete it in Studio; not uploading yet",
+                            row["id"], old.group(1))
+                return 0
+        except Exception as e:
+            log.warning("Could not check the old video: %s", str(e)[:120])
     # never upload the same story twice (e.g. if a previous run uploaded but could not save its status)
     if not args.test and not args.no_upload and os.environ.get("YT_REFRESH_TOKEN"):
         try:
@@ -320,7 +331,7 @@ def main():
         video_id = produce(row, upload=upload,
                            check_duration=not args.test)
     except Exception as e:
-        if type(e).__name__ == "ImageQuota":
+        if type(e).__name__ in ("ImageQuota", "PictureFailed"):
             log.warning("Paused: %s. Pictures made so far are saved; the next run continues.", e)
             update_row(row["id"], status="pending", fail_reason="waiting for free picture allowance")
             return 0

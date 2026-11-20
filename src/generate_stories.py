@@ -496,6 +496,9 @@ def write_story(rows, doomsday=False, redo=None):
     gta = S.GENRES[genre]["ta"]
     suffix = f" | {ser['title_ta']} - பகுதி {part}"
     title = plan["title_ta"].strip()
+    if genre == "doomsday":   # people search "doomsday": the word leads the title and the thumbnail
+        suffix = f" | டூம்ஸ்டே பகுதி {part}"
+        title = "DOOMSDAY 😱 " + title
     if len(title) + len(suffix) > 100:   # cut at a word boundary, never mid-word
         title = title[:100 - len(suffix) - 1].rsplit(" ", 1)[0].rstrip(" ,:-") + "…"
     title += suffix
@@ -512,8 +515,10 @@ def write_story(rows, doomsday=False, redo=None):
            "status": "pending", "video_id": "", "fail_reason": "",
            "description_ta": desc, "series_id": ser["id"], "part": str(part),
            "thumb_quote_ta": plan.get("thumb_line1_ta", ""), "thumb_hook_ta": plan.get("thumb_line2_ta", ""),
-           "thumb_text": json.dumps({k: plan.get(f"thumb_{k}_ta", "") for k in
-                                     ("line1", "line2", "ribbon", "title", "tagline")}, ensure_ascii=False),
+           "thumb_text": json.dumps({**{k: plan.get(f"thumb_{k}_ta", "") for k in
+                                        ("line1", "line2", "ribbon", "title", "tagline")},
+                                     **({"title": "DOOMSDAY"} if genre == "doomsday" else {})},
+                                    ensure_ascii=False),
            "thumb_prompt": thumb_prompt(plan)}
     from text_fix import foreign, repair_row
     repair_row(row, write)   # fix the few stray foreign-letter words before saving (Gemini only)

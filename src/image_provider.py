@@ -11,6 +11,7 @@ import logging
 import os
 import time
 import urllib.parse
+from pathlib import Path
 
 from PIL import Image, ImageDraw
 
@@ -33,6 +34,18 @@ def to_png_1280x720(raw: bytes) -> bytes:
 
 class ImageQuota(Exception):
     """The free picture allowance is used up (never pay: wait for the daily reset)."""
+
+
+class PictureFailed(ImageQuota):
+    """A picture failed after every retry: the video waits for the next run."""
+
+
+def is_placeholder(data, prompt):
+    """True if these bytes are the offline test pattern (grid + yellow circle) for this prompt."""
+    try:
+        return data == PlaceholderProvider().generate(prompt)
+    except Exception:
+        return False
 
 
 class ImageProvider:
@@ -210,21 +223,24 @@ def generate_all(provider, prompts, out_dir, check=True, base_seed=1000, cache_d
 
     Each image goes through the automatic checker (image_check.py). A rejected image is
     regenerated with a new seed (up to IMAGE_RETRIES more times); if all attempts are rejected
-    the last one is kept with a warning. A scene that fails to generate at all reuses the
-    previous image.
+    the last one is kept with a warning.
+    A scene that cannot be generated at all STOPS the video (PictureFailed): no test pattern and
+    no repeated picture is ever put into a real video. Pictures made so far stay cached.
     """
     from image_check import check as vision_check
     out_dir.mkdir(parents=True, exist_ok=True)
-    paths, warnings, prev = [], [], None
+    paths, warnings = [], []
     if cache_dir:
         cache_dir.mkdir(parents=True, exist_ok=True)
     for i, prompt in enumerate(prompts):
         path = out_dir / f"scene_{i:02d}.png"
         key = hashlib.md5(prompt.encode()).hexdigest()[:12]
         cached = cache_dir / f"{i:02d}_{key}.png" if cache_dir else None
+        if cached and cached.exists() and is_placeholder(cached.read_bytes(), prompt):
+            log.warning("Scene %d: cached picture is a test pattern - discarding it", i)
+            cached.unlink()
         if cached and cached.exists():
             path.write_bytes(cached.read_bytes())
-            prev = cached.read_bytes()
             paths.append(path)
             continue
         data, reason = None, ""
@@ -252,13 +268,37 @@ def generate_all(provider, prompts, out_dir, check=True, base_seed=1000, cache_d
                 log.warning(msg)
                 warnings.append(msg)
         if data is None:
-            data = prev if prev is not None else PlaceholderProvider().generate(prompt)
-            msg = f"Scene {i}: image failed, reused previous image"
-            log.warning(msg)
-            warnings.append(msg)
+            if isinstance(provider, PlaceholderProvider):
+                data = provider.generate(prompt)
+            else:
+                raise PictureFailed(f"scene {i}: picture could not be made; pausing instead of "
+                                    "using a test pattern or a repeated picture")
         path.write_bytes(data)
-        if cached and data is not prev:
+        if cached and not isinstance(provider, PlaceholderProvider):
             cached.write_bytes(data)
-        prev = data
         paths.append(path)
     return paths, warnings
+
+
+def validate_pictures(paths):
+    """Final check before rendering: every story picture must be a real, different picture.
+    Catches test patterns, blank/flat images and the same picture used twice."""
+    import hashlib as _h
+    from PIL import ImageStat
+    problems, seen = [], {}
+    for i, p in enumerate(paths):
+        data = Path(p).read_bytes()
+        h = _h.md5(data).hexdigest()
+        if h in seen:
+            problems.append(f"picture {i} is the same as picture {seen[h]}")
+        seen[h] = i
+        img = Image.open(io.BytesIO(data)).convert("L").resize((160, 90))
+        if max(ImageStat.Stat(img).stddev) < 5:
+            problems.append(f"picture {i} is almost blank")
+        # test-pattern signature: thin white lines every 80 px on a flat colour
+        big = Image.open(io.BytesIO(data)).convert("RGB")
+        if big.size == (WIDTH, HEIGHT):
+            col = [big.getpixel((x, 40)) for x in range(0, WIDTH, 80)]
+            if all(c == (255, 255, 255) for c in col):
+                problems.append(f"picture {i} looks like the test pattern")
+    return problems

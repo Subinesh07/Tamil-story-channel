@@ -42,9 +42,21 @@ def build_metadata(row):
     return {
         "snippet": {"title": title, "description": description, "categoryId": YT_CATEGORY_ID,
                     "defaultLanguage": "ta", "defaultAudioLanguage": "ta",
-                    "tags": ["Tamil story", "Tamil family story", "Tamil emotional story"]},
+                    "tags": GENRE_TAGS.get(row.get("genre"), []) + ["Tamil story", "Tamil kathaigal",
+                                                                     "Nila Kathaigal"]},
         "status": status,
     }
+
+
+GENRE_TAGS = {
+    "doomsday": ["doomsday", "doomsday tamil", "doomsday tamil story", "end of the world tamil",
+                 "solar storm story", "tamil sci-fi story"],
+    "horror": ["tamil horror story", "tamil ghost story", "pei kathai"],
+    "adventure": ["tamil adventure story", "treasure story tamil"],
+    "family serial": ["tamil family story", "tamil serial story", "kudumba kathai"],
+    "family moral": ["tamil moral story", "neethi kathaigal"],
+    "real lives": ["tamil biography", "real life story tamil"],
+}
 
 
 def upload(video_path, row):
