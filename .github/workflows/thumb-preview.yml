@@ -27,6 +27,8 @@ jobs:
       - name: Make previews
         env:
           IMAGE_API_KEY: ${{ secrets.IMAGE_API_KEY }}
+          CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
           SAMPLE: ${{ inputs.sample }}
         run: cd src && python thumb_preview.py
       - name: Save previews

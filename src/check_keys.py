@@ -65,6 +65,20 @@ def main():
            f"{ch['statistics'].get('videoCount', '?')} videos)")
     except Exception as e:
         bad("YouTube", str(e)[:200])
+    # Cloudflare (free pictures)
+    a, t = os.environ.get("CF_ACCOUNT_ID", "").strip(), os.environ.get("CF_API_TOKEN", "").strip()
+    if a and t:
+        try:
+            import requests
+            r = requests.get(f"https://api.cloudflare.com/client/v4/accounts/{a}/ai/models/search?per_page=1",
+                             headers={"Authorization": f"Bearer {t}"}, timeout=30)
+            (ok if r.status_code == 200 else bad)("Cloudflare pictures",
+                                                  "works (free 10,000 units/day)" if r.status_code == 200
+                                                  else f"HTTP {r.status_code}: check the token has Workers AI permission")
+        except Exception as e:
+            bad("Cloudflare pictures", str(e)[:120])
+    else:
+        bad("Cloudflare pictures", "CF_ACCOUNT_ID / CF_API_TOKEN not set")
     # Pollinations
     k = os.environ.get("IMAGE_API_KEY", "").strip()
     (ok if k else bad)("Pollinations", "IMAGE_API_KEY set" if k else "IMAGE_API_KEY not set")

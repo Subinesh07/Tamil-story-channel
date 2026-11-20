@@ -1,6 +1,9 @@
 """Phase 3: pluggable image providers.  Every provider implements generate(prompt) -> PNG bytes.
 
-Pick one with the IMAGE_PROVIDER env var:  pollinations (default) | placeholder
+Pick one with the IMAGE_PROVIDER env var:  auto (default) | cloudflare | pollinations | placeholder
+auto = Cloudflare Workers AI (free 10,000 units a day, ~150 pictures) first, Pollinations as backup.
+When every free allowance is used up, ImageQuota is raised and the video waits for the next run
+instead of repeating pictures.
 """
 import hashlib
 import io
@@ -26,6 +29,10 @@ def to_png_1280x720(raw: bytes) -> bytes:
     buf = io.BytesIO()
     img.save(buf, "PNG", optimize=True)
     return buf.getvalue()
+
+
+class ImageQuota(Exception):
+    """The free picture allowance is used up (never pay: wait for the daily reset)."""
 
 
 class ImageProvider:
@@ -54,11 +61,75 @@ class PollinationsProvider(ImageProvider):
         headers = {"Authorization": f"Bearer {self.api_key}"} if self.api_key else {}
         url = self.URL.format(prompt=urllib.parse.quote(prompt, safe=""))
         r = self.session.get(url, params=params, headers=headers, timeout=180)
+        if r.status_code in (402, 429) and ("balance" in r.text.lower() or "limit" in r.text.lower()):
+            raise ImageQuota("Pollinations free allowance used up")
         if r.status_code != 200 or not r.headers.get("content-type", "").startswith("image"):
             # never echo headers/URL with the key
             raise RuntimeError(f"Pollinations HTTP {r.status_code}: {r.text[:200]}")
         time.sleep(self.delay)
         return to_png_1280x720(r.content)
+
+
+class CloudflareProvider(ImageProvider):
+    """Cloudflare Workers AI, FLUX.1 schnell. Free plan: 10,000 neurons a day (~57 per picture),
+    requests simply fail above that, so it can never cost money. Secrets: CF_ACCOUNT_ID, CF_API_TOKEN."""
+    name = "cloudflare"
+    MODEL = "@cf/black-forest-labs/flux-1-schnell"
+
+    def __init__(self, seed=None):
+        import requests
+        self.session = requests.Session()
+        self.account = os.environ.get("CF_ACCOUNT_ID", "").strip()
+        self.token = os.environ.get("CF_API_TOKEN", "").strip()
+        self.seed = seed
+
+    def available(self):
+        return bool(self.account and self.token)
+
+    def generate(self, prompt, seed=None):
+        import base64
+        url = f"https://api.cloudflare.com/client/v4/accounts/{self.account}/ai/run/{self.MODEL}"
+        body = {"prompt": prompt[:2000], "steps": 4}
+        s = seed if seed is not None else self.seed
+        if s is not None:
+            body["seed"] = int(s)
+        r = self.session.post(url, json=body, headers={"Authorization": f"Bearer {self.token}"}, timeout=120)
+        text = r.text[:300]
+        if r.status_code == 429 or "4006" in text or "allocation" in text.lower() or "neurons" in text.lower():
+            raise ImageQuota("Cloudflare daily free allowance used up")
+        if r.status_code != 200:
+            raise RuntimeError(f"Cloudflare HTTP {r.status_code}: {text}")
+        img = (r.json().get("result") or {}).get("image")
+        if not img:
+            raise RuntimeError("Cloudflare returned no image")
+        return to_png_1280x720(base64.b64decode(img))
+
+
+class ChainProvider(ImageProvider):
+    """Try each free provider in order; one whose allowance is used up is skipped for the rest of the run."""
+    name = "auto"
+
+    def __init__(self, providers):
+        self.providers = providers
+        self.spent = set()
+
+    def generate(self, prompt, seed=None):
+        last = None
+        for p in self.providers:
+            if p.name in self.spent:
+                continue
+            try:
+                return p.generate(prompt, seed=seed)
+            except ImageQuota as e:
+                log.warning("%s", e)
+                self.spent.add(p.name)
+                last = e
+            except Exception as e:
+                last = e
+                log.warning("%s picture failed: %s", p.name, str(e)[:150])
+        if all(p.name in self.spent for p in self.providers):
+            raise ImageQuota("all free picture allowances are used up for today")
+        raise RuntimeError(str(last)[:200] if last else "no picture provider")
 
 
 class PlaceholderProvider(ImageProvider):
@@ -81,11 +152,23 @@ class PlaceholderProvider(ImageProvider):
 
 
 def get_provider(seed=None) -> ImageProvider:
-    name = os.environ.get("IMAGE_PROVIDER", "pollinations").lower()
+    name = os.environ.get("IMAGE_PROVIDER", "auto").lower()
     if name == "placeholder":
         return PlaceholderProvider()
     if name == "pollinations":
         return PollinationsProvider(seed=seed)
+    if name == "cloudflare":
+        return CloudflareProvider(seed=seed)
+    if name == "auto":
+        chain = []
+        cf = CloudflareProvider(seed=seed)
+        if cf.available():
+            chain.append(cf)
+        if os.environ.get("IMAGE_API_KEY"):
+            chain.append(PollinationsProvider(seed=seed))
+        if not chain:
+            raise SystemExit("No picture service set: add CF_ACCOUNT_ID + CF_API_TOKEN (or IMAGE_API_KEY)")
+        return ChainProvider(chain)
     raise SystemExit(f"Unknown IMAGE_PROVIDER '{name}'")
 
 
@@ -125,7 +208,7 @@ def make_outro_card(png_path, out_path):
     return out_path
 
 
-def generate_all(provider, prompts, out_dir, check=True, base_seed=1000):
+def generate_all(provider, prompts, out_dir, check=True, base_seed=1000, cache_dir=None):
     """Generate every scene image.
 
     Each image goes through the automatic checker (image_check.py). A rejected image is
@@ -136,12 +219,23 @@ def generate_all(provider, prompts, out_dir, check=True, base_seed=1000):
     from image_check import check as vision_check
     out_dir.mkdir(parents=True, exist_ok=True)
     paths, warnings, prev = [], [], None
+    if cache_dir:
+        cache_dir.mkdir(parents=True, exist_ok=True)
     for i, prompt in enumerate(prompts):
         path = out_dir / f"scene_{i:02d}.png"
+        key = hashlib.md5(prompt.encode()).hexdigest()[:12]
+        cached = cache_dir / f"{i:02d}_{key}.png" if cache_dir else None
+        if cached and cached.exists():
+            path.write_bytes(cached.read_bytes())
+            prev = cached.read_bytes()
+            paths.append(path)
+            continue
         data, reason = None, ""
         for attempt in range(1 + IMAGE_RETRIES):
             try:
                 candidate = provider.generate(prompt, seed=base_seed + i * 10 + attempt)
+            except ImageQuota:
+                raise   # pictures made so far are cached; the next run continues from here
             except Exception as e:
                 log.warning("Image %d attempt %d failed: %s", i, attempt + 1, e)
                 time.sleep(5 * (attempt + 1))
@@ -166,6 +260,8 @@ def generate_all(provider, prompts, out_dir, check=True, base_seed=1000):
             log.warning(msg)
             warnings.append(msg)
         path.write_bytes(data)
+        if cached and data is not prev:
+            cached.write_bytes(data)
         prev = data
         paths.append(path)
     return paths, warnings

@@ -13,7 +13,7 @@ import traceback
 
 import re
 
-from config import (CHANNEL_NAME_EN, CHANNEL_NAME_TA, IMAGE_STYLE, INTRO_LINES, OUTPUT_DIR,
+from config import (ROOT, CHANNEL_NAME_EN, CHANNEL_NAME_TA, IMAGE_STYLE, INTRO_LINES, OUTPUT_DIR,
                     OUTRO_LINES, TTS_ENGINE, WORK_DIR)
 from ffutil import run
 from image_provider import generate_all, get_provider, make_card, make_outro_card
@@ -83,7 +83,12 @@ def produce(row, upload=True, check_duration=True):
     story_scenes = [s for s in scenes if s["kind"] == "story"]
     provider = get_provider()
     story_imgs, img_warnings = generate_all(provider, [prompts[s["prompt_index"]] for s in story_scenes],
-                                            work / "images", base_seed=n * 1000 + 7)
+                                            work / "images", base_seed=n * 1000 + 7,
+                                            cache_dir=ROOT / "cache" / "images" / f"row_{rid}")
+    reused = sum("reused previous image" in w for w in img_warnings)
+    if reused > 2:
+        from image_provider import ImageQuota
+        raise ImageQuota(f"{reused} pictures failed; not uploading a video with repeated pictures")
     it = iter(story_imgs)
     images = []
     for s in scenes:
@@ -290,6 +295,10 @@ def main():
         video_id = produce(row, upload=upload,
                            check_duration=not args.test)
     except Exception as e:
+        if type(e).__name__ == "ImageQuota":
+            log.warning("Paused: %s. Pictures made so far are saved; the next run continues.", e)
+            update_row(row["id"], status="pending", fail_reason="waiting for free picture allowance")
+            return 0
         if type(e).__name__ == "GeminiQuota":
             log.warning("Paused: %s. Voiced parts are saved; the next run continues with Leda.", e)
             update_row(row["id"], status="pending", fail_reason="waiting for Gemini voice daily limit")
