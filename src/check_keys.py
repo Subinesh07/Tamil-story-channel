@@ -48,10 +48,16 @@ def main():
                 "contentDetails"]["relatedPlaylists"]["uploads"]
             ids = [i["contentDetails"]["videoId"] for i in yt.playlistItems().list(
                 part="contentDetails", playlistId=pl, maxResults=10).execute().get("items", [])]
-            for v in yt.videos().list(part="snippet,status", id=",".join(ids)).execute().get("items", []):
-                st = v["status"]
+            ch = yt.channels().list(part="statistics", mine=True).execute()["items"][0]["statistics"]
+            print(f"📊 CHANNEL | subscribers {ch.get('subscriberCount')} | views {ch.get('viewCount')} | "
+                  f"videos {ch.get('videoCount')}")
+            for v in yt.videos().list(part="snippet,status,statistics,contentDetails",
+                                      id=",".join(ids)).execute().get("items", []):
+                st, stat = v["status"], v.get("statistics", {})
                 when = st.get("publishAt", "")[:16] or v["snippet"]["publishedAt"][:16]
-                print(f"📺 {v['id']} | {st['privacyStatus']} | {when} | {v['snippet']['title'][:70]}")
+                print(f"📺 {v['id']} | {st['privacyStatus']} | {when} | views {stat.get('viewCount', 0)} | "
+                      f"likes {stat.get('likeCount', 0)} | comments {stat.get('commentCount', 0)} | "
+                      f"{v['contentDetails']['duration']} | {v['snippet']['title'][:60]}")
         except Exception as e:
             bad("Upload list", str(e)[:120])
     # Is the broken early Doomsday upload deleted?
