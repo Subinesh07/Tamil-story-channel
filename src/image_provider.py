@@ -230,7 +230,7 @@ def generate_all(provider, prompts, out_dir, check=True, base_seed=1000, cache_d
     from image_check import check as vision_check
     out_dir.mkdir(parents=True, exist_ok=True)
     paths, warnings = [], []
-    used = set()
+    used, loaded = set(), set()
     if cache_dir:
         cache_dir.mkdir(parents=True, exist_ok=True)
     for i, prompt in enumerate(prompts):
@@ -264,7 +264,11 @@ def generate_all(provider, prompts, out_dir, check=True, base_seed=1000, cache_d
         if cached and cached.exists() and is_placeholder(cached.read_bytes(), prompt):
             log.warning("Scene %d: cached picture is a test pattern - discarding it", i)
             cached.unlink()
+        if cached and cached.exists() and hashlib.md5(cached.read_bytes()).hexdigest() in loaded:
+            log.warning("Scene %d: saved picture is a copy of an earlier scene - making a new one", i)
+            cached.unlink()
         if cached and cached.exists():
+            loaded.add(hashlib.md5(cached.read_bytes()).hexdigest())
             path.write_bytes(cached.read_bytes())
             paths.append(path)
             continue
