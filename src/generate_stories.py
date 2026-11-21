@@ -576,6 +576,11 @@ def write_story(rows, doomsday=False, redo=None):
     gta = S.GENRES[genre]["ta"]
     suffix = f" | {ser['title_ta']} - பகுதி {part}"
     title = plan["title_ta"].strip()
+    # the series name and part number go in the suffix only - never twice in a title
+    for name in {ser.get("title_ta", ""), ser.get("title_ta", "").split(":")[0], ser.get("title_tag", ""), "டூம்ஸ்டே"}:
+        if name:
+            title = re.sub(r"^\s*" + re.escape(name) + r"\s*(?:Part|பாகம்|பகுதி)?\s*\d*\s*[:：|-]?\s*", "", title)
+    title = re.sub(r"^\s*(?:Part|பாகம்|பகுதி)\s*\d+\s*[:：|-]\s*", "", title).strip() or plan["title_ta"].strip()
     if genre == "doomsday":   # people search "doomsday": the word leads the title and the thumbnail
         tag = ser.get("title_tag") or "டூம்ஸ்டே"
         suffix = f" | {tag} பகுதி {part}"
