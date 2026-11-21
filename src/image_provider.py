@@ -277,6 +277,7 @@ def generate_all(provider, prompts, out_dir, check=True, base_seed=1000, cache_d
             try:
                 candidate = provider.generate(prompt, seed=base_seed + i * 10 + attempt)
             except ImageQuota:
+                log.warning("Scene %02d still needs a picture. Prompt: %s", i, prompt[:400])
                 raise   # pictures made so far are cached; the next run continues from here
             except Exception as e:
                 log.warning("Image %d attempt %d failed: %s", i, attempt + 1, e)
