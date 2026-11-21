@@ -236,6 +236,25 @@ def generate_all(provider, prompts, out_dir, check=True, base_seed=1000, cache_d
         path = out_dir / f"scene_{i:02d}.png"
         key = hashlib.md5(prompt.encode()).hexdigest()[:12]
         cached = cache_dir / f"{i:02d}_{key}.png" if cache_dir else None
+        # a picture made earlier with the previous style text is still the same scene: reuse it
+        from config import IMAGE_STYLE, OLD_IMAGE_STYLE
+        if cached and not cached.exists() and IMAGE_STYLE in prompt:
+            legacy = hashlib.md5(prompt.replace(IMAGE_STYLE, OLD_IMAGE_STYLE).encode()).hexdigest()[:12]
+            if (cache_dir / f"{i:02d}_{legacy}.png").exists():
+                cached = cache_dir / f"{i:02d}_{legacy}.png"
+        # a hand-made picture (e.g. from ChatGPT) in assets/overrides/row_<id>/NN.png|jpg wins
+        if cache_dir:
+            for ext in ("png", "jpg", "jpeg", "webp"):
+                o = Path(__file__).resolve().parent.parent / "assets" / "overrides" / cache_dir.name / f"{i:02d}.{ext}"
+                if o.exists():
+                    path.write_bytes(to_png_1280x720(o.read_bytes()))
+                    paths.append(path)
+                    log.info("Scene %d: using the hand-made picture %s", i, o.name)
+                    break
+            else:
+                o = None
+            if o is not None:
+                continue
         if cached and cached.exists() and is_placeholder(cached.read_bytes(), prompt):
             log.warning("Scene %d: cached picture is a test pattern - discarding it", i)
             cached.unlink()
