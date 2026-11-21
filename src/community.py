@@ -19,8 +19,14 @@ FALLBACK_POLLS = [
 
 
 def draft(row, video_id):
-    title = row["title_ta"]
+    title = row["title_ta"].split(" | ")[0]
     link = f"https://youtu.be/{video_id}" if video_id else "(link)"
+    from datetime import datetime
+    try:
+        h = datetime.fromisoformat(row["publish_at"]).hour
+        when = f"{'காலை' if h < 12 else 'மதியம்' if h < 16 else 'சாயங்காலம்'} {h if h <= 12 else h - 12} மணிக்கு"
+    except (KeyError, ValueError):
+        when = "இன்னைக்கு"
     post = poll_q = None
     options = []
     try:
@@ -29,7 +35,7 @@ def draft(row, video_id):
             "Write a YouTube community post in natural spoken Tamil for a story channel called "
             f"'{CHANNEL_NAME_TA}'. Today's story: '{title}' ({row['title_en']}). "
             f"Teaser: {row.get('description_ta', '')[:300]}\n"
-            "Return JSON: {\"post\": \"2-3 short warm lines inviting people to watch tonight at 7 PM, "
+            f"Return JSON: {{\"post\": \"2-3 short warm lines inviting people to watch today ({when}), "
             "no spoilers, 1-2 emojis\", \"poll_question\": \"a fun question about the story theme\", "
             "\"poll_options\": [\"2 to 4 short options\"]}",
             want_json=True, max_tokens=1500, rounds=1)
@@ -37,11 +43,16 @@ def draft(row, video_id):
     except Exception as e:  # AI busy: use a rotating template
         log.warning("Community post AI draft failed (%s); using template", str(e)[:120])
     if not post:
-        post = (f"🌙 இன்னைக்கு சாயங்காலம் 7 மணிக்கு புது கதை: \"{title}\"\n"
+        post = (f"🌙 இன்னைக்கு {when} புது கதை: \"{title}\"\n"
                 "குடும்பத்தோட உட்கார்ந்து கேளுங்க. உங்க கருத்தை கமெண்ட்ல சொல்லுங்க! ❤️")
     if not poll_q:
         poll_q, options = random.Random(row["id"]).choice(FALLBACK_POLLS)
     opts = "\n".join(f"- {o}" for o in options)
+    try:
+        import status as ST
+        ST.community(row["id"], f"{post}\n\n▶️ {link}", poll_q, list(options))
+    except Exception:
+        pass
     return f"""## Today's community post — {title}
 
 Paste this in **YouTube Studio → Create → Post** (or the YouTube app → **+** → **Post**).

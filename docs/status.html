@@ -35,6 +35,11 @@
   .ev time { color:var(--dim); margin-right:6px; }
   .pill { font-size:12px; padding:2px 7px; border-radius:20px; background:#2b2d5c; }
   .scroll { overflow-x:auto; }
+  .cm { border:1px solid var(--line); border-radius:10px; padding:10px; margin:10px 0; }
+  .cm pre { white-space:pre-wrap; font-family:inherit; background:#22234a; padding:8px; border-radius:8px; margin:6px 0; font-size:14px; }
+  .cm label { margin-right:14px; font-size:14px; }
+  .copy { font-size:12px; padding:4px 8px; border-radius:8px; background:#2b2d5c; color:var(--text); border:1px solid var(--line); cursor:pointer; }
+  .mk { font-size:12px; padding:3px 7px; border-radius:8px; background:#3a2b5c; color:#fff; text-decoration:none; white-space:nowrap; }
   .legend { color:var(--dim); font-size:12px; margin-top:6px; }
 </style>
 </head>
@@ -60,6 +65,11 @@
 
   <div class="card"><h2>Videos</h2><div class="scroll"><table id="videos"></table></div>
     <div class="legend">✅ done · ⏳ waiting (continues by itself) · ❌ failed · – not started yet (videos are made up to 3 days before their slot)</div></div>
+
+  <div class="card"><h2>Post &amp; poll checklist</h2>
+    <div class="legend" style="margin-bottom:8px">For each new video: copy the post and the poll, open YouTube, post them, then tick ✅ here.
+      <a target="_blank" href="https://studio.youtube.com">Open YouTube Studio</a> → <b>Create → Post</b> (YouTube app: <b>+ → Post</b>; choose <b>Poll</b> for the poll).</div>
+    <div id="community"></div></div>
 
   <div class="card"><h2>Free limits</h2><div class="scroll"><table id="limits"></table></div>
     <div class="legend">When a free service refuses, the video waits and continues after the service works again. Nothing is ever paid.</div></div>
@@ -130,7 +140,10 @@ async function main() {
     const failed = r.status === "failed";
     const s = (k) => done ? "✅" : icon(st[k] && st[k].state);
     const yt = done ? (r.video_id ? `<a target="_blank" href="https://youtu.be/${r.video_id}">✅</a>` : "✅") : failed ? "❌" : "–";
-    const sh = (r.fail_reason || "").includes("short:") || (st.short && st.short.state === "done") ? "✅" : done ? "–" : "–";
+    const sid = ((r.fail_reason || "").match(/short:([\w-]{11})/) || [])[1];
+    const sh = sid ? `<a target="_blank" href="https://youtube.com/shorts/${sid}">✅</a>`
+             : (st.short && st.short.state === "done") ? "✅"
+             : done ? `<a class="mk" target="_blank" title="Run workflow → type ${r.id} in 'short_for'" href="${ACT}produce.yml">▶️ Make Short<br>(id ${r.id})</a>` : "–";
     const title = (r.title_ta || r.title_en || "").split(" | ")[0];
     let note = "";
     if (!done && r.fail_reason) note = `<div class="fix">${esc(r.fail_reason).slice(0, 120)}</div>`;
@@ -186,6 +199,36 @@ async function main() {
   document.getElementById("events").innerHTML = (prog.events || []).slice(0, 25).map(e =>
     `<div class="ev"><time>${ist(e.at)}</time><span class="${e.level === "error" ? "bad" : e.level === "warn" ? "warn" : ""}">${esc(e.msg)}</span></div>`
   ).join("") || "<div class='fix'>Nothing recorded yet.</div>";
+
+  // ---- post & poll checklist ----
+  const FALLBACK = [["இன்னைக்கு கதையில உங்களுக்கு பிடிச்ச பகுதி எது?", ["ஆரம்பம்", "திருப்புமுனை", "முடிவு", "எல்லாமே!"]],
+                    ["அடுத்த கதை எந்த மாதிரி இருக்கணும்?", ["குடும்ப கதை", "திகில் கதை", "சாகச கதை", "உண்மை கதை"]],
+                    ["நீங்க எப்போ கதை கேட்பீங்க?", ["சாயங்காலம்", "தூங்கும் முன்", "பயணத்துல", "வேலை செய்யும்போது"]]];
+  const cmRows = rows.filter(r => r.publish_at && new Date(r.publish_at) > now - 2 * 24 * H && new Date(r.publish_at) < now + 24 * H);
+  let ch = "";
+  for (const r of cmRows) {
+    const c = (prog.community || {})[r.id];
+    const title = (r.title_ta || "").split(" | ")[0];
+    const link = r.video_id ? `https://youtu.be/${r.video_id}` : "(link after it is uploaded)";
+    const post = c ? c.post : `🌙 புது கதை வந்தாச்சு: "${title}"\nகுடும்பத்தோட உட்கார்ந்து பாருங்க, உங்க கருத்தை கமெண்ட்ல சொல்லுங்க! ❤️\n\n▶️ ${link}`;
+    const fb = FALLBACK[Number(r.id) % FALLBACK.length];
+    const poll = c ? `${c.poll}\n` + c.options.map(o => "• " + o).join("\n") : `${fb[0]}\n` + fb[1].map(o => "• " + o).join("\n");
+    const key = (k) => `nk-${r.id}-${k}`;
+    const chk = (k) => { try { return localStorage.getItem(key(k)) ? "checked" : ""; } catch (e) { return ""; } };
+    ch += `<div class="cm"><b>${ist(r.publish_at)} – ${esc(title)}</b>
+      <div>Post <button class="copy" data-t="${encodeURIComponent(post)}">Copy</button></div><pre>${esc(post)}</pre>
+      <div>Poll <button class="copy" data-t="${encodeURIComponent(poll)}">Copy</button></div><pre>${esc(poll)}</pre>
+      <label><input type="checkbox" data-k="${key("post")}" ${chk("post")}> Post done ✅</label>
+      <label><input type="checkbox" data-k="${key("poll")}" ${chk("poll")}> Poll done ✅</label>
+      <label><input type="checkbox" data-k="${key("pin")}" ${chk("pin")}> Pinned comment ✅</label>
+      <label><input type="checkbox" data-k="${key("share")}" ${chk("share")}> Shared ✅</label></div>`;
+  }
+  const cdiv = document.getElementById("community");
+  cdiv.innerHTML = ch || "<div class='fix'>No videos in the last 2 days.</div>";
+  cdiv.querySelectorAll(".copy").forEach(b => b.onclick = () => {
+    navigator.clipboard.writeText(decodeURIComponent(b.dataset.t)); b.textContent = "Copied ✓"; });
+  cdiv.querySelectorAll("input[type=checkbox]").forEach(x => x.onchange = () => {
+    try { x.checked ? localStorage.setItem(x.dataset.k, "1") : localStorage.removeItem(x.dataset.k); } catch (e) {} });
 
   // ---- health ----
   const bad = issues.filter(i => i[0] === "bad").length;

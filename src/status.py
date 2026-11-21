@@ -68,3 +68,13 @@ def limit(service, ok, note=""):
         _save(d)
     except Exception:
         pass
+
+
+def community(row_id, post, poll_q, options):
+    """Post and poll texts for the status page checklist."""
+    try:
+        d = _load()
+        d.setdefault("community", {})[str(row_id)] = {"post": post, "poll": poll_q, "options": options, "at": _now()}
+        _save(d)
+    except Exception:
+        pass
