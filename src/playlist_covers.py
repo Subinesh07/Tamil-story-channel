@@ -14,7 +14,7 @@ from thumb_v2 import RED, WHITE, YELLOW, _fit_line, badge, heavy
 COVERS = [
     {"name": "doomsday", "rows": ["7"], "genre": "doomsday", "pick": 0,
      "texts": {"title": "டூம்ஸ்டே", "tagline": "சனி, ஞாயிறு காலை 11 மணிக்கு புதிய பகுதி!"}},
-    {"name": "nizhal_nijamanal", "rows": ["5", "11"], "genre": "family serial", "pick": "middle",
+    {"name": "nizhal_nijamanal", "rows": ["5", "11"], "genre": "family serial", "pick": "middle", "variant": 2,
      "texts": {"line1": "நிழல் நிஜமானால்", "line2": "அப்பா மறைச்ச உயில்… அடுத்து என்ன?",
                "ribbon": "குடும்ப தொடர் கதை"}},
 ]
@@ -66,7 +66,7 @@ def main():
             path = doomsday_cover(bg, c["texts"], out / f"{c['name']}.jpg")
             print(f"made {path} from {bg.name}")
             continue
-        path, layout = thumb_v2.make(bg, c["texts"], out / f"{c['name']}.jpg", c["genre"], 0, "")
+        path, layout = thumb_v2.make(bg, c["texts"], out / f"{c['name']}.jpg", c["genre"], c.get("variant", 0), "")
         print(f"made {path} ({layout}) from {bg.name}")
     return 0
 
