@@ -222,6 +222,8 @@ def synthesize(sentences, cache_key):
         tries = 0
         while not checked.exists():
           if not wav.exists():
+            if os.environ.get("NO_NEW_ASSETS"):
+                raise GeminiQuota("Short-only run: the saved voice is missing - not voicing again")
             while True:
                 try:
                     model = model or tts_model(key)

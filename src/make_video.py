@@ -315,7 +315,12 @@ def main():
         if "short:" in (row.get("fail_reason") or ""):
             log.info("Row %s already has a Short", row["id"])
             return 0
-        produce(row, upload=False, check_duration=False)
+        os.environ["NO_NEW_ASSETS"] = "1"   # a Short of an old video must cost no voice or picture credits
+        try:
+            produce(row, upload=False, check_duration=False)
+        except Exception as e:
+            log.warning("Short for row %s skipped (saved voice/pictures not available): %s", row["id"], str(e)[:150])
+            return 0
         make_and_upload_short(row, row["video_id"])
         return 0
     if not args.row_id and not any(r["status"] == "pending" for r in rows):

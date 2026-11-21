@@ -272,6 +272,8 @@ def generate_all(provider, prompts, out_dir, check=True, base_seed=1000, cache_d
             path.write_bytes(cached.read_bytes())
             paths.append(path)
             continue
+        if os.environ.get("NO_NEW_ASSETS"):
+            raise ImageQuota(f"Short-only run: saved picture {i} is missing - not making new pictures")
         data, reason = None, ""
         for attempt in range(1 + IMAGE_RETRIES):
             try:
