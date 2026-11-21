@@ -68,13 +68,39 @@
   },
   "6": {
    "voice": {
-    "state": "waiting",
-    "note": "voice check could not run (gemini-3.5-flash HTTP 503); will retry next run",
-    "at": "2026-11-21T17:19:09+00:00"
+    "state": "done",
+    "note": "Leda voice ready, listening check and click check passed",
+    "at": "2026-11-21T18:15:01+00:00"
+   },
+   "pictures": {
+    "state": "done",
+    "note": "48 pictures, all real and different",
+    "at": "2026-11-21T18:18:45+00:00"
+   },
+   "video": {
+    "state": "done",
+    "note": "19.9 min, quality check passed",
+    "at": "2026-11-21T18:27:22+00:00"
+   },
+   "short": {
+    "state": "done",
+    "note": "Short kTW5TclyCUM scheduled 30 min after the video",
+    "at": "2026-11-21T18:28:00+00:00"
+   },
+   "upload": {
+    "state": "done",
+    "note": "https://youtu.be/cQ3rhliRRpU scheduled 2026-11-22T17:00",
+    "at": "2026-11-21T18:42:11+00:00"
    }
   }
  },
  "events": [
+  {
+   "at": "2026-11-21T18:42:11+00:00",
+   "row": "6",
+   "level": "info",
+   "msg": "Video scheduled on YouTube (cQ3rhliRRpU)"
+  },
   {
    "at": "2026-11-21T17:19:09+00:00",
    "row": "6",
@@ -114,17 +140,17 @@
  ],
  "limits": {
   "cloudflare": {
-   "blocked_at": "2026-11-21T13:52:33+00:00",
-   "worked_at": "2026-11-21T17:02:28+00:00",
-   "note": "daily free allocation used up",
+   "blocked_at": "2026-11-21T18:27:22+00:00",
+   "worked_at": "2026-11-21T18:15:05+00:00",
+   "note": "Cloudflare daily free allowance used up (HTTP 429: {\"errors\":[{\"message\":\"AiError: AiError: you have used up your daily free allocation of 10,000 neur",
    "last_reset_seen": "2026-11-21T17:02:28+00:00"
   },
   "pollinations": {
-   "blocked_at": "2026-11-21T13:52:33+00:00",
-   "note": "free allowance used up"
+   "blocked_at": "2026-11-21T18:27:22+00:00",
+   "note": "Pollinations free allowance used up"
   },
   "leda": {
-   "worked_at": "2026-11-21T17:02:06+00:00"
+   "worked_at": "2026-11-21T18:14:28+00:00"
   }
  },
  "community": {
@@ -158,6 +184,16 @@
     "பிரார்த்தனை செய்வேன் 🕯️"
    ],
    "at": "2026-11-21T17:12:32+00:00"
+  },
+  "6": {
+   "post": "வணக்கம் நிலா குடும்பமே! இன்னைக்கு சாயங்காலம் 5 மணிக்கு ஒரு த்ரில்லான மர்மக் கதை வரப்போகுது. பாட்டி கொடுத்த அந்தப் பனை ஓலை ரகசியத்தைத் தேடி நாமும் காட்டுக்குள்ள போகலாமா? கண்டிப்பா பாருங்க! 🌿✨\n\n▶️ https://youtu.be/cQ3rhliRRpU",
+   "poll": "திடீர்னு உங்க கைக்கு ஒரு மர்மமான பனை ஓலை கிடைச்சா என்ன செய்வீங்க?",
+   "options": [
+    "ரகசியத்தைத் தேடிப் போவேன்",
+    "பயந்து தூக்கிப் போட்டுடுவேன்",
+    "பாட்டி கிட்டயே கொடுத்துடுவேன்"
+   ],
+   "at": "2026-11-21T18:42:11+00:00"
   }
  }
 }
