@@ -28,6 +28,28 @@
     "note": "Cloudflare daily free allowance used up",
     "at": "2026-11-21T13:52:33+00:00"
    }
+  },
+  "5": {
+   "voice": {
+    "state": "done",
+    "note": "Leda voice ready, listening check and click check passed",
+    "at": "2026-11-21T15:59:04+00:00"
+   },
+   "pictures": {
+    "state": "done",
+    "note": "48 pictures, all real and different",
+    "at": "2026-11-21T15:59:08+00:00"
+   },
+   "video": {
+    "state": "done",
+    "note": "19.0 min, quality check passed",
+    "at": "2026-11-21T16:09:09+00:00"
+   },
+   "short": {
+    "state": "done",
+    "note": "Short Buh1Y2W_ywk scheduled 30 min after the video",
+    "at": "2026-11-21T16:09:43+00:00"
+   }
   }
  },
  "events": [
