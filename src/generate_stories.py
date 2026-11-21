@@ -397,6 +397,9 @@ def logic_check_and_fix(plan, sentences):
     return sentences, serious
 
 
+LAST_CHECKS = {}
+
+
 def style_check(sentences):
     """Gemini scores a sample of the script; bookish or flowery scripts are rewritten."""
     n = len(sentences)
@@ -413,6 +416,7 @@ def style_check(sentences):
     if min(scores) < 7:
         problems.append(f"style {scores} ({str(v.get('worst_problem', ''))[:100]})")
     log.info("Style scores spoken/pace/clear: %s", scores)
+    LAST_CHECKS["style"] = scores
     return problems
 
 
@@ -548,6 +552,7 @@ def write_story(rows, doomsday=False, redo=None):
     sentences = _trim(sentences, hi)
     sentences = tamil_letters_for_english(sentences)
     sentences, logic_issues = logic_check_and_fix(plan, sentences)
+    LAST_CHECKS["logic"] = len(logic_issues)
     from text_fix import bad_lines
     garbled = len(bad_lines(sentences))
     if garbled > max(8, len(sentences) * 0.06):
@@ -600,6 +605,10 @@ def write_story(rows, doomsday=False, redo=None):
     repair_row(row, write)   # fix the few stray foreign-letter words before saving (Gemini only)
     if foreign(row["script_ta"]):
         raise LLMError("story still has foreign letters after repair")
+    import status as ST
+    ST.stage(row["id"], "script", "done", f"written; style {LAST_CHECKS.get('style')}, "
+             f"{LAST_CHECKS.get('logic', 0)} logic problems fixed, foreign letters checked")
+    ST.event(f"Story written: {row['title_ta'][:80]}", row["id"])
     if redo:
         return row, None, names
     ser["so_far"].append(plan.get("episode_summary_en") or plan.get("premise_en", ""))

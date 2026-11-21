@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nila Kathaigal – Status</title>
+<style>
+  :root { --bg:#0f1020; --card:#1a1b33; --line:#2c2e52; --text:#ecebf7; --dim:#a7a6c4;
+          --ok:#3ccf7a; --warn:#ffb020; --bad:#ff5a5a; --gold:#ffd34d; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:system-ui,-apple-system,"Noto Sans Tamil",sans-serif; background:var(--bg); color:var(--text); }
+  header { padding:18px 16px 8px; }
+  h1 { margin:0; font-size:22px; color:var(--gold); }
+  .sub { color:var(--dim); font-size:13px; margin-top:4px; }
+  main { padding:8px 12px 40px; max-width:980px; margin:0 auto; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px; margin:12px 0; }
+  .card h2 { margin:0 0 10px; font-size:16px; }
+  .health { font-size:17px; font-weight:700; }
+  .ok { color:var(--ok); } .warn { color:var(--warn); } .bad { color:var(--bad); }
+  .issue { border-left:4px solid var(--warn); padding:8px 10px; margin:8px 0; background:#22234a; border-radius:8px; }
+  .issue.bad { border-color:var(--bad); color:var(--text); } .issue.warn { color:var(--text); }
+  .issue b { display:block; margin-bottom:4px; }
+  .fix { color:var(--dim); font-size:14px; }
+  a { color:#8fb8ff; }
+  .btns { display:flex; flex-wrap:wrap; gap:8px; }
+  .btn { display:inline-block; padding:10px 12px; border-radius:10px; background:#2b2d5c; color:var(--text);
+         text-decoration:none; font-size:14px; border:1px solid var(--line); }
+  .btn:hover { background:#37397a; }
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th, td { padding:7px 5px; border-bottom:1px solid var(--line); text-align:left; vertical-align:top; }
+  th { color:var(--dim); font-weight:600; }
+  td.s { text-align:center; white-space:nowrap; }
+  .tl { max-width:260px; }
+  .ev { font-size:13px; padding:5px 0; border-bottom:1px solid var(--line); }
+  .ev time { color:var(--dim); margin-right:6px; }
+  .pill { font-size:12px; padding:2px 7px; border-radius:20px; background:#2b2d5c; }
+  .scroll { overflow-x:auto; }
+  .legend { color:var(--dim); font-size:12px; margin-top:6px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>🌙 நிலா கதைகள் – Status</h1>
+  <div class="sub" id="updated">Loading…</div>
+</header>
+<main>
+  <div class="card"><h2>Health</h2><div id="health" class="health">Checking…</div><div id="issues"></div></div>
+
+  <div class="card"><h2>Buttons</h2>
+    <div class="btns">
+      <a class="btn" target="_blank" href="https://github.com/Subinesh07/Tamil-story-channel/actions/workflows/produce.yml">▶️ Make the next video now</a>
+      <a class="btn" target="_blank" href="https://github.com/Subinesh07/Tamil-story-channel/actions/workflows/generate.yml">✍️ Write stories now</a>
+      <a class="btn" target="_blank" href="https://github.com/Subinesh07/Tamil-story-channel/actions/workflows/check-keys.yml">🔑 Check all keys</a>
+      <a class="btn" target="_blank" href="https://github.com/Subinesh07/Tamil-story-channel/actions/workflows/redo-thumbnail.yml">🖼️ Redo a thumbnail</a>
+      <a class="btn" target="_blank" href="https://github.com/Subinesh07/Tamil-story-channel/blob/main/docs/PROBLEMS_AND_FIXES.md">🛡️ Problems &amp; fixes</a>
+      <a class="btn" target="_blank" href="https://studio.youtube.com">📺 YouTube Studio</a>
+    </div>
+    <div class="legend">Open a button, press <b>Run workflow</b> (phone app: ⋯ → Run workflow), then the green button.</div>
+  </div>
+
+  <div class="card"><h2>Videos</h2><div class="scroll"><table id="videos"></table></div>
+    <div class="legend">✅ done · ⏳ waiting (continues by itself) · ❌ failed · – not started yet (videos are made up to 3 days before their slot)</div></div>
+
+  <div class="card"><h2>Free limits</h2><div class="scroll"><table id="limits"></table></div>
+    <div class="legend">When a free service refuses, the video waits and continues after the service works again. Nothing is ever paid.</div></div>
+
+  <div class="card"><h2>Latest activity</h2><div id="events"></div></div>
+
+  <div class="card"><h2>Latest GitHub runs</h2><div class="scroll"><table id="runs"></table></div></div>
+</main>
+
+<script>
+const REPO = "Subinesh07/Tamil-story-channel";
+const RAW = `https://raw.githubusercontent.com/${REPO}/main/`;
+const ACT = `https://github.com/${REPO}/actions/workflows/`;
+const H = 3600e3;
+
+function parseCSV(text) {
+  const rows = []; let row = [], f = "", q = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (q) { if (c === '"') { if (text[i + 1] === '"') { f += '"'; i++; } else q = false; } else f += c; }
+    else if (c === '"') q = true;
+    else if (c === ",") { row.push(f); f = ""; }
+    else if (c === "\n") { row.push(f); rows.push(row); row = []; f = ""; }
+    else if (c !== "\r") f += c;
+  }
+  if (f || row.length) { row.push(f); rows.push(row); }
+  const head = rows.shift();
+  return rows.filter(r => r.length > 1).map(r => Object.fromEntries(head.map((h, i) => [h, r[i] || ""])));
+}
+const ist = d => new Date(d).toLocaleString("en-IN", { timeZone: "Asia/Kolkata", weekday: "short", day: "numeric",
+  month: "short", hour: "numeric", minute: "2-digit" });
+const ago = d => { const m = Math.round((Date.now() - new Date(d)) / 60000);
+  return m < 60 ? `${m} min ago` : m < 2880 ? `${Math.round(m / 60)} h ago` : `${Math.round(m / 1440)} days ago`; };
+const esc = s => String(s).replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
+
+function fixFor(reason) {
+  const r = reason.toLowerCase();
+  if (r.includes("picture")) return "The free picture limit is used up. It continues by itself when the limit resets (often in the evening). If the video is due in the next few hours, press ▶️ Make the next video now after the reset, or make the missing picture in the Gemini app and send it to Claude.";
+  if (r.includes("voice") || r.includes("gemini")) return "The free Leda voice limit is used up. It resets around 1:30 PM IST and the video continues by itself. If it is urgent, press ▶️ Make the next video now after 1:30 PM.";
+  if (r.includes("invalid_grant") || r.includes("token") || r.includes("unauthorized")) return "The YouTube permission stopped working (e.g. after a Google password change). Regenerate the YouTube refresh token and update the YT_REFRESH_TOKEN secret (see README), then press 🔑 Check all keys.";
+  if (r.includes("quality")) return "The finished video did not pass the quality check, so it was not uploaded. Press ▶️ Make the next video now once; if it fails again, open the run log and ask Claude.";
+  if (r.includes("studio") || r.includes("delete")) return "Delete the old broken video in YouTube Studio; the remake uploads by itself afterwards.";
+  return "Open the latest run log (Latest GitHub runs below) to see the error, press ▶️ Make the next video now once, and check 🛡️ Problems & fixes.";
+}
+
+async function get(url, json = true) {
+  const r = await fetch(url + (url.includes("?") ? "&" : "?") + "t=" + Date.now(), { cache: "no-store" });
+  if (!r.ok) throw new Error(url + " " + r.status);
+  return json ? r.json() : r.text();
+}
+
+async function main() {
+  let rows = [], prog = { stages: {}, events: [], limits: {} }, runs = [];
+  try { rows = parseCSV(await get(RAW + "stories.csv", false)); } catch (e) {}
+  try { prog = await get(RAW + "status/progress.json"); } catch (e) {}
+  try { runs = (await get(`https://api.github.com/repos/${REPO}/actions/runs?per_page=40`)).workflow_runs || []; } catch (e) {}
+  const now = Date.now();
+  const issues = [];
+
+  // ---- videos table ----
+  rows.sort((a, b) => (a.publish_at || "").localeCompare(b.publish_at || ""));
+  const recent = rows.filter(r => r.publish_at && new Date(r.publish_at) > now - 3 * 24 * H);
+  const icon = (st) => st === "done" ? "✅" : st === "waiting" ? "⏳" : st === "failed" ? "❌" : st === "working" ? "🔄" : "–";
+  let html = "<tr><th>When (IST)</th><th>Story</th><th>Script</th><th>Voice</th><th>Pictures</th><th>Video</th><th>YouTube</th><th>Short</th></tr>";
+  for (const r of recent) {
+    const st = prog.stages[r.id] || {};
+    const done = r.status === "done";
+    const failed = r.status === "failed";
+    const s = (k) => done ? "✅" : icon(st[k] && st[k].state);
+    const yt = done ? (r.video_id ? `<a target="_blank" href="https://youtu.be/${r.video_id}">✅</a>` : "✅") : failed ? "❌" : "–";
+    const sh = (r.fail_reason || "").includes("short:") || (st.short && st.short.state === "done") ? "✅" : done ? "–" : "–";
+    const title = (r.title_ta || r.title_en || "").split(" | ")[0];
+    let note = "";
+    if (!done && r.fail_reason) note = `<div class="fix">${esc(r.fail_reason).slice(0, 120)}</div>`;
+    html += `<tr><td>${ist(r.publish_at)}</td><td class="tl">${esc(title)}<br><span class="pill">${esc(r.genre)}${r.part ? " · part " + r.part : ""}</span>${note}</td>
+      <td class="s">✅</td><td class="s">${s("voice")}</td><td class="s">${s("pictures")}</td><td class="s">${s("video")}</td><td class="s">${yt}</td><td class="s">${sh}</td></tr>`;
+
+    // ---- problems ----
+    const due = new Date(r.publish_at) - now;
+    if (!done && due < 0)
+      issues.push(["bad", `Missed: "${title}" was due ${ist(r.publish_at)} and is not on YouTube.`, fixFor(r.fail_reason || "")]);
+    else if (failed)
+      issues.push(["bad", `Failed: "${title}" (due ${ist(r.publish_at)})`, fixFor(r.fail_reason || "")]);
+    else if (!done && due < 20 * H)
+      issues.push([due < 8 * H ? "bad" : "warn", `Not ready yet: "${title}" is due ${ist(r.publish_at)} (in ${Math.round(due / H)} h).`,
+                   r.fail_reason ? fixFor(r.fail_reason) : "It should be made by the next automatic run. If nothing changes within 2 hours, press ▶️ Make the next video now."]);
+  }
+  document.getElementById("videos").innerHTML = html;
+
+  // ---- runs ----
+  const lastOf = (file) => runs.find(x => x.path && x.path.endsWith(file));
+  const produce = lastOf("produce.yml"), generate = lastOf("generate.yml");
+  const dueSoon = rows.some(r => r.status !== "done" && r.publish_at && new Date(r.publish_at) - now < 72 * H && new Date(r.publish_at) > now);
+  if (dueSoon && (!produce || now - new Date(produce.created_at) > 3 * H))
+    issues.push(["warn", `No video run for ${produce ? ago(produce.created_at) : "a long time"} although videos are due soon.`,
+                 "GitHub sometimes skips its scheduled runs. Press ▶️ Make the next video now."]);
+  if (produce && produce.conclusion === "failure")
+    issues.push(["bad", `The last video run failed (${ago(produce.created_at)}).`,
+                 `Open <a target="_blank" href="${produce.html_url}">its log</a>, then press ▶️ Make the next video now once. If it fails again, check 🛡️ Problems & fixes.`]);
+  const upcoming = rows.filter(r => r.status !== "done" && r.publish_at && new Date(r.publish_at) > now).length;
+  if (upcoming < 4)
+    issues.push(["warn", `Only ${upcoming} stories are written ahead.`, "Press ✍️ Write stories now (it writes 2 per run)."]);
+  if (generate && now - new Date(generate.created_at) > 16 * H)
+    issues.push(["warn", `No story-writing run for ${ago(generate.created_at)}.`, "Press ✍️ Write stories now."]);
+
+  let rh = "<tr><th>When</th><th>Run</th><th>Result</th></tr>";
+  for (const x of runs.filter(x => !String(x.name).includes("pages")).slice(0, 12)) {
+    const res = x.status !== "completed" ? "🔄 running" : x.conclusion === "success" ? "✅" : x.conclusion === "cancelled" ? "⏹️" : "❌";
+    rh += `<tr><td>${ago(x.created_at)}</td><td><a target="_blank" href="${x.html_url}">${esc(x.name)}</a> <span class="pill">${x.event === "schedule" ? "automatic" : "manual"}</span></td><td>${res}</td></tr>`;
+  }
+  document.getElementById("runs").innerHTML = rh;
+
+  // ---- limits ----
+  const names = { cloudflare: "Pictures – Cloudflare", pollinations: "Pictures – Pollinations (backup)", leda: "Leda voice (Gemini)" };
+  let lh = "<tr><th>Service</th><th>Now</th><th>Last refused</th><th>Last worked</th></tr>";
+  for (const [k, v] of Object.entries(prog.limits || {})) {
+    const blocked = v.blocked_at && (!v.worked_at || v.blocked_at > v.worked_at);
+    lh += `<tr><td>${names[k] || k}</td><td>${blocked ? '<span class="warn">⏳ used up</span>' : '<span class="ok">✅ working</span>'}</td>
+      <td>${v.blocked_at ? ist(v.blocked_at) : "–"}</td><td>${v.worked_at ? ist(v.worked_at) : "–"}</td></tr>`;
+  }
+  document.getElementById("limits").innerHTML = lh;
+
+  // ---- events ----
+  document.getElementById("events").innerHTML = (prog.events || []).slice(0, 25).map(e =>
+    `<div class="ev"><time>${ist(e.at)}</time><span class="${e.level === "error" ? "bad" : e.level === "warn" ? "warn" : ""}">${esc(e.msg)}</span></div>`
+  ).join("") || "<div class='fix'>Nothing recorded yet.</div>";
+
+  // ---- health ----
+  const bad = issues.filter(i => i[0] === "bad").length;
+  const h = document.getElementById("health");
+  h.className = "health " + (bad ? "bad" : issues.length ? "warn" : "ok");
+  h.textContent = bad ? `❗ ${bad} problem(s) need attention` : issues.length ? "⚠️ Running, with something to watch" : "✅ All good – nothing to do";
+  document.getElementById("issues").innerHTML = issues.map(i =>
+    `<div class="issue ${i[0]}"><b>${i[1]}</b><div class="fix">👉 ${i[2]}</div></div>`).join("");
+  document.getElementById("updated").textContent = "Updated " + new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }) + " IST · refreshes every 5 minutes";
+}
+main(); setInterval(main, 5 * 60e3);
+</script>
+</body>
+</html>

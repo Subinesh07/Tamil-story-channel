@@ -7,6 +7,8 @@ videos are made and scheduled up to 3 days before their slot. You never need to 
 Use these buttons only if you want something to happen **now**. Open the link, press
 **Run workflow** (top right; in the GitHub phone app: ⋯ → Run workflow), then the green button.
 
+**👉 [Open the status page](https://subinesh07.github.io/Tamil-story-channel/status.html)** – shows every video's progress, any problem and what to press to fix it.
+
 | Button | What it does | Time |
 |---|---|---|
 | [▶️ Make the next video now](https://github.com/Subinesh07/Tamil-story-channel/actions/workflows/produce.yml) | Voices (Leda), pictures, renders, checks and schedules the next story | 20–40 min |

@@ -1,0 +1,73 @@
+{
+ "stages": {
+  "7": {
+   "script": {
+    "state": "done",
+    "note": "",
+    "at": "2026-11-20T21:30:00+00:00"
+   },
+   "short": {
+    "state": "done",
+    "note": "Short ywEOgXnuU-s",
+    "at": "2026-11-21T04:31:55+00:00"
+   }
+  },
+  "10": {
+   "script": {
+    "state": "done",
+    "note": "logic-checked",
+    "at": "2026-11-21T02:45:00+00:00"
+   },
+   "voice": {
+    "state": "done",
+    "note": "Leda voice ready, listening check passed",
+    "at": "2026-11-21T13:52:17+00:00"
+   },
+   "pictures": {
+    "state": "waiting",
+    "note": "Cloudflare daily free allowance used up",
+    "at": "2026-11-21T13:52:33+00:00"
+   }
+  }
+ },
+ "events": [
+  {
+   "at": "2026-11-21T13:52:33+00:00",
+   "row": "10",
+   "level": "warn",
+   "msg": "Paused: Doomsday Part 2 waits for free pictures (Cloudflare used up). Voice is saved."
+  },
+  {
+   "at": "2026-11-21T13:30:00+00:00",
+   "row": "5",
+   "level": "info",
+   "msg": "நிழல் நிஜமானால் Part 1 went public"
+  },
+  {
+   "at": "2026-11-21T06:00:00+00:00",
+   "row": "7",
+   "level": "info",
+   "msg": "Doomsday Part 1 Short went public"
+  },
+  {
+   "at": "2026-11-21T05:30:00+00:00",
+   "row": "7",
+   "level": "info",
+   "msg": "Doomsday Part 1 went public"
+  }
+ ],
+ "limits": {
+  "cloudflare": {
+   "blocked_at": "2026-11-21T13:52:33+00:00",
+   "worked_at": "2026-11-20T15:40:00+00:00",
+   "note": "daily free allocation used up"
+  },
+  "pollinations": {
+   "blocked_at": "2026-11-21T13:52:33+00:00",
+   "note": "free allowance used up"
+  },
+  "leda": {
+   "worked_at": "2026-11-21T13:52:17+00:00"
+  }
+ }
+}

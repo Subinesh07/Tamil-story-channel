@@ -88,6 +88,8 @@ def produce(row, upload=True, check_duration=True):
         if clicks > 2:
             raise RuntimeError(f"audio still has {clicks} click sounds at {at} s - not uploading")
     log.info("Audio click check passed")
+    import status as ST
+    ST.stage(row["id"], "voice", "done", "Leda voice ready, listening check and click check passed")
     log.info("Narration %.1f min", timings["total"] / 60)
 
     log.info("== Images ==")
@@ -105,6 +107,7 @@ def produce(row, upload=True, check_duration=True):
     bad_pics = validate_pictures(story_imgs)
     if bad_pics:
         raise PictureFailed("picture check failed: " + "; ".join(bad_pics[:5]))
+    ST.stage(row["id"], "pictures", "done", f"{len(story_imgs)} pictures, all real and different")
     it = iter(story_imgs)
     images = []
     for s in scenes:
@@ -162,6 +165,7 @@ def produce(row, upload=True, check_duration=True):
     if not ok:
         raise RuntimeError("Quality gate failed: " + " | ".join(failures))
     LAST.update(video=out / video.name, timings=timings, intro=len(intro), title=title)
+    ST.stage(row["id"], "video", "done", f"{timings['total'] / 60:.1f} min, quality check passed")
 
     if not upload:
         log.info("Upload skipped (--no-upload)")
@@ -195,6 +199,8 @@ def make_and_upload_short(row, video_id):
         if short and os.environ.get("YT_REFRESH_TOKEN"):
             sid = upload_short(short, row, video_id, row.get("publish_at"))
             update_row(row["id"], fail_reason=f"short:{sid}")
+            import status as ST
+            ST.stage(row["id"], "short", "done", f"Short {sid} scheduled 30 min after the video")
     except Exception as e:
         log.warning("Shorts trailer failed: %s", str(e)[:200])
 
@@ -371,25 +377,33 @@ def main():
         except Exception as e:
             log.warning("Duplicate check skipped: %s", str(e)[:150])
     update_row(row["id"], status="processing", fail_reason="")
+    import status as ST
     try:
         upload = args.test_upload if args.test else not args.no_upload
         video_id = produce(row, upload=upload,
                            check_duration=not args.test)
     except Exception as e:
         if type(e).__name__ in ("ImageQuota", "PictureFailed"):
+            ST.stage(row["id"], "pictures", "waiting", str(e)[:150])
+            ST.event(f"Paused: {str(e)[:150]}", row["id"], "warn")
             log.warning("Paused: %s. Pictures made so far are saved; the next run continues.", e)
             update_row(row["id"], status="pending", fail_reason="waiting for free picture allowance")
             return 0
         if type(e).__name__ in ("GeminiQuota", "VoiceCheckFailed"):
+            ST.stage(row["id"], "voice", "waiting", str(e)[:150])
+            ST.event(f"Paused: {str(e)[:150]}", row["id"], "warn")
             log.warning("Paused: %s. Voiced parts are saved; the next run continues with Leda.", e)
             update_row(row["id"], status="pending", fail_reason="waiting for Gemini voice daily limit")
             return 0
         log.error("Row %s failed: %s", row["id"], e)
+        ST.event(f"FAILED: {str(e)[:180]}", row["id"], "error")
         log.debug(traceback.format_exc())
         update_row(row["id"], status="failed", fail_reason=str(e)[:500].replace("\n", " "))
         return 1
     if video_id:
         update_row(row["id"], status="done", video_id=video_id)
+        ST.stage(row["id"], "upload", "done", f"https://youtu.be/{video_id} scheduled {row.get('publish_at', '')[:16]}")
+        ST.event(f"Video scheduled on YouTube ({video_id})", row["id"])
     else:
         update_row(row["id"], status="pending")
     log.info("Row %s finished", row["id"])

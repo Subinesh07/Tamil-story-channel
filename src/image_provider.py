@@ -129,9 +129,16 @@ class ChainProvider(ImageProvider):
             if p.name in self.spent:
                 continue
             try:
-                return p.generate(prompt, seed=seed)
+                out = p.generate(prompt, seed=seed)
+                if p.name not in getattr(self, "ok_noted", set()):
+                    import status as ST
+                    ST.limit(p.name, True)
+                    self.ok_noted = getattr(self, "ok_noted", set()) | {p.name}
+                return out
             except ImageQuota as e:
                 log.warning("%s", e)
+                import status as ST
+                ST.limit(p.name, False, str(e)[:150])
                 self.spent.add(p.name)
                 last = e
             except Exception as e:

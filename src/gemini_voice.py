@@ -233,6 +233,8 @@ def synthesize(sentences, cache_key):
                     break
                 except GeminiQuota as e:
                     if not keys:
+                        import status as ST
+                        ST.limit("leda", False, str(e)[:150])
                         raise
                     log.warning("%s; switching to the next Leda key", str(e)[:120])
                     key, model = keys.pop(0), None
@@ -251,5 +253,8 @@ def synthesize(sentences, cache_key):
         spans = align_by_pauses(wav, [sentences[i] for i in idxs])
         pieces.append((wav, [(i, s, e) for i, (s, e) in zip(idxs, spans)]))
     log.info("Leda: %d passages (%d new requests, %d from cache)", len(pieces), made, len(pieces) - made)
+    if made:
+        import status as ST
+        ST.limit("leda", True)
     (cache / "done.json").write_text(json.dumps({"passages": len(pieces)}))
     return pieces
