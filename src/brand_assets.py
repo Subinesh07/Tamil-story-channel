@@ -130,21 +130,39 @@ def logo_from_art(path=None):
 
 
 def banner_from_art(path=None):
+    """Channel banner. Everything sits inside YouTube's "all devices" safe area (1546x423 in the
+    centre of 2560x1440), measured, with a margin, so nothing is cut on phones."""
     W, H = 2560, 1440
+    SW, SH, M = 1546, 423, 24
+    x0, y0 = (W - SW) // 2 + M, (H - SH) // 2 + M
+    x1, y1 = (W + SW) // 2 - M, (H + SH) // 2 - M
     img = sky(W, H, seed=11, stars=520).convert("RGBA")
-    art = Image.open(ART).convert("RGBA").resize((520, 520), Image.LANCZOS)
+    size = y1 - y0                                   # moon artwork fills the safe height
+    art = Image.open(ART).convert("RGBA").resize((size, size), Image.LANCZOS)
     mask = Image.new("L", art.size, 0)
-    ImageDraw.Draw(mask).ellipse([10, 10, 510, 510], fill=255)
-    img.paste(art, (W // 2 - 790, H // 2 - 260), mask.filter(ImageFilter.GaussianBlur(14)))
+    ImageDraw.Draw(mask).ellipse([6, 6, size - 6, size - 6], fill=255)
+    img.paste(art, (x0, y0), mask.filter(ImageFilter.GaussianBlur(10)))
     d = ImageDraw.Draw(img)
-    f1, f2 = font(150), font(58, bold=False)
-    d.text((W // 2 - 230, H // 2 - 150), "நிலா கதைகள்", font=f1, fill=GOLD, stroke_width=5,
+    tx, tw = x0 + size + 40, x1 - (x0 + size + 40)   # text column
+    lines = [("நிலா கதைகள்", True, GOLD, 170), ("தினமும் ஒரு புது தமிழ் கதை", False, CREAM, 70)]
+    fonts = []
+    for text, bold, col, sz in lines:
+        f = font(sz, bold=bold)
+        while d.textlength(text, font=f, language="ta") > tw and sz > 20:
+            sz -= 4
+            f = font(sz, bold=bold)
+        fonts.append(f)
+    sub = ImageFont.truetype("/usr/share/fonts/truetype/noto/NotoSans-Regular.ttf", 40)
+    h1 = d.textbbox((0, 0), lines[0][0], font=fonts[0], language="ta")
+    h2 = d.textbbox((0, 0), lines[1][0], font=fonts[1], language="ta")
+    total = (h1[3] - h1[1]) + 30 + (h2[3] - h2[1]) + 30 + 44
+    y = y0 + ((y1 - y0) - total) // 2
+    d.text((tx, y - h1[1]), lines[0][0], font=fonts[0], fill=GOLD, stroke_width=5,
            stroke_fill=(15, 12, 35), language="ta")
-    d.text((W // 2 - 225, H // 2 + 50), "தினமும் மாலை 7 மணிக்கு ஒரு புது கதை", font=f2, fill=CREAM,
-           language="ta")
-    d.text((W // 2 - 223, H // 2 + 130), "Nila Kathaigal  •  Original Tamil Stories",
-           font=ImageFont.truetype("/usr/share/fonts/truetype/noto/NotoSans-Regular.ttf", 40),
-           fill=(200, 190, 230))
+    y += (h1[3] - h1[1]) + 30
+    d.text((tx, y - h2[1]), lines[1][0], font=fonts[1], fill=CREAM, language="ta")
+    y += (h2[3] - h2[1]) + 30
+    d.text((tx, y), "Nila Kathaigal  •  Original Tamil Stories", font=sub, fill=(200, 190, 230))
     img.convert("RGB").save(path or OUT / "banner.png")
 
 
