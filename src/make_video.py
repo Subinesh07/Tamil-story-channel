@@ -253,6 +253,8 @@ def drama_thumbnail(row, provider, work, out_path, n):
             prompt = None
     bg = work / "images" / "thumb_bg.png"
     bg.parent.mkdir(parents=True, exist_ok=True)
+    if os.environ.get("NO_NEW_ASSETS"):
+        prompt = None   # Short-only run: no new pictures, use a story picture
     if prompt:
         try:
             bg.write_bytes(provider.generate(prompt, seed=n * 1000 + 999))

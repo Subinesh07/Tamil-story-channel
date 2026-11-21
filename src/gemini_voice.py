@@ -23,6 +23,14 @@ log = logging.getLogger(__name__)
 API = "https://generativelanguage.googleapis.com/v1beta/models"
 
 
+# earlier versions of the voice instructions (so voice saved before a wording change is reused)
+OLD_STYLES = [
+    "Read this Tamil story aloud like a warm, emotional storyteller from Tamil Nadu. "
+    "Natural, slightly brisk conversational pace; short pauses between sentences; "
+    "expressive: rising on questions, softer on sad lines, lively on dialogue",
+]
+
+
 class GeminiQuota(RuntimeError):
     pass
 
@@ -218,7 +226,15 @@ def synthesize(sentences, cache_key):
         text = " ".join(_punct(sentences[i]) for i in idxs)
         h = hashlib.sha1(f"{GEMINI_VOICE}|{GEMINI_STYLE}|{GEMINI_TEMPO}|{text}".encode()).hexdigest()[:16]
         wav = cache / f"c{k:03d}_{h}.wav"
+        if not wav.exists():   # voice saved before the instructions were improved is still Leda's voice
+            for style in OLD_STYLES:
+                h_old = hashlib.sha1(f"{GEMINI_VOICE}|{style}|{GEMINI_TEMPO}|{text}".encode()).hexdigest()[:16]
+                if (cache / f"c{k:03d}_{h_old}.wav").exists():
+                    wav = cache / f"c{k:03d}_{h_old}.wav"
+                    break
         checked = wav.with_suffix(".ok")
+        if os.environ.get("NO_NEW_ASSETS") and wav.exists():
+            checked.write_text("published video")   # already on YouTube: no new checks, no credits
         tries = 0
         while not checked.exists():
           if not wav.exists():
