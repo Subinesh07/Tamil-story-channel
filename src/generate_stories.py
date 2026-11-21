@@ -647,7 +647,28 @@ def main():
                     help="30 stories in total at first, then refill to 20 pending when below 10")
     ap.add_argument("--max-per-run", type=int, default=5)
     ap.add_argument("--redo", default="", help="comma-separated row ids to rewrite in the new style")
+    ap.add_argument("--logic", default="", help="comma-separated row ids: run the logic check and fix in place")
     args = ap.parse_args()
+    if args.logic:
+        import series as S
+        from stories import split_sentences
+        data = S.load()
+        rows = load_rows()
+        for rid in [x.strip() for x in args.logic.split(",") if x.strip()]:
+            r = next(x for x in rows if x["id"] == rid)
+            ser = next((s for s in data["series"] if s["id"] == r.get("series_id")), {})
+            sents = split_sentences(r["script_ta"])
+            fixed, issues = logic_check_and_fix({"characters": ser.get("characters", [])}, sents)
+            fixed = tamil_letters_for_english(fixed)
+            r["script_ta"] = " ".join(f"{i + 1}. {s}{SENTENCE_SEP}" for i, s in enumerate(fixed))
+            if r["status"] == "hold" and "logic check" in (r.get("fail_reason") or ""):
+                r["status"], r["fail_reason"] = "pending", ""
+            save_rows(rows)
+            changed = sum(a != b for a, b in zip(sents, fixed))
+            log.info("Row %s: %d serious logic problems found, %d lines changed", rid, len(issues), changed)
+            for p in issues:
+                log.info("  - lines %s-%s: %s", p.get("from"), p.get("to"), str(p.get("issue", ""))[:150])
+        return 0
     if args.redo:
         rewrite_rows(load_rows(), [x.strip() for x in args.redo.split(",") if x.strip()])
         return 0

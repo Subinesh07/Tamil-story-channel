@@ -4,8 +4,12 @@ on:
   workflow_dispatch:
     inputs:
       rows:
-        description: "Row ids to rewrite, comma-separated (e.g. 7,5,10)"
+        description: "Row ids, comma-separated (e.g. 7,5,10)"
         required: true
+      mode:
+        description: "redo = rewrite in the new style; logic = logic check and fix only"
+        required: false
+        default: "redo"
 
 permissions:
   contents: write
@@ -32,7 +36,7 @@ jobs:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           LLM_PROVIDER: ${{ vars.LLM_PROVIDER || 'gemini' }}
           LLM_ORDER: ${{ vars.LLM_ORDER }}
-        run: python src/generate_stories.py --redo "${{ inputs.rows }}"
+        run: python src/generate_stories.py --${{ inputs.mode || 'redo' }} "${{ inputs.rows }}"
       - name: Commit
         if: always()
         run: |
