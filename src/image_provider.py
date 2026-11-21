@@ -106,7 +106,7 @@ class CloudflareProvider(ImageProvider):
         r = self.session.post(url, json=body, headers={"Authorization": f"Bearer {self.token}"}, timeout=120)
         text = r.text[:300]
         if r.status_code == 429 or "4006" in text or "allocation" in text.lower() or "neurons" in text.lower():
-            raise ImageQuota("Cloudflare daily free allowance used up")
+            raise ImageQuota(f"Cloudflare daily free allowance used up (HTTP {r.status_code}: {text[:200]})")
         if r.status_code != 200:
             raise RuntimeError(f"Cloudflare HTTP {r.status_code}: {text}")
         img = (r.json().get("result") or {}).get("image")
