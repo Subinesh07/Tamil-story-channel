@@ -20,13 +20,28 @@
    },
    "voice": {
     "state": "done",
-    "note": "Leda voice ready, listening check passed",
-    "at": "2026-11-21T13:52:17+00:00"
+    "note": "Leda voice ready, listening check and click check passed",
+    "at": "2026-11-21T17:02:25+00:00"
    },
    "pictures": {
-    "state": "waiting",
-    "note": "Cloudflare daily free allowance used up",
-    "at": "2026-11-21T13:52:33+00:00"
+    "state": "done",
+    "note": "25 pictures, all real and different",
+    "at": "2026-11-21T17:05:09+00:00"
+   },
+   "video": {
+    "state": "done",
+    "note": "9.6 min, quality check passed",
+    "at": "2026-11-21T17:10:18+00:00"
+   },
+   "short": {
+    "state": "done",
+    "note": "Short RVwLaNsQOXk scheduled 30 min after the video",
+    "at": "2026-11-21T17:10:58+00:00"
+   },
+   "upload": {
+    "state": "done",
+    "note": "https://youtu.be/zhaPl2ODEPA scheduled 2026-11-22T11:00",
+    "at": "2026-11-21T17:12:32+00:00"
    }
   },
   "5": {
@@ -53,6 +68,12 @@
   }
  },
  "events": [
+  {
+   "at": "2026-11-21T17:12:32+00:00",
+   "row": "10",
+   "level": "info",
+   "msg": "Video scheduled on YouTube (zhaPl2ODEPA)"
+  },
   {
    "at": "2026-11-21T13:52:33+00:00",
    "row": "10",
@@ -81,15 +102,16 @@
  "limits": {
   "cloudflare": {
    "blocked_at": "2026-11-21T13:52:33+00:00",
-   "worked_at": "2026-11-20T15:40:00+00:00",
-   "note": "daily free allocation used up"
+   "worked_at": "2026-11-21T17:02:28+00:00",
+   "note": "daily free allocation used up",
+   "last_reset_seen": "2026-11-21T17:02:28+00:00"
   },
   "pollinations": {
    "blocked_at": "2026-11-21T13:52:33+00:00",
    "note": "free allowance used up"
   },
   "leda": {
-   "worked_at": "2026-11-21T13:52:17+00:00"
+   "worked_at": "2026-11-21T17:02:06+00:00"
   }
  },
  "community": {
@@ -114,14 +136,15 @@
    ]
   },
   "10": {
-   "post": "⏳ டூம்ஸ்டே – பகுதி 2 இன்னைக்கு காலை 11 மணிக்கு!\nமலையிலிருந்து மீரா தப்பிச்சாளா? ராகவன் ஏன் துரத்துறார்? 😱\n\n▶️ (link after it is uploaded)",
-   "poll": "டூம்ஸ்டேல உங்களுக்கு பிடிச்ச கேரக்டர் யாரு?",
+   "post": "வணக்கம் நிலா கதைகள் குடும்பமே! 🌙 டூம்ஸ்டே தொடரோட 2-வது பகுதி இன்னைக்கு காலை 11 மணிக்கு வெளியாகுது. சென்னைக்கு தப்பிச்சு வர்ற மீராவுக்கு காத்துட்டு இருக்குற அந்த பேரதிர்ச்சி என்னன்னு தெரிஞ்சுக்க மறக்காம பாருங்க! 😱\n\n▶️ https://youtu.be/zhaPl2ODEPA",
+   "poll": "உலகம் அழிய இன்னும் 6 நாட்களே இருந்தா, நீங்க முதலாவதா என்ன செய்வீங்க?",
    "options": [
-    "மீரா",
-    "அப்பா செல்வம்",
-    "குட்டி அர்ஜுன்",
-    "கார்த்திக்"
-   ]
+    "குடும்பத்தோட நேரம் செலவழிப்பேன் 👨‍👩‍👧‍👦",
+    "பிடிச்ச இடங்களுக்கு டிராவல் பண்ணுவேன் ✈️",
+    "பிடிச்ச உணவுகளை சாப்பிடுவேன் 🍲",
+    "பிரார்த்தனை செய்வேன் 🕯️"
+   ],
+   "at": "2026-11-21T17:12:32+00:00"
   }
  }
 }
