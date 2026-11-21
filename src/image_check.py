@@ -25,6 +25,10 @@ Reject it if ANY of these is true:
 - a deformed or broken object (e.g. bicycle with missing/merged wheels, melted furniture)
 - deformed people: extra or missing limbs, extra fingers, distorted or duplicated faces
 - people who should not be there (more people than described, random extra figures)
+- a person's age clearly does not match the description (a child drawn for an adult, an adult
+  for a child, a young person for an elderly one; allow about ±10 years)
+- facial hair contradicts the description (beard when it says "NO beard" or "clean-shaven",
+  no beard when it says "beard")
 - visible text, letters, watermarks or logos
 - it clearly does not match the description
 
@@ -58,7 +62,7 @@ def check(png_bytes, prompt):
             "contents": [{"parts": [
                 {"inline_data": {"mime_type": "image/png",
                                  "data": base64.b64encode(png_bytes).decode()}},
-                {"text": QUESTION.format(prompt=prompt[:600])},
+                {"text": QUESTION.format(prompt=prompt[:900])},
             ]}],
             "generationConfig": {"temperature": 0, "responseMimeType": "application/json",
                                  "maxOutputTokens": 300},

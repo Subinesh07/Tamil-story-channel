@@ -219,7 +219,7 @@ Return JSON:
   "premise_en": "2-3 sentence premise",
   {'"person": "full name", "key_facts_en": ["..."],' if genre == 'real lives' else ''}
   "characters": [{{"name": "...", "role": "...", "age": 0,
-                   "appearance_en": "fixed look: face, hair, clothes (kept identical in every picture)"}}],
+                   "gender": "male/female", "appearance_en": "fixed look: face, hair, facial hair (beard / moustache only / clean-shaven), clothes - identical in every picture"}}],
   "arc": ["one-line outline of part 1", "... part 2", "... (exactly {g['parts']} items)"]}}""",
                     want_json=True, max_tokens=6000)
     if len(plan.get("arc", [])) < 2:

@@ -145,7 +145,7 @@ Return JSON with exactly these keys:
  "description_ta": "2-3 line Tamil YouTube description that hooks the viewer without spoiling the ending",
  "episode_summary_en": "3-4 sentence summary of what happens in this story/part, including how it ends",
  "characters": [{{"name": "...", "role": "...", "age": 0,
-                  "appearance_en": "fixed look: face, hair, clothes, so images stay consistent"}}],
+                  "gender": "male/female", "appearance_en": "fixed look: face, hair, facial hair (beard / moustache only / clean-shaven), clothes - identical in every picture"}}],
  "beats": [{{"summary_en": "what happens", "characters": ["names in scene"],
              "setting_en": "place", "time_of_day": "morning/afternoon/evening/night",
              "emotion": "dominant feeling"}}]
@@ -247,8 +247,9 @@ SEG_MIN, SEG_MAX = 4, 7       # sentences per picture (~20-40 s of narration at 
 def segment_scenes(plan, sentences):
     """Ask the model where the picture must change (new place, time or characters) and
     what each picture shows, based on the ACTUAL script. Returns [(start_idx, prompt)]."""
-    looks = {c["name"]: f"{c['name']} ({c.get('age', '')}, {c['appearance_en']})"
-             for c in plan["characters"]}
+    from characters import card
+    chars = {c["name"]: c for c in plan["characters"]}
+    looks = {n: card(c) for n, c in chars.items()}
     numbered = "\n".join(f"{i}: {x}" for i, x in enumerate(sentences))
     data = write(
         f"""Below is a Tamil story script, one numbered sentence per line.
@@ -259,8 +260,10 @@ Characters (keep their look identical in every picture): {json.dumps(looks, ensu
 For each segment return the sentence number where it starts and an English description of ONE
 simple, paintable moment from that part: who is visible (max 2 people, by name), the place,
 time of day and the mood. No text, no small objects held in hands, no vehicles in close-up.
-Return JSON: [{{"start": 0, "characters": ["Name"], "setting": "...", "time_of_day": "...",
-"moment": "...", "mood": "..."}}]
+Ages must stay logical: draw each character at the age on their card. Only if the script shows a
+character at a DIFFERENT age (a flashback to childhood, years later), give that age in "ages".
+Return JSON: [{{"start": 0, "characters": ["Name"], "ages": {{"Name": 8}}, "setting": "...",
+"time_of_day": "...", "moment": "...", "mood": "..."}}]
 
 {numbered}""", want_json=True, max_tokens=12000)
     segs, last = [], -1
@@ -269,7 +272,9 @@ Return JSON: [{{"start": 0, "characters": ["Name"], "setting": "...", "time_of_d
         if st <= last or st >= len(sentences):
             continue
         names = (d.get("characters") or [])[:2]
-        who = (f"Only these people in the picture: {', '.join(looks.get(n, n) for n in names)}. "
+        ages = d.get("ages") or {}
+        who = (f"Only these people in the picture: "
+               f"{', '.join(card(chars[n], ages.get(n)) if n in chars else n for n in names)}. "
                "No other people") if names else "No people in the picture"
         p = (f"{d.get('moment', '')}. {who}. Setting: {d.get('setting', '')}, "
              f"{d.get('time_of_day', '')}. Mood: {d.get('mood', '')}. "
@@ -289,14 +294,15 @@ Return JSON: [{{"start": 0, "characters": ["Name"], "setting": "...", "time_of_d
 
 def thumb_prompt(plan):
     from thumbnail import THUMB_STYLE
-    looks = "; ".join(f"{c['name']}: {c.get('age', '')}, {c['appearance_en']}" for c in plan["characters"])
+    from characters import card
+    looks = "; ".join(card(c) for c in plan["characters"])
     scene = plan.get("thumb_scene_en", "")
     return f"{scene}. Characters look: {looks}. South Indian setting. {THUMB_STYLE}".replace(PROMPT_SEP, "/") if scene else ""
 
 
 def scene_prompts(plan):
-    looks = {c["name"]: f"{c['name']} ({c.get('age', '')}, {c['appearance_en']})"
-             for c in plan["characters"]}
+    from characters import card
+    looks = {c["name"]: card(c) for c in plan["characters"]}
     prompts = []
     for b in plan["beats"]:
         names = b.get("characters", [])[:2]

@@ -18,7 +18,8 @@
           "name": "Iniya",
           "role": "Protagonist, Interior Designer",
           "age": 26,
-          "appearance_en": "Oval face with sharp eyes, tied-back wavy hair, wears cotton salwar kameez with minimal silver jewelry."
+          "appearance_en": "Oval face with sharp eyes, tied-back wavy hair, wears cotton salwar kameez with minimal silver jewelry.",
+          "gender": "female"
         },
         {
           "name": "Kathiravan",
@@ -36,7 +37,8 @@
           "name": "Vetri",
           "role": "Opponent/Cousin",
           "age": 28,
-          "appearance_en": "Angular face, short-cropped modern haircut, wears branded polo shirts and watches."
+          "appearance_en": "Angular face, short-cropped modern haircut, wears branded polo shirts and watches.",
+          "gender": "male"
         }
       ],
       "arc": [
@@ -203,19 +205,22 @@
           "name": "Kavin",
           "role": "Acoustic Engineer",
           "age": 29,
-          "appearance_en": "Short curly black hair, dark tan skin, round wire-rim glasses, navy blue zipped jacket over a beige linen shirt, dark denim pants."
+          "appearance_en": "Short curly black hair, dark tan skin, round wire-rim glasses, navy blue zipped jacket over a beige linen shirt, dark denim pants.",
+          "gender": "male"
         },
         {
           "name": "Oviya",
           "role": "Archivist & Historian",
           "age": 27,
-          "appearance_en": "Shoulder-length straight black hair tied in a half-up ponytail, olive complexion, forest green cotton kurti with rolled-up sleeves, small silver nose pin."
+          "appearance_en": "Shoulder-length straight black hair tied in a half-up ponytail, olive complexion, forest green cotton kurti with rolled-up sleeves, small silver nose pin.",
+          "gender": "female"
         },
         {
           "name": "Sundaram",
           "role": "Village Caretaker",
           "age": 58,
-          "appearance_en": "Receding gray hair, thick handlebar mustache, weathered dark brown skin, light tan khadi shirt, cream dhoti, holding a antique brass pocket watch."
+          "appearance_en": "Receding gray hair, thick handlebar mustache, weathered dark brown skin, light tan khadi shirt, cream dhoti, holding a antique brass pocket watch.",
+          "gender": "male"
         }
       ],
       "arc": [
@@ -250,7 +255,8 @@
           "name": "Aristotle",
           "role": "Philosopher and Tutor",
           "age": 50,
-          "appearance_en": "Tall stature, deep-set thoughtful brown eyes, receding grey-brown hair with a short beard, wearing a traditional olive-green Greek chiton and a dark draped cloak."
+          "appearance_en": "Tall stature, deep-set thoughtful brown eyes, receding grey-brown hair with a short beard, wearing a traditional olive-green Greek chiton and a dark draped cloak.",
+          "gender": "male"
         },
         {
           "name": "King Porus",
