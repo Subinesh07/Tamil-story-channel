@@ -7,6 +7,10 @@ on:
         description: "Story id to produce (blank = next pending story)"
         required: false
         default: ""
+      short_for:
+        description: "Make and upload only the Shorts trailer for this uploaded story id"
+        required: false
+        default: ""
       upload:
         description: "Upload to YouTube"
         type: boolean
@@ -73,6 +77,7 @@ jobs:
         run: |
           ARGS=""
           if [ -n "${{ inputs.row_id }}" ]; then ARGS="--row-id ${{ inputs.row_id }}"; fi
+          if [ -n "${{ inputs.short_for }}" ]; then ARGS="--short-for ${{ inputs.short_for }}"; fi
           if [ "${{ inputs.upload }}" = "false" ]; then ARGS="$ARGS --no-upload"; fi
           python src/make_video.py $ARGS
 

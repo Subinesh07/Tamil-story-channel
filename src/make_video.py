@@ -125,7 +125,7 @@ def produce(row, upload=True, check_duration=True):
             cards.append((s["start"] + 0.3, s["end"] - 0.2, CHANNEL_NAME_TA, title, CHANNEL_NAME_EN))
         elif s["kind"] == "outro":
             cards.append((s["start"] + 0.3, s["end"], CHANNEL_NAME_TA, "Subscribe பண்ணுங்க!",
-                          "தினமும் மாலை 7 மணிக்கு ஒரு புது கதை"))
+                          "தினமும் ஒரு புது தமிழ் கதை"))
     ass = work / "subs.ass"
     build_ass(timings, ass, cards)
     video = work / f"story_{rid}.mp4"
@@ -161,6 +161,7 @@ def produce(row, upload=True, check_duration=True):
         log.warning("Thumbnail failed: %s", e)
     if not ok:
         raise RuntimeError("Quality gate failed: " + " | ".join(failures))
+    LAST.update(video=out / video.name, timings=timings, intro=len(intro), title=title)
 
     if not upload:
         log.info("Upload skipped (--no-upload)")
@@ -173,12 +174,29 @@ def produce(row, upload=True, check_duration=True):
     video_id = yt_upload(out / video.name, {**row, "description_ta": desc, "chapters": chapters(scenes)})
     if thumb:
         set_thumbnail(video_id, thumb)
+    make_and_upload_short(row, video_id)
     try:
         from community import draft
         (out / "community_post.md").write_text(draft(row, video_id), encoding="utf-8")
     except Exception as e:
         log.warning("Community post draft failed: %s", e)
     return video_id
+
+
+LAST = {}   # the video just rendered (used for the Shorts trailer)
+
+
+def make_and_upload_short(row, video_id):
+    """Shorts trailer of the opening hook; never fails the main video."""
+    try:
+        from shorts import make_short, upload_short
+        short = make_short(LAST["video"], LAST["timings"], LAST["intro"], row["title_ta"].split(" | ")[0],
+                           OUTPUT_DIR.resolve() / f"story_{row['id']}_short.mp4")
+        if short and os.environ.get("YT_REFRESH_TOKEN"):
+            sid = upload_short(short, row, video_id, row.get("publish_at"))
+            update_row(row["id"], fail_reason=f"short:{sid}")
+    except Exception as e:
+        log.warning("Shorts trailer failed: %s", str(e)[:200])
 
 
 def previous_part_link(row):
@@ -280,6 +298,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--row-id", default="")
     ap.add_argument("--no-upload", action="store_true")
+    ap.add_argument("--short-for", default="", help="row id of an uploaded story: make and upload its Short")
     ap.add_argument("--test", action="store_true",
                     help="short test story: skip the 19-26 minute length check and never upload")
     ap.add_argument("--test-upload", action="store_true",
@@ -291,6 +310,14 @@ def main():
                         handlers=[logging.StreamHandler(),
                                   logging.FileHandler(OUTPUT_DIR / "run.log", encoding="utf-8")])
     rows = load_rows()
+    if args.short_for:
+        row = next(r for r in rows if r["id"] == args.short_for)
+        if "short:" in (row.get("fail_reason") or ""):
+            log.info("Row %s already has a Short", row["id"])
+            return 0
+        produce(row, upload=False, check_duration=False)
+        make_and_upload_short(row, row["video_id"])
+        return 0
     if not args.row_id and not any(r["status"] == "pending" for r in rows):
         log.info("No pending stories yet - nothing to produce today.")
         return 0
