@@ -230,18 +230,24 @@ def generate_all(provider, prompts, out_dir, check=True, base_seed=1000, cache_d
     from image_check import check as vision_check
     out_dir.mkdir(parents=True, exist_ok=True)
     paths, warnings = [], []
+    used = set()
     if cache_dir:
         cache_dir.mkdir(parents=True, exist_ok=True)
     for i, prompt in enumerate(prompts):
         path = out_dir / f"scene_{i:02d}.png"
         key = hashlib.md5(prompt.encode()).hexdigest()[:12]
         cached = cache_dir / f"{i:02d}_{key}.png" if cache_dir else None
-        # a picture made earlier with the previous style text is still the same scene: reuse it
+        # reuse a saved picture of the same scene even if the picture numbering moved or the
+        # style text changed (each saved file is used once, so repeated scenes stay different)
         from config import IMAGE_STYLE, OLD_IMAGE_STYLE
-        if cached and not cached.exists() and IMAGE_STYLE in prompt:
-            legacy = hashlib.md5(prompt.replace(IMAGE_STYLE, OLD_IMAGE_STYLE).encode()).hexdigest()[:12]
-            if (cache_dir / f"{i:02d}_{legacy}.png").exists():
-                cached = cache_dir / f"{i:02d}_{legacy}.png"
+        if cached and not cached.exists():
+            keys = {key, hashlib.md5(prompt.replace(IMAGE_STYLE, OLD_IMAGE_STYLE).encode()).hexdigest()[:12]}
+            for f in sorted(cache_dir.glob("*.png")):
+                if f.stem.split("_", 1)[-1] in keys and f not in used:
+                    cached = f
+                    break
+        if cached:
+            used.add(cached)
         # a hand-made picture (e.g. from ChatGPT) in assets/overrides/row_<id>/NN.png|jpg wins
         if cache_dir:
             for ext in ("png", "jpg", "jpeg", "webp"):
