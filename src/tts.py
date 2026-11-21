@@ -174,7 +174,12 @@ def build_narration(pieces, sentences, work_dir, lead_in=0.5):
     concat = [f"file '{lead.name}'"]
     for n, (audio, marks) in enumerate(pieces):
         wav = wav_dir / f"p{n:04d}.wav"
-        run(["ffmpeg", "-y", "-i", str(audio), "-ar", "44100", "-ac", "2", "-c:a", "pcm_s16le", str(wav)])
+        d0 = ffprobe_duration(audio)
+        # remove clicks inside the voice and fade every edge (15 ms) so joins never "crack"
+        run(["ffmpeg", "-y", "-i", str(audio), "-af",
+             f"adeclick,alimiter=limit=0.89:level=false,afade=t=in:d=0.015,"
+             f"afade=t=out:st={max(0.0, d0 - 0.015):.3f}:d=0.015",
+             "-ar", "44100", "-ac", "2", "-c:a", "pcm_s16le", str(wav)])
         d = ffprobe_duration(wav)
         for i, rs, re_ in marks:
             end = d if re_ is None else min(d, re_)
@@ -202,3 +207,35 @@ def build_narration(pieces, sentences, work_dir, lead_in=0.5):
     data = {"total": round(total, 3), "pause": SENTENCE_PAUSE, "sentences": timings}
     (work_dir / "timings.json").write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")
     return narration, data
+
+
+def count_clicks(wav_path, max_report=5):
+    """Find 'crick crick' sounds. Two kinds:
+    - clipping: the waveform hits the top of the scale (sounds like crackle)
+    - impulses: one sample jumps far away and straight back (a digital click).
+    Normal speech consonants are neither. Returns (count, [seconds...])."""
+    import wave
+    import numpy as np
+    with wave.open(str(wav_path)) as w:
+        rate, ch = w.getframerate(), w.getnchannels()
+        x = np.frombuffer(w.readframes(w.getnframes()), dtype=np.int16).astype(np.float32)
+    if ch > 1:
+        x = x.reshape(-1, ch).mean(axis=1)
+    if len(x) < rate:
+        return 0, []
+    events = list(np.where(np.abs(x) >= 32600)[0])                   # clipping
+    d = np.diff(x)
+    ad = np.abs(d)
+    local = np.convolve(ad, np.ones(882) / 882, mode="same") + 50.0
+    cand = np.where((ad[:-1] > 8 * local[:-1]) & (ad[:-1] > 3000))[0]
+    for i in cand:                                                   # impulse: out and straight back
+        if np.sign(d[i]) != np.sign(d[i + 1]) and ad[i + 1] > 0.6 * ad[i] and \
+                abs(x[i + 1] - x[i - 1] if i > 0 else 0) < 0.4 * ad[i]:
+            events.append(i + 1)
+    times, last = [], -1.0
+    for i in sorted(events):
+        t = i / rate
+        if t - last > 0.25:
+            times.append(round(float(t), 2))
+            last = t
+    return len(times), times[:max_report]

@@ -143,7 +143,9 @@ def _request(model, key, text):
 
 def _pcm_to_wav(pcm, rate, out_wav):
     subprocess.run(["ffmpeg", "-v", "error", "-y", "-f", "s16le", "-ar", str(rate), "-ac", "1", "-i", "pipe:0",
-                    "-af", f"atempo={GEMINI_TEMPO}", "-ar", "44100", "-ac", "2", "-c:a", "pcm_s16le",
+                    # head-room before speeding up, then a limiter: no clipping "crackle"
+                    "-af", f"volume=0.75,atempo={GEMINI_TEMPO},alimiter=limit=0.89:level=false",
+                    "-ar", "44100", "-ac", "2", "-c:a", "pcm_s16le",
                     str(out_wav)], input=pcm, check=True)
 
 

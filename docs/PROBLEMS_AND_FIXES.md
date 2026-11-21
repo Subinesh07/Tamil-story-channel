@@ -5,6 +5,8 @@ now stops it. Newest first. Keep adding to this file whenever something new goes
 
 | # | Date | Problem seen | Cause | Automatic prevention now |
 |---|------|--------------|-------|--------------------------|
+| 19 | 21 Nov | "Crick crick" glitch sounds in the Doomsday video | Leda audio peaks at full scale; speeding it up and adding the chime/bell pushed it into clipping (crackle); passages were also joined with hard edges | Head-room + limiter on every voice passage and on the final mix; de-click filter and 15 ms fades at every join; an automatic **click check** scans the narration, repairs clicks and refuses to upload if any remain |
+| 18 | 21 Nov | Characters looked the wrong age (30-year-old drawn as a schoolboy) and the father had a beard in one picture but not in another | Picture prompts gave only a bare number for age and no facial-hair rule | Every picture prompt uses a **character card**: exact age with age group (child / teenager / adult in his thirties / elderly), gender, fixed look and facial hair (beard / moustache only / clean-shaven); flashback ages are given explicitly; the picture checker rejects wrong ages and wrong facial hair. Scripts also get a **logic check** (scene-by-scene continuity, who knows what, timeline) with automatic fixes |
 | 17 | 21 Nov | Remake would have re-made all 25 pictures instead of 1 | Saved pictures were looked up by picture number + exact prompt text; the style text and numbering had changed | Saved pictures are found by scene (old or new style text, any number); copies of an earlier scene are discarded and only those are made again |
 | 16 | 21 Nov | Cloudflare still blocked at 6:30–7:30 AM IST although its docs say the limit resets at 00:00 UTC (5:30 AM IST) | Reset did not happen as documented for this account (real reset time being measured) | Never rely on an assumed reset: paused videos retry; the exact limit message is logged; a **hand-made picture** (e.g. Gemini app) can be dropped into `assets/overrides/row_<id>/NN.png` and is used first |
 | 15 | 21 Nov | Free Together AI turned out to need payment | Out-of-date web info | Not used. Free sources: Cloudflare (~75 pictures/day), Pollinations (small hourly), hand-made pictures |
@@ -24,9 +26,9 @@ now stops it. Newest first. Keep adding to this file whenever something new goes
 | 1 | 19 Nov | Thumbnail text cut off / boxes instead of English letters | Text sizing and font fallback | Text fits or shrinks; Latin font for English words |
 
 ## Checks every video passes before upload
-1. Script: Gemini only, English words converted to Tamil letters (Tanglish kept), style score ≥ 7 (start, middle, end), no foreign letters, length in range, ending resolves (final parts), not a copy of a specific work.
+1. Script: Gemini only, logic check (scene-by-scene continuity) with automatic fixes, English words converted to Tamil letters (Tanglish kept), style score ≥ 7 (start, middle, end), no foreign letters, length in range, ending resolves (final parts), not a copy of a specific work.
 2. Voice: Leda only (extra key first, main key second); every passage passes the **listening check** (clean Tamil, matches the script); quota = wait, never another voice.
-3. Pictures: every picture real and different (no test pattern, blank or duplicate); any failure = wait.
-4. Video: duration in range, subtitles match sentences, audio/video in sync, H.264/AAC format, Tamil letters render.
+3. Pictures: character cards (age, gender, facial hair) in every prompt; picture checker verifies ages and facial hair; every picture real and different (no test pattern, blank or duplicate); any failure = wait.
+4. Video: no clicks or clipping in the audio (click check), duration in range, subtitles match sentences, audio/video in sync, H.264/AAC format, Tamil letters render.
 5. Upload: not already on YouTube (same title); a remake waits until the old video is deleted.
 6. Thumbnail: curiosity layout with picture (story picture if the allowance is out).

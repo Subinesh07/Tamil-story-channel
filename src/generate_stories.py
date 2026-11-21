@@ -64,6 +64,10 @@ RULES = """Hard rules:
   * A feeling is shown in a few words or a line of dialogue ("மீராவுக்கு கை நடுங்க ஆரம்பிச்சுது."),
     then the story moves on. Never describe the same feeling twice.
   * Simple words a 12-year-old in Chennai understands. No rare or bookish Tamil words.
+  * LOGIC, scene by scene: every scene must follow from the one before. Show how people get from
+    one place to another and why they act; time of day moves forward sensibly; a character only
+    knows what they have seen or been told; ages, relationships, names and looks never change;
+    every clue or object that matters is introduced before it is used. No sudden unexplained jumps.
 - Write in exactly this voice and rhythm (style sample, do not copy its content):
 """ + "\n".join("    " + x for x in STYLE_EXAMPLE.splitlines()) + """
 - Hook in the first 30 seconds, rising tension, a turning point around 60%, emotional climax,
@@ -351,6 +355,48 @@ def tamil_letters_for_english(sentences):
     return sentences
 
 
+def logic_check_and_fix(plan, sentences):
+    """Gemini reads the whole script for plot holes and fixes serious ones in place
+    (same number of lines, so pictures and timings stay valid). Returns (sentences, problems_left)."""
+    chars = "; ".join(f"{c['name']} ({c.get('age', '')}, {c.get('role', '')})" for c in plan.get("characters", []))
+    numbered = "\n".join(f"{i}: {s}" for i, s in enumerate(sentences))
+    try:
+        v = write(
+            "You are a strict story editor. Read this Tamil story script (numbered lines) and list LOGIC "
+            "problems only: events that do not follow from what came before, unexplained jumps in place "
+            "or time, a character knowing something they could not know, changed ages/relations/names, "
+            "objects or clues used before they were introduced, contradictions. Ignore style.\n"
+            f"Characters: {chars}\n"
+            'Return JSON {"problems": [{"from": line, "to": line, "issue": "short", "serious": true/false}]}\n\n'
+            + numbered, want_json=True, max_tokens=6000)
+    except Exception as e:
+        log.warning("Logic check could not run: %s", str(e)[:120])
+        return sentences, []
+    serious = [p for p in v.get("problems", []) if p.get("serious")][:6]
+    sentences = list(sentences)
+    for p in serious:
+        try:
+            a = max(0, int(p["from"]) - 1)
+            b = min(len(sentences) - 1, int(p["to"]) + 1)
+        except (KeyError, ValueError, TypeError):
+            continue
+        part = sentences[a:b + 1]
+        try:
+            out = write(
+                f"Fix this logic problem in a Tamil story: {p.get('issue', '')}\n"
+                f"Rewrite these {len(part)} lines so the story is logical. Keep the same casual spoken "
+                f"Tanglish style, the same events around it, and exactly {len(part)} lines.\n"
+                f'Return JSON {{"lines": [exactly {len(part)} strings]}}\n\n' + "\n".join(part),
+                want_json=True, max_tokens=4000)
+            new = [str(x).strip() for x in out.get("lines", [])]
+            if len(new) == len(part) and all(new):
+                sentences[a:b + 1] = new
+                log.info("Logic fix (lines %d-%d): %s", a, b, str(p.get("issue", ""))[:100])
+        except Exception as e:
+            log.warning("Logic fix failed: %s", str(e)[:100])
+    return sentences, serious
+
+
 def style_check(sentences):
     """Gemini scores a sample of the script; bookish or flowery scripts are rewritten."""
     n = len(sentences)
@@ -501,6 +547,7 @@ def write_story(rows, doomsday=False, redo=None):
     sentences = fix_long_sentences(adjust_length(plan, sentences, lo=lo, hi=hi))
     sentences = _trim(sentences, hi)
     sentences = tamil_letters_for_english(sentences)
+    sentences, logic_issues = logic_check_and_fix(plan, sentences)
     from text_fix import bad_lines
     garbled = len(bad_lines(sentences))
     if garbled > max(8, len(sentences) * 0.06):

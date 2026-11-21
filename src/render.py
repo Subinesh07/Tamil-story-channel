@@ -75,9 +75,9 @@ def render_video(scenes, images, narration, ass_path, total, work_dir, out_path,
     parts.extend(sfx_parts)
     if extra:
         parts.append(f"[{a_idx}:a]{''.join(extra)}amix=inputs={1 + len(extra)}:duration=first:normalize=0,"
-                     f"afade=t=in:st=0:d=0.5,afade=t=out:st={fade_out_start:.3f}:d={FADE_OUT}[a]")
+                     f"alimiter=limit=0.89:level=false,afade=t=in:st=0:d=0.5,afade=t=out:st={fade_out_start:.3f}:d={FADE_OUT}[a]")
     else:
-        parts.append(f"[{a_idx}:a]afade=t=in:st=0:d=0.5,afade=t=out:st={fade_out_start:.3f}:d={FADE_OUT}[a]")
+        parts.append(f"[{a_idx}:a]alimiter=limit=0.89:level=false,afade=t=in:st=0:d=0.5,afade=t=out:st={fade_out_start:.3f}:d={FADE_OUT}[a]")
     graph = work_dir / "filter.txt"
     graph.write_text(";\n".join(parts), encoding="utf-8")
 

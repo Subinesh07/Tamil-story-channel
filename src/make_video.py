@@ -6,6 +6,7 @@ python src/make_video.py --no-upload     # stop after the quality gate
 """
 import argparse
 import json
+import subprocess
 import os
 import logging
 import shutil
@@ -75,6 +76,18 @@ def produce(row, upload=True, check_duration=True):
     else:
         clips, voice = synthesize(sentences, work / "tts")
     narration, timings = build_narration(clips, sentences, work)
+    from tts import count_clicks
+    clicks, at = count_clicks(narration)
+    if clicks:
+        log.warning("Audio: %d click(s) found at %s s - removing them", clicks, at)
+        fixed = narration.with_name("narration_fixed.wav")
+        subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", str(narration), "-af",
+                        "adeclick=w=55:o=75:t=2,adeclick=w=55:o=75:t=2", str(fixed)], check=True)
+        fixed.replace(narration)
+        clicks, at = count_clicks(narration)
+        if clicks > 2:
+            raise RuntimeError(f"audio still has {clicks} click sounds at {at} s - not uploading")
+    log.info("Audio click check passed")
     log.info("Narration %.1f min", timings["total"] / 60)
 
     log.info("== Images ==")
