@@ -129,15 +129,54 @@ def next_doom_date(rows):
     return day
 
 
-def doomsday_series(data):
-    """The active Doomsday series (created from the approved bible the first time)."""
+# Weekend 11 AM serial: after Doomsday, a new original season on a theme people already search for.
+# tag = Tamil word that leads every title and the thumbnail; search = English YouTube search tags.
+WEEKEND_THEMES = [
+    {"tag": "ஜாம்பி", "search": ["zombie tamil story", "zombie tamil", "zombie outbreak story"],
+     "brief": "a zombie-virus outbreak spreading through a Tamil Nadu town; a family and strangers try to "
+              "survive and reach safety"},
+    {"tag": "ஏலியன்", "search": ["alien tamil story", "alien invasion tamil", "ufo tamil story"],
+     "brief": "mysterious alien ships appear over Chennai; ordinary people uncover what the visitors want"},
+    {"tag": "சுனாமி", "search": ["tsunami tamil story", "survival story tamil", "disaster story tamil"],
+     "brief": "a giant tsunami warning for the Tamil Nadu coast; a fishing family races to save their village"},
+    {"tag": "டைம் லூப்", "search": ["time loop tamil story", "time travel tamil", "sci fi tamil story"],
+     "brief": "a young woman keeps reliving the same day before a disaster and must find how to stop it"},
+    {"tag": "கடைசி மனிதன்", "search": ["last man on earth tamil", "apocalypse tamil story", "survival tamil"],
+     "brief": "a man wakes up to find Chennai completely empty and slowly discovers who else survived and why"},
+    {"tag": "வைரஸ்", "search": ["virus outbreak tamil story", "pandemic story tamil", "thriller tamil story"],
+     "brief": "a strange new virus makes people forget who they are; a doctor and her brother search for the cure"},
+    {"tag": "எரிமலை", "search": ["volcano tamil story", "disaster survival tamil", "end of the world tamil"],
+     "brief": "an ancient volcano wakes under the Western Ghats; a hill-station family must escape in time"},
+]
+
+
+def doomsday_series(data, complete=None, used_names=()):
+    """The active weekend serial. Season 1 is the approved Doomsday bible; when a season ends, a new
+    original season starts on a popular theme that has not been used yet."""
     for s in data["series"]:
         if s["genre"] == "doomsday" and s["status"] == "active":
             return s
-    if any(s["genre"] == "doomsday" for s in data["series"]):
-        return None   # season finished; a new season is only started on request
-    s = json.loads(json.dumps(DOOMSDAY_BIBLE))
-    data["series"].append(s)
+    if not any(s["genre"] == "doomsday" for s in data["series"]):
+        s = json.loads(json.dumps(DOOMSDAY_BIBLE))
+        s.update({"title_tag": "டூம்ஸ்டே", "search_tags": ["doomsday", "doomsday tamil", "doomsday tamil story",
+                                                         "end of the world tamil"]})
+        data["series"].append(s)
+        return s
+    if complete is None:
+        return None
+    used = {s.get("title_tag") for s in data["series"] if s["genre"] == "doomsday"}
+    theme = next((t for t in WEEKEND_THEMES if t["tag"] not in used), WEEKEND_THEMES[len(used) % len(WEEKEND_THEMES)])
+    old = GENRES["doomsday"]["brief"]
+    GENRES["doomsday"]["brief"] = (f"an ORIGINAL weekend survival thriller series (fiction): {theme['brief']}. "
+                                   "Each part ends on a cliffhanger. Suspense, chases, family emotion, brave "
+                                   "ordinary people. No gore, no real politicians, agencies or brands, nothing "
+                                   "from any film or series")
+    try:
+        s = create_series("doomsday", data, complete, set(used_names))
+    finally:
+        GENRES["doomsday"]["brief"] = old
+    s.update({"title_tag": theme["tag"], "search_tags": theme["search"]})
+    log.info("New weekend season: %s (%s)", s.get("title_en"), theme["tag"])
     return s
 
 

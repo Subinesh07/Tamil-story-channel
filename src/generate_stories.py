@@ -509,7 +509,7 @@ def write_story(rows, doomsday=False, redo=None):
         else:
             lo, hi, n_parts, part_words, mins, approx = MIN_WORDS, MAX_WORDS, PARTS, "660-720", "20-25", "2,650"
     elif doomsday:
-        ser = S.doomsday_series(data)
+        ser = S.doomsday_series(data, complete, used_names)
         if not ser:
             raise LLMError("NO_DOOMSDAY: season finished")
         day, genre, why = S.next_doom_date(rows), "doomsday", "weekend 12 PM"
@@ -572,14 +572,15 @@ def write_story(rows, doomsday=False, redo=None):
     suffix = f" | {ser['title_ta']} - பகுதி {part}"
     title = plan["title_ta"].strip()
     if genre == "doomsday":   # people search "doomsday": the word leads the title and the thumbnail
-        suffix = f" | டூம்ஸ்டே பகுதி {part}"
-        title = "டூம்ஸ்டே 😱 " + title
+        tag = ser.get("title_tag") or "டூம்ஸ்டே"
+        suffix = f" | {tag} பகுதி {part}"
+        title = f"{tag} 😱 " + title
     if len(title) + len(suffix) > 100:   # cut at a word boundary, never mid-word
         title = title[:100 - len(suffix) - 1].rsplit(" ", 1)[0].rstrip(" ,:-") + "…"
     title += suffix
     desc = plan.get("description_ta", "")
     if genre == "doomsday":
-        desc += ("\n\n⏳ டூம்ஸ்டே தொடர்: ஒவ்வொரு சனி, ஞாயிறு காலை 11 மணிக்கு புதிய பகுதி!"
+        desc += (f"\n\n⏳ {ser.get('title_tag') or 'டூம்ஸ்டே'} தொடர்: ஒவ்வொரு சனி, ஞாயிறு காலை 11 மணிக்கு புதிய பகுதி!"
                  "\n(இது முழுக்க கற்பனைக் கதை / This is a work of fiction)")
     if genre == "real lives":
         desc += "\n\n(நிஜ வாழ்க்கை நிகழ்வுகளை அடிப்படையாகக் கொண்ட நாடகமாக்கல் / Dramatised from documented real events)"
@@ -592,7 +593,7 @@ def write_story(rows, doomsday=False, redo=None):
            "thumb_quote_ta": plan.get("thumb_line1_ta", ""), "thumb_hook_ta": plan.get("thumb_line2_ta", ""),
            "thumb_text": json.dumps({**{k: plan.get(f"thumb_{k}_ta", "") for k in
                                         ("line1", "line2", "ribbon", "title", "tagline")},
-                                     **({"title": "டூம்ஸ்டே"} if genre == "doomsday" else {})},
+                                     **({"title": ser.get("title_tag") or "டூம்ஸ்டே"} if genre == "doomsday" else {})},
                                     ensure_ascii=False),
            "thumb_prompt": thumb_prompt(plan)}
     from text_fix import foreign, repair_row

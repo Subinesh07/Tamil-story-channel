@@ -42,8 +42,7 @@ def build_metadata(row):
     return {
         "snippet": {"title": title, "description": description, "categoryId": YT_CATEGORY_ID,
                     "defaultLanguage": "ta", "defaultAudioLanguage": "ta",
-                    "tags": GENRE_TAGS.get(row.get("genre"), []) + ["Tamil story", "Tamil kathaigal",
-                                                                     "Nila Kathaigal"]},
+                    "tags": series_tags(row) + ["Tamil story", "Tamil kathaigal", "Nila Kathaigal"]},
         "status": status,
     }
 
@@ -57,6 +56,18 @@ GENRE_TAGS = {
     "family moral": ["tamil moral story", "neethi kathaigal"],
     "real lives": ["tamil biography", "real life story tamil"],
 }
+
+
+def series_tags(row):
+    """Search tags of the row's series (e.g. a weekend season's theme), else the genre's."""
+    try:
+        import series as S
+        for ser in S.load()["series"]:
+            if ser["id"] == row.get("series_id") and ser.get("search_tags"):
+                return list(ser["search_tags"])
+    except Exception:
+        pass
+    return GENRE_TAGS.get(row.get("genre"), [])
 
 
 def upload(video_path, row):
