@@ -65,9 +65,22 @@
     "note": "Short Buh1Y2W_ywk scheduled 30 min after the video",
     "at": "2026-11-21T16:09:43+00:00"
    }
+  },
+  "6": {
+   "voice": {
+    "state": "waiting",
+    "note": "voice check could not run (gemini-3.5-flash HTTP 503); will retry next run",
+    "at": "2026-11-21T17:19:09+00:00"
+   }
   }
  },
  "events": [
+  {
+   "at": "2026-11-21T17:19:09+00:00",
+   "row": "6",
+   "level": "warn",
+   "msg": "Paused: voice check could not run (gemini-3.5-flash HTTP 503); will retry next run"
+  },
   {
    "at": "2026-11-21T17:12:32+00:00",
    "row": "10",
