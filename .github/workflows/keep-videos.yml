@@ -4,6 +4,10 @@ name: Keep recent videos
 # release, so full-series compilations can use them. Safe to run any time.
 on:
   workflow_dispatch:
+    inputs:
+      reset:
+        description: "true = delete the kept copies first and copy again (newest wins)"
+        default: "false"
 
 permissions:
   contents: write
@@ -20,6 +24,9 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release view videos >/dev/null 2>&1 || gh release create videos --title "Finished videos (for compilations)" --notes "Kept automatically. Do not delete."
+          if [ "${{ inputs.reset }}" = "true" ]; then
+            for a in $(gh release view videos --json assets -q '.assets[].name'); do gh release delete-asset videos "$a" -y; done
+          fi
           gh release view videos --json assets -q '.assets[].name' > have.txt
           gh api "repos/${{ github.repository }}/actions/artifacts?per_page=100" \
             -q '.artifacts | sort_by(.created_at) | reverse | .[] | select(.expired==false and (.name|startswith("video-")) and .size_in_bytes > 1000000) | "\(.id) \(.name)"' |
