@@ -81,6 +81,18 @@ jobs:
           if [ "${{ inputs.upload }}" = "false" ]; then ARGS="$ARGS --no-upload"; fi
           python src/make_video.py $ARGS
 
+      - name: Keep the finished video for full-series compilations
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view videos >/dev/null 2>&1 || gh release create videos --title "Finished videos (for compilations)" --notes "Kept automatically. Do not delete."
+          for f in output/story_*.mp4 output/story_*_thumbnail.jpg; do
+            [ -f "$f" ] || continue
+            case "$f" in *_short*) continue;; esac
+            gh release upload videos "$f" --clobber || echo "could not keep $f"
+          done
+
       - name: Community post draft -> GitHub issue
         if: success()
         env:

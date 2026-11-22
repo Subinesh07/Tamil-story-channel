@@ -164,7 +164,7 @@ def produce(row, upload=True, check_duration=True):
         log.warning("Thumbnail failed: %s", e)
     if not ok:
         raise RuntimeError("Quality gate failed: " + " | ".join(failures))
-    LAST.update(video=out / video.name, timings=timings, intro=len(intro), title=title)
+    LAST.update(video=out / video.name, timings=timings, intro=len(intro), outro=len(outro), title=title)
     ST.stage(row["id"], "video", "done", f"{timings['total'] / 60:.1f} min, quality check passed")
 
     if not upload:
@@ -212,6 +212,42 @@ def make_and_upload_short(row, video_id):
             ST.stage(row["id"], "short", "done", f"Short {sid} scheduled 30 min after the video")
     except Exception as e:
         log.warning("Shorts trailer failed: %s", str(e)[:200])
+        return
+    make_extra_shorts(row, video_id)
+
+
+def make_extra_shorts(row, video_id):
+    """Shorts 2 and 3: strongest middle moment + cliffhanger, cut from the same finished video
+    (no voice or picture credits). Posted the next two afternoons."""
+    try:
+        from shorts import EXTRA, extra_when, make_short, pick_extra_segments, upload_short
+        import series as S
+        final = row.get("genre") == "family emotional"
+        try:
+            ser = next(x for x in S.load()["series"] if x["id"] == row.get("series_id"))
+            final = final or int(row.get("part") or 0) >= ser["parts_total"]
+        except Exception:
+            pass
+        t = LAST["timings"]
+        story_t = {**t, "sentences": t["sentences"][:len(t["sentences"]) - LAST.get("outro", 0)]}
+        texts = [x.get("text", "") for x in story_t["sentences"]]
+        segs = pick_extra_segments(story_t, LAST["intro"], texts if any(texts) else None, final)
+        ids = []
+        for k, seg in enumerate(segs[:2]):
+            ending, cta = EXTRA[k]
+            out = OUTPUT_DIR.resolve() / f"story_{row['id']}_short{k + 2}.mp4"
+            clip = make_short(LAST["video"], LAST["timings"], LAST["intro"], row["title_ta"].split(" | ")[0],
+                              out, seg=seg, cta=cta)
+            if clip and os.environ.get("YT_REFRESH_TOKEN"):
+                ids.append(upload_short(clip, row, video_id, row.get("publish_at"),
+                                        when=extra_when(row.get("publish_at"), k + 1), ending=ending))
+        if ids:
+            cur = next((r for r in load_rows() if r["id"] == row["id"]), {}).get("fail_reason", "")
+            update_row(row["id"], fail_reason=f"{cur} shorts:{','.join(ids)}".strip())
+            import status as ST
+            ST.event(f"Row {row['id']}: {len(ids)} extra Shorts scheduled (next afternoons, 1 PM)")
+    except Exception as e:
+        log.warning("Extra Shorts failed: %s", str(e)[:200])
 
 
 def previous_part_link(row):

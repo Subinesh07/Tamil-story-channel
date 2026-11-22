@@ -1,0 +1,27 @@
+name: Daily 7 PM checklist
+
+# 7:05 PM IST: opens a GitHub issue with today's end screen / pin comment / Shorts checklist.
+on:
+  schedule:
+    - cron: "35 13 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  remind:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - name: Open checklist issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if python src/daily_reminder.py > checklist.md; then
+            gh issue create --title "🎬 7 PM checklist – end screen + pin ($(TZ=Asia/Kolkata date +%d-%b))" --body-file checklist.md
+          else
+            echo "No video today"
+          fi
