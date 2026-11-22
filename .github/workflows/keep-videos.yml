@@ -20,17 +20,17 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release view videos >/dev/null 2>&1 || gh release create videos --title "Finished videos (for compilations)" --notes "Kept automatically. Do not delete."
-          have=$(gh release view videos --json assets -q '.assets[].name')
+          gh release view videos --json assets -q '.assets[].name' > have.txt
           gh api "repos/${{ github.repository }}/actions/artifacts?per_page=100" \
-            -q '.artifacts[] | select(.expired==false and (.name|startswith("video-")) and .size_in_bytes > 1000000) | "\(.id) \(.name)"' |
+            -q '.artifacts | sort_by(.created_at) | reverse | .[] | select(.expired==false and (.name|startswith("video-")) and .size_in_bytes > 1000000) | "\(.id) \(.name)"' |
           while read id name; do
             mkdir -p "a/$name" && gh api "repos/${{ github.repository }}/actions/artifacts/$id/zip" > "a/$name.zip" && unzip -o -q "a/$name.zip" -d "a/$name"
             for f in a/$name/story_*.mp4 a/$name/story_*_thumbnail.jpg; do
               [ -f "$f" ] || continue
               case "$f" in *_short*) continue;; esac
               b=$(basename "$f")
-              echo "$have" | grep -qx "$b" && { echo "already kept $b"; continue; }
-              gh release upload videos "$f" --clobber && echo "kept $b"
+              grep -qx "$b" have.txt && { echo "already kept $b"; continue; }
+              gh release upload videos "$f" --clobber && echo "kept $b ($name)" && echo "$b" >> have.txt
             done
             rm -rf "a/$name" "a/$name.zip"
           done
