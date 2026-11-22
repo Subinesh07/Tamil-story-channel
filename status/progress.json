@@ -103,6 +103,11 @@
     "state": "waiting",
     "note": "all free picture allowances are used up for today",
     "at": "2026-11-22T09:59:45+00:00"
+   },
+   "script": {
+    "state": "done",
+    "note": "written; style [9, 9, 9], 3 logic problems fixed, foreign letters checked",
+    "at": "2026-11-22T17:23:47+00:00"
    }
   },
   "16": {
@@ -111,9 +116,28 @@
     "note": "written; style [10, 10, 10], 1 logic problems fixed, foreign letters checked",
     "at": "2026-11-21T22:38:02+00:00"
    }
+  },
+  "9": {
+   "script": {
+    "state": "done",
+    "note": "written; style [8, 9, 9], 1 logic problems fixed, foreign letters checked",
+    "at": "2026-11-22T17:28:30+00:00"
+   }
   }
  },
  "events": [
+  {
+   "at": "2026-11-22T17:28:30+00:00",
+   "row": "9",
+   "level": "info",
+   "msg": "Story written: சென்னிமலை கிராமத்து மணி சத்தம்... நள்ளிரவு 12 மணிக்கு நிழலாக வந்த… | நிழல் மணியி"
+  },
+  {
+   "at": "2026-11-22T17:23:47+00:00",
+   "row": "8",
+   "level": "info",
+   "msg": "Story written: காட்டுக்குள் மாட்டிய 4 பேரின் தவிப்பு! 400 வருஷ இரகசியம்...… | கடலும் காடும் கோய"
+  },
   {
    "at": "2026-11-22T09:59:45+00:00",
    "row": "8",
