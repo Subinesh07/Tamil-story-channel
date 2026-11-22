@@ -204,7 +204,7 @@ async function main() {
   const FALLBACK = [["இன்னைக்கு கதையில உங்களுக்கு பிடிச்ச பகுதி எது?", ["ஆரம்பம்", "திருப்புமுனை", "முடிவு", "எல்லாமே!"]],
                     ["அடுத்த கதை எந்த மாதிரி இருக்கணும்?", ["குடும்ப கதை", "திகில் கதை", "சாகச கதை", "உண்மை கதை"]],
                     ["நீங்க எப்போ கதை கேட்பீங்க?", ["சாயங்காலம்", "தூங்கும் முன்", "பயணத்துல", "வேலை செய்யும்போது"]]];
-  const cmRows = rows.filter(r => r.publish_at && new Date(r.publish_at) > now - 2 * 24 * H && new Date(r.publish_at) < now + 24 * H);
+  const cmRows = rows.filter(r => r.publish_at && new Date(r.publish_at) > now - 2 * 24 * H && new Date(r.publish_at) < now + 5 * 24 * H);
   let ch = "";
   for (const r of cmRows) {
     const c = (prog.community || {})[r.id];
@@ -215,16 +215,20 @@ async function main() {
     const poll = c ? `${c.poll}\n` + c.options.map(o => "• " + o).join("\n") : `${fb[0]}\n` + fb[1].map(o => "• " + o).join("\n");
     const key = (k) => `nk-${r.id}-${k}`;
     const chk = (k) => { try { return localStorage.getItem(key(k)) ? "checked" : ""; } catch (e) { return ""; } };
+    const sched = ist(new Date(new Date(r.publish_at).getTime() + H).toISOString());
+    const future = new Date(r.publish_at) > now;
     ch += `<div class="cm"><b>${ist(r.publish_at)} – ${esc(title)}</b>
+      <div class="fix">${future ? "📅 Schedule this post for: <b>" + sched + "</b> (1 hour after the video) – in the app: + → Post → paste → add poll → clock icon → Schedule" : "Video is public – post now"}${c ? "" : " · final text appears when the video is made"}</div>
       <div>Post <button class="copy" data-t="${encodeURIComponent(post)}">Copy</button></div><pre>${esc(post)}</pre>
       <div>Poll <button class="copy" data-t="${encodeURIComponent(poll)}">Copy</button></div><pre>${esc(poll)}</pre>
       <label><input type="checkbox" data-k="${key("post")}" ${chk("post")}> Post done ✅</label>
       <label><input type="checkbox" data-k="${key("poll")}" ${chk("poll")}> Poll done ✅</label>
       <label><input type="checkbox" data-k="${key("pin")}" ${chk("pin")}> Pinned comment ✅</label>
+      <label><input type="checkbox" data-k="${key("end")}" ${chk("end")}> End screen ✅</label>
       <label><input type="checkbox" data-k="${key("share")}" ${chk("share")}> Shared ✅</label></div>`;
   }
   const cdiv = document.getElementById("community");
-  cdiv.innerHTML = ch || "<div class='fix'>No videos in the last 2 days.</div>";
+  cdiv.innerHTML = ch || "<div class='fix'>No videos in the last 2 days or the next 5.</div>";
   cdiv.querySelectorAll(".copy").forEach(b => b.onclick = () => {
     navigator.clipboard.writeText(decodeURIComponent(b.dataset.t)); b.textContent = "Copied ✓"; });
   cdiv.querySelectorAll("input[type=checkbox]").forEach(x => x.onchange = () => {
