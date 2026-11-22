@@ -1,0 +1,40 @@
+name: Channel analytics
+
+# Daily report: watch hours toward 4,000, where viewers leave, traffic sources.
+# Saved to status/analytics.txt (shown on the status page). "backfill" adds old videos to playlists.
+on:
+  schedule:
+    - cron: "41 2 * * *"   # 8:11 AM IST
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "report or backfill (add old videos to playlists)"
+        default: report
+
+permissions:
+  contents: write
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Run
+        env:
+          YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
+          YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
+          YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
+        run: |
+          if [ "${{ github.event.inputs.mode }}" = "backfill" ]; then python src/channel_tools.py backfill; fi
+          python src/channel_tools.py
+      - name: Save
+        run: |
+          git config user.name "nila-bot"; git config user.email "bot@users.noreply.github.com"
+          git add status/analytics.txt playlists.json 2>/dev/null || true
+          git diff --cached --quiet || (git commit -m "Analytics report" && (git push || (git pull --rebase -X theirs && git push)))

@@ -181,9 +181,18 @@ def produce(row, upload=True, check_duration=True):
     make_and_upload_short(row, video_id)
     try:
         from community import draft
-        (out / "community_post.md").write_text(draft(row, video_id), encoding="utf-8")
+        md = draft(row, video_id)
+        (out / "community_post.md").write_text(md, encoding="utf-8")
     except Exception as e:
+        md = ""
         log.warning("Community post draft failed: %s", e)
+    try:
+        from channel_tools import add_to_playlist, post_comment
+        add_to_playlist(row, video_id)
+        m = re.search(r"\*\*(🗳️[^*]+)\*\*", md)
+        post_comment(row, video_id, m.group(1) if m else None)
+    except Exception as e:
+        log.warning("Playlist/comment step failed: %s", e)
     return video_id
 
 

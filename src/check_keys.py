@@ -101,6 +101,15 @@ def main():
     else:
         r = requests.get("https://api.groq.com/openai/v1/models", headers={"Authorization": f"Bearer {k}"}, timeout=30)
         (ok if r.ok else bad)("Groq", f"{len(r.json().get('data', []))} models" if r.ok else f"HTTP {r.status_code}")
+    # YouTube Analytics permission
+    if os.environ.get("YT_REFRESH_TOKEN"):
+        try:
+            sys.path.insert(0, os.path.dirname(__file__))
+            from channel_tools import analytics_report
+            analytics_report()
+            ok("YouTube Analytics", "permission works")
+        except Exception as e:
+            bad("YouTube Analytics", str(e)[:150])
     # YouTube token: upload + readonly
     try:
         from competitors import client
