@@ -123,9 +123,61 @@
     "note": "written; style [8, 9, 9], 1 logic problems fixed, foreign letters checked",
     "at": "2026-11-22T17:28:30+00:00"
    }
+  },
+  "11": {
+   "script": {
+    "state": "done",
+    "note": "written; style [10, 10, 9], 4 logic problems fixed, foreign letters checked",
+    "at": "2026-11-22T18:03:58+00:00"
+   }
+  },
+  "12": {
+   "script": {
+    "state": "done",
+    "note": "written; style [9, 7, 9], 4 logic problems fixed, foreign letters checked",
+    "at": "2026-11-22T18:05:27+00:00"
+   }
+  },
+  "13": {
+   "script": {
+    "state": "done",
+    "note": "written; style [9, 8, 9], 3 logic problems fixed, foreign letters checked",
+    "at": "2026-11-22T18:15:13+00:00"
+   }
+  },
+  "14": {
+   "script": {
+    "state": "done",
+    "note": "written; style [9, 8, 9], 4 logic problems fixed, foreign letters checked",
+    "at": "2026-11-22T18:18:28+00:00"
+   }
   }
  },
  "events": [
+  {
+   "at": "2026-11-22T18:18:28+00:00",
+   "row": "14",
+   "level": "info",
+   "msg": "Story written: சொத்துக்காக போலி ஆவணம்? இனியா கண்டுபிடித்த அதிர்ச்சி உண்மை… என்ன… | நிழல் நிஜமான"
+  },
+  {
+   "at": "2026-11-22T18:15:13+00:00",
+   "row": "13",
+   "level": "info",
+   "msg": "Story written: மண்ணில் செய்த பறவை உடைந்தது… ஊரே தேடும் அந்த பழைய அச்சு எங்கே… | மழைச்சாரல் தாத்"
+  },
+  {
+   "at": "2026-11-22T18:05:27+00:00",
+   "row": "12",
+   "level": "info",
+   "msg": "Story written: 20 வயதில் ராஜாவான அலெக்சாண்டர்: 48,000 வீரர்களுடன்… | அலெட்சாண்டர்: ஒரு மாமனிதன்"
+  },
+  {
+   "at": "2026-11-22T18:03:58+00:00",
+   "row": "11",
+   "level": "info",
+   "msg": "Story written: அப்பாவோட சொத்துக்காக சொந்த சித்தப்பா செஞ்ச சதி… 26 வயசு பொண்ணுக்கு… | நிழல் நிஜம"
+  },
   {
    "at": "2026-11-22T17:28:30+00:00",
    "row": "9",
