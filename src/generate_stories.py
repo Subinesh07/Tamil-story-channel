@@ -176,7 +176,10 @@ def write_part(plan, part, previous_text="", final_note=None, parts=PARTS, part_
     chunk = beats[part * size:(part + 1) * size]
     chars = "\n".join(f"- {c['name']}: {c['role']}, {c.get('age', '')}" for c in plan["characters"])
     beat_text = "\n".join(f"{i + 1}. {b['summary_en']} ({b['emotion']})" for i, b in enumerate(chunk))
-    context = ("" if part == 0 else
+    context = ("COLD OPEN: begin with 3-4 short gripping lines from the most dramatic moment of THIS episode "
+               "(a flash-forward, present tense, no names explained yet), then one bridge line such as "
+               "'இதெல்லாம் எப்படி ஆரம்பிச்சது? கொஞ்சம் பின்னாடி போவோம்…', then tell the story from its start."
+               if part == 0 else
                "The story so far ends like this; continue seamlessly from it:\n" + previous_text[-1200:])
     last = part == PARTS - 1
     ending = ((final_note or "Finish the story with these beats and give it a satisfying, complete ending.")
@@ -511,7 +514,7 @@ def write_story(rows, doomsday=False, redo=None):
         if doomsday:
             lo, hi, n_parts, part_words, mins, approx = DOOM_MIN_WORDS, DOOM_MAX_WORDS, 2, "620-700", "10-12", "1,300"
         else:
-            lo, hi, n_parts, part_words, mins, approx = MIN_WORDS, MAX_WORDS, PARTS, "660-720", "20-25", "2,650"
+            lo, hi, n_parts, part_words, mins, approx = MIN_WORDS, MAX_WORDS, 2, "620-700", "10-12", "1,300"
     elif doomsday:
         ser = S.doomsday_series(data, complete, used_names)
         if not ser:
@@ -521,7 +524,7 @@ def write_story(rows, doomsday=False, redo=None):
     else:
         day = S.next_publish_date(rows)
         genre, why = S.genre_for(day, rows, data)
-        lo, hi, n_parts, part_words, mins, approx = MIN_WORDS, MAX_WORDS, PARTS, "660-720", "20-25", "2,650"
+        lo, hi, n_parts, part_words, mins, approx = MIN_WORDS, MAX_WORDS, 2, "620-700", "10-12", "1,300"
     prefer = why.split(":", 1)[1] if why.startswith("weekend:") else None
     if not doomsday and not redo:
         ser = S.active_series(data, genre, prefer) or S.create_series(genre, data, complete, used_names)

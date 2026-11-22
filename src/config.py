@@ -19,7 +19,7 @@ CSV_COLUMNS = [
 SENTENCE_SEP = "।"
 PROMPT_SEP = "|"
 # Leda (1.08x) narrates ~118 Tamil words/min (measured: 1,892 words = 14.9 min at 1.15x), so ~2,600 words = 21-24 min
-MIN_WORDS, MAX_WORDS = 2450, 2850
+MIN_WORDS, MAX_WORDS = 1150, 1450   # 10-12 min parts: new viewers stay longer
 MAX_WORDS_PER_SENTENCE = 15
 MIN_SCENES, MAX_SCENES = 20, 25   # story beats in the plan (pictures follow the script)
 OLD_IMAGE_STYLE = ("cinematic semi-realistic digital painting like a Tamil TV serial still, "
@@ -62,8 +62,8 @@ X264_PRESET = "veryfast"
 X264_CRF = 21
 
 # --- Quality gate (minutes) ---
-HARD_MIN, HARD_MAX = 12.0, 30.0   # fail outside; warn outside the soft range
-SOFT_MIN, SOFT_MAX = 18.0, 26.0
+HARD_MIN, HARD_MAX = 8.0, 16.0   # fail outside; warn outside the soft range
+SOFT_MIN, SOFT_MAX = 9.5, 14.0
 # Weekend Doomsday serial (12 PM Sat/Sun): shorter parts, so two videos a day fit Leda's free limit
 DOOM_MIN_WORDS, DOOM_MAX_WORDS = 1150, 1450
 DOOM_HARD = (8.0, 16.0)
@@ -92,12 +92,13 @@ THUMB_FONT = "/usr/share/fonts/truetype/noto/NotoSansTamil-Bold.ttf"
 
 # Intro / outro lines rotate by story id so videos don't all sound the same.
 # {title} is replaced with the story title. Keep every sentence short.
+# Title card after the cold open: one short line (about 3 seconds), no long welcome
 INTRO_LINES = [
-    "வணக்கம்! நிலா கதைகளுக்கு உங்களை அன்போட வரவேற்கிறோம்। இன்னைக்கு கதை, {title}",
-    "நிலா கதைகள்ல இன்னைக்கு ஒரு புது கதை। கதையோட பேரு, {title}",
-    "வாங்க, ஒரு கதை கேட்கலாம்। நிலா கதைகள் வழங்கும், {title}",
-    "இன்னைக்கு சாயங்காலம் நிலா கதைகள்ல, {title}। வாங்க கேட்கலாம்",
-    "வணக்கம் நண்பர்களே! இது நிலா கதைகள்। இன்னைக்கு நம்ம கதை, {title}",
+    "நிலா கதைகள் வழங்கும், {title}",
+    "{title}",
+    "நிலா கதைகள், {title}",
+    "{title}, நிலா கதைகள்ல",
+    "இது நிலா கதைகள், {title}",
 ]
 OUTRO_LINES = [
     "கதை பிடிச்சிருந்தா லைக் பண்ணுங்க। நிலா கதைகளை சப்ஸ்க்ரைப் பண்ணுங்க। நாளைக்கு இன்னொரு கதையோட சந்திப்போம்",
