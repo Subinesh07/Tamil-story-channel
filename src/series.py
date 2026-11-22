@@ -52,6 +52,30 @@ GENRES["doomsday"] = {
              "brave ordinary people. NO gore or graphic violence, no real politicians, agencies or brands, "
              "and nothing from Marvel, DC or any film (no superheroes, no famous villain names)"}
 
+# Sunday 5 PM "golden shot": one COMPLETE family-emotional story every week, written to be shared
+# (our best video so far is a family-emotional story). Same playlist every week.
+GENRES["family emotional"] = {
+    "ta": "குடும்பக் கதை", "parts": 1000,
+    "brief": "ONE complete, standalone, deeply emotional Tamil family story (amma, appa, patti, thatha, "
+             "son, daughter, in-laws, siblings) that people will want to share on WhatsApp with their family. "
+             "A relatable everyday situation, a hidden sacrifice or secret, a big emotional twist near the end "
+             "that brings tears, and a warm, satisfying ending with a quiet life lesson (never preachy). "
+             "The very first line must be a gripping hook. Title = a family member + a secret / one object, "
+             "like 'அம்மா மறைச்ச அந்த ஒரு கடிதம்'"}
+GOLDEN_BIBLE = {
+    "id": "golden-1", "genre": "family emotional", "status": "active", "parts_total": 1000, "parts_done": 0,
+    "so_far": [], "title_ta": "தமிழ் குடும்ப கதைகள்", "title_en": "Tamil Family Stories",
+    "premise_en": "Standalone emotional family stories, a new family every week.", "characters": [], "arc": []}
+
+
+def golden_series(data):
+    for x in data["series"]:
+        if x["genre"] == "family emotional" and x["status"] == "active":
+            return x
+    data["series"].append(json.loads(json.dumps(GOLDEN_BIBLE)))
+    return data["series"][-1]
+
+
 # Pre-written bible (approved sample), so no AI tokens are spent creating it
 DOOMSDAY_BIBLE = {
     "id": "doomsday-1", "genre": "doomsday", "status": "active", "parts_total": 7, "parts_done": 0,
@@ -222,8 +246,10 @@ def genre_for(day, rows, data):
     wd = day.weekday()
     if wd in WEEKLY:
         return WEEKLY[wd], "weekday"
+    if wd == 6:
+        return "family emotional", "sunday-golden"
     speed = views_per_day_by_series(rows)
-    active = {s["id"]: s for s in data["series"] if s["status"] == "active"}
+    active = {s["id"]: s for s in data["series"] if s["status"] == "active" and s["genre"] != "family emotional"}
     ranked = [sid for sid in sorted(speed, key=speed.get, reverse=True) if sid in active]
     if ranked:
         log.info("Weekend pick: fastest-growing series %s (%.0f views/day)", ranked[0], speed[ranked[0]])
@@ -275,6 +301,11 @@ Return JSON:
 
 def episode_brief(s):
     """Prompt text that makes the next part continue the series."""
+    if s["genre"] == "family emotional":
+        done = "; ".join(t[:120] for t in s["so_far"][-12:]) or "none yet"
+        return (f"STANDALONE STORY (not a serial): {GENRES['family emotional']['brief']}.\n"
+                f"A NEW family, new names and a clearly different situation from these earlier stories: {done}.\n"
+                "No recap, no 'part', no cliffhanger: the story is complete and resolved in this one video.")
     n, total = s["parts_done"] + 1, s["parts_total"]
     g = GENRES[s["genre"]]
     chars = "\n".join(f"- {c['name']}: {c.get('role', '')}, {c.get('age', '')}, look: {c.get('appearance_en', '')}"

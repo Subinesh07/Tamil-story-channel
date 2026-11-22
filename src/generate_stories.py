@@ -527,12 +527,13 @@ def write_story(rows, doomsday=False, redo=None):
         lo, hi, n_parts, part_words, mins, approx = MIN_WORDS, MAX_WORDS, 2, "620-700", "10-12", "1,300"
     prefer = why.split(":", 1)[1] if why.startswith("weekend:") else None
     if not doomsday and not redo:
-        ser = S.active_series(data, genre, prefer) or S.create_series(genre, data, complete, used_names)
+        ser = (S.golden_series(data) if genre == "family emotional" else
+               S.active_series(data, genre, prefer) or S.create_series(genre, data, complete, used_names))
     part = int(redo["part"]) if redo else ser["parts_done"] + 1
     brief_ser = ser
     if redo:   # same part again: same outline and the same events, so later parts still follow on
         brief_ser = {**ser, "parts_done": part - 1, "so_far": ser["so_far"][:part - 1]}
-    final = part >= ser["parts_total"]
+    final = part >= ser["parts_total"] or genre == "family emotional"
     opening = next_opening(rows)
     log.info("%s %s -> %s part %d/%d (%s)", day, day.strftime("%a"), ser["title_en"], part,
              ser["parts_total"], why)
@@ -588,6 +589,8 @@ def write_story(rows, doomsday=False, redo=None):
         tag = ser.get("title_tag") or "டூம்ஸ்டே"
         suffix = f" | {tag} பகுதி {part}"
         title = f"{tag} 😱 " + title
+    if genre == "family emotional":   # standalone story: no series name, no part number
+        suffix = ""
     if len(title) + len(suffix) > 100:   # cut at a word boundary, never mid-word
         title = title[:100 - len(suffix) - 1].rsplit(" ", 1)[0].rstrip(" ,:-") + "…"
     title += suffix
@@ -598,7 +601,7 @@ def write_story(rows, doomsday=False, redo=None):
     if genre == "real lives":
         desc += "\n\n(நிஜ வாழ்க்கை நிகழ்வுகளை அடிப்படையாகக் கொண்ட நாடகமாக்கல் / Dramatised from documented real events)"
     row = {"id": str(next_id), "genre": genre, "title_ta": title,
-           "title_en": f"{plan['title_en']} | {ser['title_en']} Part {part}", "script_ta": script,
+           "title_en": plan['title_en'] if genre == "family emotional" else f"{plan['title_en']} | {ser['title_en']} Part {part}", "script_ta": script,
            "scene_prompts": prompts_field,
            "publish_at": redo["publish_at"] if redo else S.publish_at(day, DOOM_HOUR if doomsday else None),
            "status": "pending", "video_id": "", "fail_reason": "",
