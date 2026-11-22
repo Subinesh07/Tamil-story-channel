@@ -8,6 +8,9 @@ on:
       reset:
         description: "true = delete the kept copies first and copy again (newest wins)"
         default: "false"
+      skip:
+        description: "artifact names to skip, e.g. video-21 (Short-only re-renders)"
+        default: ""
 
 permissions:
   contents: write
@@ -31,6 +34,7 @@ jobs:
           gh api "repos/${{ github.repository }}/actions/artifacts?per_page=100" \
             -q '.artifacts | sort_by(.created_at) | reverse | .[] | select(.expired==false and (.name|startswith("video-")) and .size_in_bytes > 1000000) | "\(.id) \(.name)"' |
           while read id name; do
+            case " ${{ inputs.skip }} " in *" $name "*) echo "skipping $name"; continue;; esac
             mkdir -p "a/$name" && gh api "repos/${{ github.repository }}/actions/artifacts/$id/zip" > "a/$name.zip" && unzip -o -q "a/$name.zip" -d "a/$name"
             for f in a/$name/story_*.mp4 a/$name/story_*_thumbnail.jpg; do
               [ -f "$f" ] || continue

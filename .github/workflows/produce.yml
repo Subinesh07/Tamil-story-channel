@@ -82,7 +82,8 @@ jobs:
           python src/make_video.py $ARGS
 
       - name: Keep the finished video for full-series compilations
-        if: success()
+        if: success() && inputs.short_for == ''
+
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
