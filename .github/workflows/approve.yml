@@ -1,0 +1,33 @@
+name: Approve video
+
+# Schedules a video that was held for review (and its Shorts) at the planned times.
+on:
+  workflow_dispatch:
+    inputs:
+      row_id:
+        description: "Story id to approve"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  approve:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - env:
+          YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
+          YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
+          YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
+        run: python src/approve.py ${{ inputs.row_id }}
+      - run: |
+          git config user.name "nila-bot"; git config user.email "bot@users.noreply.github.com"
+          git add stories.csv
+          git diff --cached --quiet || (git commit -m "Approved [skip ci]" && (git push || (git pull --rebase -X theirs && git push)))

@@ -237,6 +237,9 @@ def make_and_upload_short(row, video_id):
         log.warning("Shorts trailer failed: %s", str(e)[:200])
         return
     make_extra_shorts(row, video_id)
+    if os.environ.get("HOLD_FOR_APPROVAL"):
+        cur = next((r for r in load_rows() if r["id"] == row["id"]), {}).get("fail_reason", "")
+        update_row(row["id"], fail_reason=f"{cur} hold".strip())
 
 
 def make_extra_shorts(row, video_id):
@@ -421,6 +424,9 @@ def main():
                                                               "thumb_quote_ta", "thumb_hook_ta", "thumb_text")})
         except Exception as e:
             log.warning("Text repair failed: %s", str(e)[:150])
+    # a story marked "needs_approval" is always uploaded privately without a schedule (any run)
+    if "needs_approval" in (row.get("fail_reason") or ""):
+        os.environ["HOLD_FOR_APPROVAL"] = "1"
     # a remake waits until the old broken upload has been deleted in YouTube Studio
     old = re.search(r"replaces:([\w-]{11})", row.get("fail_reason") or "")
     if old and not args.test and os.environ.get("YT_REFRESH_TOKEN"):

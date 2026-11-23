@@ -11,6 +11,10 @@ on:
         description: "true = redo every picture of this story (voice is reused)"
         required: false
         default: "false"
+      hold:
+        description: "true = upload privately WITHOUT a schedule; it waits for approval (Approve video workflow)"
+        required: false
+        default: "false"
       short_for:
         description: "Make and upload only the Shorts trailer for this uploaded story id"
         required: false
@@ -84,6 +88,7 @@ jobs:
           if [ -n "${{ inputs.short_for }}" ]; then ARGS="--short-for ${{ inputs.short_for }}"; fi
           if [ "${{ inputs.upload }}" = "false" ]; then ARGS="$ARGS --no-upload"; fi
           if [ "${{ inputs.fresh_pictures }}" = "true" ]; then export FRESH_PICTURES=1; fi
+          if [ "${{ inputs.hold }}" = "true" ]; then export HOLD_FOR_APPROVAL=1; fi
           python src/make_video.py $ARGS
 
       - name: Keep the finished video for full-series compilations

@@ -34,7 +34,9 @@ def build_metadata(row):
     publish = datetime.fromisoformat(row["publish_at"]) if row.get("publish_at") else None
     status = {"privacyStatus": "private", "selfDeclaredMadeForKids": False,
               "containsSyntheticMedia": True}
-    if publish and publish > datetime.now(timezone.utc):
+    if os.environ.get("HOLD_FOR_APPROVAL"):
+        log.warning("Held for approval: uploaded as private WITHOUT a schedule (approve to schedule it)")
+    elif publish and publish > datetime.now(timezone.utc):
         status["publishAt"] = publish.isoformat()
     else:
         log.warning("No future publish_at (%s); uploading as private without a schedule",
