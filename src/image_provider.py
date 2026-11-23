@@ -229,17 +229,24 @@ def generate_all(provider, prompts, out_dir, check=True, base_seed=1000, cache_d
     """Generate every scene image.
 
     Each image goes through the automatic checker (image_check.py). A rejected image is
-    regenerated with a new seed (up to IMAGE_RETRIES more times); if all attempts are rejected
-    the last one is kept with a warning.
+    regenerated (up to IMAGE_RETRIES more times); if all attempts are rejected, or the checker
+    cannot run, the video PAUSES (PictureFailed) - a picture is never used unchecked or rejected.
+    Saved pictures carry a ".ok" mark once checked; unchecked saved pictures are checked before use.
+    FRESH_PICTURES=1 ignores saved pictures (redo every picture of a video).
     A scene that cannot be generated at all STOPS the video (PictureFailed): no test pattern and
     no repeated picture is ever put into a real video. Pictures made so far stay cached.
     """
-    from image_check import check as vision_check
+    from image_check import CheckUnavailable, check as vision_check
+    fresh = bool(os.environ.get("FRESH_PICTURES"))
     out_dir.mkdir(parents=True, exist_ok=True)
     paths, warnings = [], []
     used, loaded = set(), set()
     if cache_dir:
         cache_dir.mkdir(parents=True, exist_ok=True)
+        if fresh:   # redo every picture: forget all saved pictures of this video (a paused run continues from new ones)
+            for f in cache_dir.glob("*"):
+                f.unlink()
+            log.info("Redoing every picture: saved pictures of this video removed")
     for i, prompt in enumerate(prompts):
         path = out_dir / f"scene_{i:02d}.png"
         key = hashlib.md5(prompt.encode()).hexdigest()[:12]
@@ -275,6 +282,17 @@ def generate_all(provider, prompts, out_dir, check=True, base_seed=1000, cache_d
         if cached and cached.exists() and hashlib.md5(cached.read_bytes()).hexdigest() in loaded:
             log.warning("Scene %d: saved picture is a copy of an earlier scene - making a new one", i)
             cached.unlink()
+        if cached and cached.exists() and check and not os.environ.get("NO_NEW_ASSETS") \
+                and not cached.with_suffix(".ok").exists():
+            try:
+                ok, reason = vision_check(cached.read_bytes(), prompt)
+            except CheckUnavailable as e:
+                raise PictureFailed(str(e))
+            if ok:
+                cached.with_suffix(".ok").write_text("checked")
+            else:
+                log.warning("Scene %d: saved picture fails the check (%s) - making a new one", i, reason)
+                cached.unlink()
         if cached and cached.exists():
             loaded.add(hashlib.md5(cached.read_bytes()).hexdigest())
             path.write_bytes(cached.read_bytes())
@@ -296,7 +314,10 @@ def generate_all(provider, prompts, out_dir, check=True, base_seed=1000, cache_d
             data = candidate
             if not check:
                 break
-            ok, reason = vision_check(candidate, prompt)
+            try:
+                ok, reason = vision_check(candidate, prompt)
+            except CheckUnavailable as e:
+                raise PictureFailed(str(e))   # pictures accepted so far stay saved
             if ok:
                 if reason:
                     log.info("Image %d: %s", i, reason)
@@ -304,9 +325,8 @@ def generate_all(provider, prompts, out_dir, check=True, base_seed=1000, cache_d
             log.warning("Image %d rejected by checker (%s); regenerating", i, reason)
         else:
             if data is not None and check:
-                msg = f"Scene {i}: kept image although checker said: {reason}"
-                log.warning(msg)
-                warnings.append(msg)
+                raise PictureFailed(f"scene {i}: every attempt was rejected by the checker ({reason}); "
+                                    "pausing - the next run tries again")
         if data is None:
             if isinstance(provider, PlaceholderProvider):
                 data = provider.generate(prompt)
@@ -316,6 +336,8 @@ def generate_all(provider, prompts, out_dir, check=True, base_seed=1000, cache_d
         path.write_bytes(data)
         if cached and not isinstance(provider, PlaceholderProvider):
             cached.write_bytes(data)
+            if check:
+                cached.with_suffix(".ok").write_text("checked")
         paths.append(path)
     return paths, warnings
 

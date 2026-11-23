@@ -37,7 +37,8 @@ IMAGE_STYLE = ("2D digital painting, semi-realistic illustrated Tamil drama art,
                "a softly rounded tip, full lips, warm brown skin; realistic adult proportions for adults, every "
                "character looks exactly their stated age, never childlike unless a child. Signature lighting: cool "
                "blue moonlight on one side and warm orange lamp glow on the other. Every character wears a clearly "
-               "visible small silver crescent-moon pendant. Detailed Tamil Nadu background, no text, no letters, no logos")
+               "visible small silver crescent-moon pendant. Every person's whole head and face fully inside the frame, natural "
+               "anatomy, correct number of people. Detailed Tamil Nadu background, no text, no letters, no logos")
 # every earlier picture style: stored prompts are switched to the current style, saved pictures still match
 PREVIOUS_IMAGE_STYLES = [
     "warm watercolor illustration, South Indian home, soft natural light, no text, no logos",
@@ -62,7 +63,7 @@ TTS_RETRY_WAIT = 5
 
 # --- Images ---
 WIDTH, HEIGHT = 1280, 720
-IMAGE_RETRIES = 2
+IMAGE_RETRIES = 3
 SECONDS_PER_IMAGE_MIN, SECONDS_PER_IMAGE_MAX = 25, 40   # fallback when a story has no scene marks
 
 # --- Video ---
