@@ -9,6 +9,7 @@ import hashlib
 import io
 import logging
 import os
+import re
 import time
 import urllib.parse
 from pathlib import Path
@@ -235,9 +236,11 @@ def simpler_prompt(prompt, reasons, context=""):
         from llm import complete
         d = complete(
             "A picture generator keeps drawing this story picture wrong. Rewrite the picture description so the "
-            "SAME story moment is much easier to draw correctly: show only the 1-2 people that matter, one clear "
-            "action, explicit simple positions (e.g. 'he is driving, seen from the passenger side'), a simple "
-            "camera angle. Keep every character's age, look, clothes and facial-hair wording exactly as given, "
+            "SAME story moment is much easier to draw correctly. The picture model cannot reliably decide WHICH "
+            "of two people does an action, so: show ONLY the one person doing the main action or speaking, "
+            "framed close (the other person may appear only from behind or just a shoulder, never doing "
+            "anything), one clear action, a simple camera angle (e.g. 'Oviya in a car passenger seat, pointing "
+            "ahead, seen from the front'). Keep every character's age, look, clothes and facial-hair wording exactly as given, "
             "and keep the art style sentence unchanged. Never mention things that should NOT appear.\n\n"
             f"Description:\n{prompt}\n\nWhat went wrong:\n- " + "\n- ".join(reasons[-3:]) +
             f"\n\nNarration at this moment (Tamil): {context[:500]}\n\n"
@@ -332,7 +335,8 @@ def generate_all(provider, prompts, out_dir, check=True, base_seed=1000, cache_d
         data, reason = None, ""
         draw_prompt, reasons = prompt, []
         for attempt in range(1 + IMAGE_RETRIES):
-            if check and len(reasons) >= 2 and draw_prompt == prompt:
+            if check and draw_prompt == prompt and (len(reasons) >= 2 or (reasons and re.search(
+                    r"instead of|reversed|wrong person|swapped|extra person", reasons[-1], re.I))):
                 draw_prompt = simpler_prompt(prompt, reasons, ctx)   # same moment, easier to draw right
             try:
                 candidate = provider.generate(draw_prompt, seed=base_seed + i * 10 + attempt)
