@@ -126,12 +126,12 @@
    "voice": {
     "state": "done",
     "note": "Leda voice ready, listening check and click check passed",
-    "at": "2026-11-23T20:59:43+00:00"
+    "at": "2026-11-23T21:04:35+00:00"
    },
    "pictures": {
     "state": "waiting",
-    "note": "scene 1: every attempt was rejected by the checker (Kavin has a beard and moustache despite the prompt explicitly requesting a clean-shaven look with ",
-    "at": "2026-11-23T21:01:42+00:00"
+    "note": "scene 1: every attempt was rejected by the checker (Oviya is sitting in the back seat behind the driver instead of beside him in the passenger seat, a",
+    "at": "2026-11-23T21:06:16+00:00"
    },
    "video": {
     "state": "done",
@@ -179,6 +179,12 @@
   }
  },
  "events": [
+  {
+   "at": "2026-11-23T21:06:16+00:00",
+   "row": "9",
+   "level": "warn",
+   "msg": "Paused: scene 1: every attempt was rejected by the checker (Oviya is sitting in the back seat behind the driver instead of beside him in the passenger seat, a"
+  },
   {
    "at": "2026-11-23T21:01:42+00:00",
    "row": "9",
@@ -320,7 +326,7 @@
  ],
  "limits": {
   "cloudflare": {
-   "blocked_at": "2026-11-23T20:59:43+00:00",
+   "blocked_at": "2026-11-23T21:04:35+00:00",
    "worked_at": "2026-11-23T08:05:09+00:00",
    "note": "Cloudflare daily free allowance used up (HTTP 429: {\"errors\":[{\"message\":\"AiError: AiError: you have used up your daily free allocation of 10,000 neur",
    "last_reset_seen": "2026-11-23T08:05:09+00:00"
@@ -333,7 +339,7 @@
    "worked_at": "2026-11-23T08:04:46+00:00"
   },
   "cloudflare_2": {
-   "worked_at": "2026-11-23T20:59:48+00:00"
+   "worked_at": "2026-11-23T21:04:38+00:00"
   }
  },
  "community": {
