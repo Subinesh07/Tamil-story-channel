@@ -141,7 +141,8 @@ jobs:
         run: |
           git config user.name "story-bot"
           git config user.email "story-bot@users.noreply.github.com"
-          git add stories.csv SCHEDULE.md status/ playlists.json 2>/dev/null; git add stories.csv SCHEDULE.md status/
+          git add stories.csv SCHEDULE.md status/
+          if [ -f playlists.json ]; then git add playlists.json; fi
           git diff --cached --quiet && exit 0
           git commit -m "Update story status [skip ci]"
           for i in 1 2 3; do

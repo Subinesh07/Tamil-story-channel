@@ -5,6 +5,7 @@ now stops it. Newest first. Keep adding to this file whenever something new goes
 
 | # | Date | Problem seen | Cause | Automatic prevention now |
 |---|------|--------------|-------|--------------------------|
+| 24 | 23 Nov | Monday's video uploaded but its status was not saved (system still showed "pending" - risk of making it twice) | A change to the save step tried to save a file that did not exist yet; GitHub stops a step at the first failing command | Save step only adds files that exist; uploads are also protected by the same-title check |
 | 23 | 22 Nov | Copying old videos for compilations kept a broken old copy of Doomsday Part 1 | Several runs saved a file with the same name; the oldest overwrote the newest, and Short-only runs re-render the video | Newest copy wins; Short-only re-renders are never kept; produce keeps only real uploads |
 | 22 | 22 Nov | New YouTube token rejected ("invalid_grant"); then a permission name was mistyped | Wrong value copied from the OAuth Playground; "force.ssl" typo | Check keys tests the token and the Analytics permission after every change; the refresh token starts with 1// |
 | 21 | 22 Nov | Average view duration only 2:22 on 10-21 min videos | Slow start (brand card + welcome line before the story), long videos for new viewers, pictures changing every ~25 s | All stories are now 10-12 min parts; every script opens with a 3-4 line **cold open** (most dramatic moment) and a 3-second title line; pictures change about every 15 s |
