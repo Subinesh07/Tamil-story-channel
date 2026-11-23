@@ -21,9 +21,14 @@ QUESTION = """You are a strict quality checker for pictures in a Tamil story vid
 The picture was requested with this description:
 "{prompt}"
 
+While this picture is on screen, the narrator says (Tamil):
+"{context}"
+
 Reject it (ok=false) if ANY of these is true:
-- deformed people: missing head, headless or disembodied body parts, extra or missing limbs or
-  fingers, distorted, melted or duplicated faces, a face pasted on the wrong body
+- HANDS: look at every visible hand. Reject any hand with more or fewer than five fingers, fused or
+  merged hands, two hands joined together, an extra hand or arm, a hand not attached to an arm
+- deformed people: missing head, headless or disembodied body parts, extra or missing limbs,
+  distorted, melted or duplicated faces, a face pasted on the wrong body, twisted necks or bodies
 - a person's head or face is cut off by the edge of the picture
 - the number of people differs from the description, or random extra figures appear
 - the action or positions differ from the description (who is sitting, standing, lying, driving,
@@ -34,7 +39,12 @@ Reject it (ok=false) if ANY of these is true:
   glasses or no glasses, hair style, clothes colour
 - deformed objects (merged wheels, melted furniture, broken weapons)
 - visible text, letters, watermarks or logos
-- the picture does not show the described moment
+- the picture does not show the described moment, or contradicts what the narrator says: places,
+  vehicles and objects the narration says are there now (car, road, tower, temple, gun, letter) must be
+  visible; people must be where the narration puts them (inside the car, on the floor, at the door);
+  the person speaking or acting must be the right one
+- anything illogical a normal viewer would notice (floating objects, impossible poses, wrong lighting
+  for the time of day said in the narration, two copies of the same person)
 
 Answer only JSON: {{"ok": true or false, "problem": "short reason or empty"}}"""
 
@@ -65,7 +75,7 @@ def _keys():
     return out
 
 
-def check(png_bytes, prompt):
+def check(png_bytes, prompt, context=""):
     """Return (ok, reason). Raises CheckUnavailable if no check is possible - never accepts unchecked."""
     if os.environ.get("IMAGE_CHECK", "on") == "off":
         return True, "check switched off by setting"
@@ -77,7 +87,7 @@ def check(png_bytes, prompt):
     body = {
         "contents": [{"parts": [
             {"inline_data": {"mime_type": "image/png", "data": base64.b64encode(png_bytes).decode()}},
-            {"text": QUESTION.format(prompt=prompt[:1200])},
+            {"text": QUESTION.format(prompt=prompt[:1200], context=(context or "(not given)")[:700])},
         ]}],
         "generationConfig": {"temperature": 0, "responseMimeType": "application/json", "maxOutputTokens": 300},
     }

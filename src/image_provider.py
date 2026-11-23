@@ -228,7 +228,7 @@ def make_outro_card(png_path, out_path):
     return out_path
 
 
-def generate_all(provider, prompts, out_dir, check=True, base_seed=1000, cache_dir=None):
+def generate_all(provider, prompts, out_dir, check=True, base_seed=1000, cache_dir=None, contexts=None):
     """Generate every scene image.
 
     Each image goes through the automatic checker (image_check.py). A rejected image is
@@ -253,6 +253,7 @@ def generate_all(provider, prompts, out_dir, check=True, base_seed=1000, cache_d
                 f.unlink()
             log.info("Redoing every picture: saved pictures of this video removed")
     for i, prompt in enumerate(prompts):
+        ctx = contexts[i] if contexts and i < len(contexts) else ""
         path = out_dir / f"scene_{i:02d}.png"
         key = hashlib.md5(prompt.encode()).hexdigest()[:12]
         cached = cache_dir / f"{i:02d}_{key}.png" if cache_dir else None
@@ -290,7 +291,7 @@ def generate_all(provider, prompts, out_dir, check=True, base_seed=1000, cache_d
         if cached and cached.exists() and check and not os.environ.get("NO_NEW_ASSETS") \
                 and not cached.with_suffix(".ok").exists():
             try:
-                ok, reason = vision_check(cached.read_bytes(), prompt)
+                ok, reason = vision_check(cached.read_bytes(), prompt, ctx)
             except CheckUnavailable as e:
                 raise PictureFailed(str(e))
             if ok:
@@ -320,7 +321,7 @@ def generate_all(provider, prompts, out_dir, check=True, base_seed=1000, cache_d
             if not check:
                 break
             try:
-                ok, reason = vision_check(candidate, prompt)
+                ok, reason = vision_check(candidate, prompt, ctx)
             except CheckUnavailable as e:
                 raise PictureFailed(str(e))   # pictures accepted so far stay saved
             if ok:

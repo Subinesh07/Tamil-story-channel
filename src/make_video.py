@@ -131,8 +131,11 @@ def produce(row, upload=True, check_duration=True):
              "follow the story's scene changes" if marks else "evenly timed")
     story_scenes = [s for s in scenes if s["kind"] == "story"]
     provider = get_provider()
+    sents = timings["sentences"]
+    contexts = [" ".join(sents[k].get("text", "") for k in range(s["first"], s["last"] + 1))
+                for s in story_scenes]
     story_imgs, img_warnings = generate_all(provider, [prompts[s["prompt_index"]] for s in story_scenes],
-                                            work / "images", base_seed=n * 1000 + 7,
+                                            work / "images", base_seed=n * 1000 + 7, contexts=contexts,
                                             cache_dir=ROOT / "cache" / "images" / f"row_{rid}")
     from image_provider import PictureFailed, validate_pictures
     bad_pics = validate_pictures(story_imgs)
