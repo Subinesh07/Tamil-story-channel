@@ -77,7 +77,7 @@ _last_call = [0.0]
 
 def _keys():
     seen, out = set(), []
-    for name in ("LLM_API_KEY", "VOICE_API_KEY_2", "VOICE_API_KEY"):
+    for name in ("CHECK_API_KEY", "CHECK_API_KEY_2", "LLM_API_KEY", "VOICE_API_KEY_2", "VOICE_API_KEY"):
         k = os.environ.get(name, "").strip()
         if k and k not in seen:
             seen.add(k)
@@ -130,7 +130,8 @@ def check(png_bytes, prompt, context=""):
                     continue
         log.info("Picture checker busy (%s); waiting a minute (round %d/5)", last, rnd + 1)
         time.sleep(65)
-    raise CheckUnavailable("no Gemini key for the picture checker")
+    raise CheckUnavailable(f"picture checker unavailable ({last}): Gemini limit reached, waiting instead of "
+                           "using unchecked pictures")
     body = {
         "contents": [{"parts": [
             {"inline_data": {"mime_type": "image/png", "data": base64.b64encode(png_bytes).decode()}},
