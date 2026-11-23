@@ -246,9 +246,10 @@ def generate_all(provider, prompts, out_dir, check=True, base_seed=1000, cache_d
         cached = cache_dir / f"{i:02d}_{key}.png" if cache_dir else None
         # reuse a saved picture of the same scene even if the picture numbering moved or the
         # style text changed (each saved file is used once, so repeated scenes stay different)
-        from config import IMAGE_STYLE, OLD_IMAGE_STYLE
+        from config import IMAGE_STYLE, PREVIOUS_IMAGE_STYLES
         if cached and not cached.exists():
-            keys = {key, hashlib.md5(prompt.replace(IMAGE_STYLE, OLD_IMAGE_STYLE).encode()).hexdigest()[:12]}
+            keys = {key} | {hashlib.md5(prompt.replace(IMAGE_STYLE, st).encode()).hexdigest()[:12]
+                            for st in PREVIOUS_IMAGE_STYLES}
             for f in sorted(cache_dir.glob("*.png")):
                 if f.stem.split("_", 1)[-1] in keys and f not in used:
                     cached = f

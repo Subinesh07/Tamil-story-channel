@@ -41,10 +41,11 @@ def produce(row, upload=True, check_duration=True):
 
     story = split_sentences(row["script_ta"])
     # older stories were written with the watercolour style: swap in the current picture style
-    old_style = "warm watercolor illustration, South Indian home, soft natural light, no text, no logos"
-    from config import OLD_IMAGE_STYLE
-    row = {**row, "scene_prompts": row["scene_prompts"].replace(old_style, IMAGE_STYLE)
-           .replace(OLD_IMAGE_STYLE, IMAGE_STYLE)}
+    from config import PREVIOUS_IMAGE_STYLES
+    sp = row["scene_prompts"]
+    for old_style in PREVIOUS_IMAGE_STYLES:
+        sp = sp.replace(old_style, IMAGE_STYLE)
+    row = {**row, "scene_prompts": sp}
     prompts = split_prompts(row["scene_prompts"])
     if not story or not prompts:
         raise ValueError("script_ta or scene_prompts is empty")

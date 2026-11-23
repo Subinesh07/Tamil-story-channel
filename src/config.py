@@ -26,10 +26,24 @@ MIN_SCENES, MAX_SCENES = 20, 25   # story beats in the plan (pictures follow the
 OLD_IMAGE_STYLE = ("cinematic semi-realistic digital painting like a Tamil TV serial still, "
                    "South Indian people and setting, dramatic natural lighting, detailed expressive faces, "
                    "vibrant colours, sharp focus, no text, no letters, no logos")
-IMAGE_STYLE = ("photorealistic cinematic film still, South Indian people and setting, intriguing "
+PHOTO_IMAGE_STYLE = ("photorealistic cinematic film still, South Indian people and setting, intriguing "
                "mysterious moment that makes you want to know what happens next, dramatic movie lighting "
                "with strong contrast and rim light, shallow depth of field, rich detail, expressive faces, "
                "natural skin, sharp focus, 35mm film look, no text, no letters, no logos")
+# House look since 23 Nov: Gemini-like painted drama art with the "Nila face" design
+IMAGE_STYLE = ("2D digital painting, semi-realistic illustrated Tamil drama art, smooth painterly shading, clean soft "
+               "outlines, rich natural colours. NILA FACE DESIGN: soft oval face, high rounded cheekbones, large "
+               "expressive deep-brown almond eyes with a bright catch-light, thick defined eyebrows, straight nose with "
+               "a softly rounded tip, full lips, warm brown skin; realistic adult proportions for adults, every "
+               "character looks exactly their stated age, never childlike unless a child. Signature lighting: cool "
+               "blue moonlight on one side and warm orange lamp glow on the other. Every character wears a clearly "
+               "visible small silver crescent-moon pendant. Detailed Tamil Nadu background, no text, no letters, no logos")
+# every earlier picture style: stored prompts are switched to the current style, saved pictures still match
+PREVIOUS_IMAGE_STYLES = [
+    "warm watercolor illustration, South Indian home, soft natural light, no text, no logos",
+    OLD_IMAGE_STYLE,
+    PHOTO_IMAGE_STYLE,
+]
 GENRE_MIX = {  # used by generate_stories.py for each new batch of 30
     "family emotional": 12,
     "moral or life-lesson": 8,
