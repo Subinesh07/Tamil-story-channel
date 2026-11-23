@@ -35,7 +35,7 @@ now stops it. Newest first. Keep adding to this file whenever something new goes
 ## Checks every video passes before upload
 1. Script: Gemini only, logic check (scene-by-scene continuity) with automatic fixes, English words converted to Tamil letters (Tanglish kept), style score ≥ 7 (start, middle, end), no foreign letters, length in range, ending resolves (final parts), not a copy of a specific work.
 2. Voice: Leda only (extra key first, main key second); every passage passes the **listening check** (clean Tamil, matches the script); quota = wait, never another voice.
-3. Pictures: character cards (age, gender, facial hair) in every prompt; picture checker verifies ages and facial hair; every picture real and different (no test pattern, blank or duplicate); any failure = wait.
+3. Pictures: character cards (age, gender, facial hair) in every prompt; every picture is checked by Gemini against its description AND the narration spoken during it (right objects and places, right people in the right place, five fingers per hand, no merged or extra limbs, no cut-off heads, right ages and facial hair); a picture is never used unchecked or rejected; every picture real and different (no test pattern, blank or duplicate); any failure = wait.
 4. Video: no clicks or clipping in the audio (click check), duration in range, subtitles match sentences, audio/video in sync, H.264/AAC format, Tamil letters render.
 5. Upload: not already on YouTube (same title); a remake waits until the old video is deleted.
 6. Thumbnail: curiosity layout with picture (story picture if the allowance is out).
