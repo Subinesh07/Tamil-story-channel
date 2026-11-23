@@ -49,13 +49,23 @@ Reject it (ok=false) if ANY of these is true:
 Answer only JSON: {{"ok": true or false, "problem": "short reason or empty"}}"""
 
 
-def _pick_model(key):
-    global _model
-    if _model is None:
+_models = {}
+
+
+def _models_for(key):
+    """Up to 4 vision-capable Gemini models (newest flash first): a busy model is skipped, not waited on."""
+    if key not in _models:
         from llm import gemini_models
-        models = gemini_models(key)
-        _model = models[0] if models else ""
-    return _model
+        try:
+            _models[key] = gemini_models(key)[:4]
+        except Exception:
+            _models[key] = []
+    return _models[key]
+
+
+def _pick_model(key):
+    m = _models_for(key)
+    return m[0] if m else ""
 
 
 class CheckUnavailable(Exception):
@@ -89,7 +99,44 @@ def check(png_bytes, prompt, context=""):
             {"inline_data": {"mime_type": "image/png", "data": base64.b64encode(png_bytes).decode()}},
             {"text": QUESTION.format(prompt=prompt[:1200], context=(context or "(not given)")[:700])},
         ]}],
-        "generationConfig": {"temperature": 0, "responseMimeType": "application/json", "maxOutputTokens": 300},
+        "generationConfig": {"temperature": 0, "responseMimeType": "application/json", "maxOutputTokens": 4096},
+    }
+    last = ""
+    for rnd in range(5):                    # free tier: a few requests per minute - be patient
+        for key in keys:
+            for model in _models_for(key):
+                wait = 4.5 - (time.time() - _last_call[0])
+                if wait > 0:
+                    time.sleep(wait)
+                _last_call[0] = time.time()
+                try:
+                    r = requests.post(
+                        f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent",
+                        headers={"x-goog-api-key": key}, json=body, timeout=60)
+                except Exception as e:
+                    last = str(e)[:80]
+                    continue
+                if r.status_code == 200:
+                    try:
+                        parts = r.json()["candidates"][0]["content"]["parts"]
+                        text = "".join(p.get("text", "") for p in parts if not p.get("thought"))
+                        verdict = json.loads(re.sub(r"^```(?:json)?|```$", "", text.strip()))
+                        return bool(verdict.get("ok", False)), verdict.get("problem", "")
+                    except Exception as e:
+                        last = f"unreadable answer from {model} ({str(e)[:60]})"
+                        continue
+                last = f"HTTP {r.status_code} from {model}"
+                if r.status_code not in (429, 500, 503):
+                    continue
+        log.info("Picture checker busy (%s); waiting a minute (round %d/5)", last, rnd + 1)
+        time.sleep(65)
+    raise CheckUnavailable("no Gemini key for the picture checker")
+    body = {
+        "contents": [{"parts": [
+            {"inline_data": {"mime_type": "image/png", "data": base64.b64encode(png_bytes).decode()}},
+            {"text": QUESTION.format(prompt=prompt[:1200], context=(context or "(not given)")[:700])},
+        ]}],
+        "generationConfig": {"temperature": 0, "responseMimeType": "application/json", "maxOutputTokens": 4096},
     }
     last = ""
     for rnd in range(5):                    # free tier: a few requests per minute - be patient
