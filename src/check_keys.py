@@ -119,19 +119,26 @@ def main():
            f"{ch['statistics'].get('videoCount', '?')} videos)")
     except Exception as e:
         bad("YouTube", str(e)[:200])
-    # Cloudflare (free pictures)
-    a, t = os.environ.get("CF_ACCOUNT_ID", "").strip(), os.environ.get("CF_API_TOKEN", "").strip()
-    if a and t:
+    # Cloudflare (free pictures): every account, with a 1-step test picture to show today's allowance
+    for sfx in ("", "_2", "_3"):
+        a, t = os.environ.get("CF_ACCOUNT_ID" + sfx, "").strip(), os.environ.get("CF_API_TOKEN" + sfx, "").strip()
+        label = "Cloudflare pictures" + (f" (account {sfx[1:]})" if sfx else " (account 1)")
+        if not (a and t):
+            if not sfx:
+                bad(label, "CF_ACCOUNT_ID / CF_API_TOKEN not set")
+            continue
         try:
-            r = requests.get(f"https://api.cloudflare.com/client/v4/accounts/{a}/ai/models/search?per_page=1",
-                             headers={"Authorization": f"Bearer {t}"}, timeout=30)
-            (ok if r.status_code == 200 else bad)("Cloudflare pictures",
-                                                  "works (free 10,000 units/day)" if r.status_code == 200
-                                                  else f"HTTP {r.status_code}: check the token has Workers AI permission")
+            r = requests.post(f"https://api.cloudflare.com/client/v4/accounts/{a}/ai/run/@cf/black-forest-labs/flux-1-schnell",
+                              headers={"Authorization": f"Bearer {t}"}, json={"prompt": "a full moon", "steps": 1},
+                              timeout=60)
+            if r.status_code == 200:
+                ok(label, "works, pictures available now")
+            elif r.status_code == 429 or "daily free allocation" in r.text:
+                ok(label, "key works, but today's free allowance is used up (comes back about 24 h after it ran out)")
+            else:
+                bad(label, f"HTTP {r.status_code}: {r.text[:120]} - check the account id and that the token has Workers AI permission")
         except Exception as e:
-            bad("Cloudflare pictures", str(e)[:120])
-    else:
-        bad("Cloudflare pictures", "CF_ACCOUNT_ID / CF_API_TOKEN not set")
+            bad(label, str(e)[:120])
     # Pollinations
     k = os.environ.get("IMAGE_API_KEY", "").strip()
     (ok if k else bad)("Pollinations", "IMAGE_API_KEY set" if k else "IMAGE_API_KEY not set")
