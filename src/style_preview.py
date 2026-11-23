@@ -16,7 +16,7 @@ SCENES = {
              "standing near a village temple wall at dusk"),
 }
 STYLES = {
-    "N_nilaface": 'semi-realistic cinematic portrait, Tamil cinema poster realism. NILA FACE DESIGN for every character: soft oval face with high rounded cheekbones, large deep-brown almond eyes slightly bigger than real with a bright catch-light, thick well-defined eyebrows, straight nose with a softly rounded tip, full defined lips, warm golden-brown skin. Signature lighting: cool silver-blue moonlight rim light from the left and warm oil-lamp light from the right on every face. Each character wears a small silver crescent-moon ornament. no text, no letters, no watermark',
+    "P_painted": '2D digital painting, semi-realistic illustrated Tamil drama art, smooth painterly shading, clean soft outlines, rich but natural colours. NILA FACE DESIGN for every character: soft oval face, high rounded cheekbones, large expressive deep-brown almond eyes with a bright catch-light, thick defined eyebrows, straight nose with a softly rounded tip, full lips, warm brown skin. Signature lighting: cool blue moonlight from a window on one side and warm orange lantern glow on the other. Every character wears a clearly visible small silver crescent-moon pendant on a thin chain. Detailed Tamil Nadu home or street background. no text, no letters, no watermark',
 }
 prov = get_provider()
 for s_name, style in STYLES.items():
