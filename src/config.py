@@ -23,6 +23,7 @@ PROMPT_SEP = "|"
 MIN_WORDS, MAX_WORDS = 1150, 1450   # 10-12 min parts: new viewers stay longer
 MAX_WORDS_PER_SENTENCE = 15
 MIN_SCENES, MAX_SCENES = 20, 25   # story beats in the plan (pictures follow the script)
+MAX_PICTURES = 20   # pictures per video: fits the free daily picture allowance (~75) with checker redraws
 OLD_IMAGE_STYLE = ("cinematic semi-realistic digital painting like a Tamil TV serial still, "
                    "South Indian people and setting, dramatic natural lighting, detailed expressive faces, "
                    "vibrant colours, sharp focus, no text, no letters, no logos")

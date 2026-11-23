@@ -19,8 +19,13 @@ log = logging.getLogger(__name__)
 PATH = ROOT / "series.json"
 TZ = ZoneInfo(TIMEZONE)
 
-WEEKLY = {0: "adventure", 1: "horror", 2: "family serial", 3: "real lives", 4: "family moral"}
-WEEKEND_DEFAULT = {5: "family serial", 6: "adventure"}
+# Niche from 30 Nov: horror (4-part stories Mon/Wed/Fri/Sat) + family emotional (3-part Tue/Thu/Sun).
+# Weekend specials (11 AM) stay: Doomsday-type serial / experiments.
+WEEKLY = {0: "horror", 1: "family serial", 2: "horror", 3: "family serial", 4: "horror", 5: "horror",
+          6: "family serial"}
+WEEKEND_DEFAULT = {5: "horror", 6: "family serial"}
+# transition week (finish the adventure serial, keep the horror story moving)
+DATE_OVERRIDES = {"2026-11-26": "adventure", "2026-11-27": "horror", "2026-11-29": "horror"}
 
 GENRES = {
     "adventure": {"ta": "சாகசத் தொடர்", "parts": 5,
@@ -30,9 +35,10 @@ GENRES = {
                "brief": "a suspense and horror serial: eerie houses, villages, night journeys, mysteries "
                         "with a satisfying explanation. Scary atmosphere but NO gore, blood or graphic "
                         "violence (advertiser-friendly)"},
-    "family serial": {"ta": "குடும்பத் தொடர்", "parts": 8,
-                      "brief": "an emotional Tamil family drama serial like a TV mega-serial: in-laws, "
-                               "siblings, property, betrayal, a calm and clever heroine, and justice in the end"},
+    "family serial": {"ta": "குடும்பத் தொடர்", "parts": 3,
+                      "brief": "a deeply emotional Tamil family story in 3 parts: amma, appa, patti, thatha, "
+                               "siblings, in-laws; a hidden sacrifice or secret, misunderstandings, a big emotional "
+                               "twist and a warm ending that brings tears - the kind of story families share on WhatsApp"},
     "real lives": {"ta": "நிஜ வாழ்க்கைக் கதை", "parts": 4,
                    "brief": "the TRUE life story of one famous person from anywhere in the world and any era, "
                             "told dramatically but strictly based on well-documented facts. Never invent "
@@ -136,10 +142,12 @@ def next_publish_date(rows):
     """The day after the last scheduled 7 PM story (never today after 15:00, never in the past)."""
     now = datetime.now(TZ)
     earliest = now.date() if now.hour < 15 else now.date() + timedelta(days=1)
-    taken = [datetime.fromisoformat(r["publish_at"]).date() for r in rows
-             if r.get("publish_at") and not is_doom(r)]
-    day = max(taken) + timedelta(days=1) if taken else earliest
-    return max(day, earliest)
+    taken = {datetime.fromisoformat(r["publish_at"]).date() for r in rows
+             if r.get("publish_at") and not is_doom(r) and r.get("status") != "parked"}
+    day = earliest
+    while day in taken:   # first free day (fills gaps, e.g. after a story was parked)
+        day += timedelta(days=1)
+    return day
 
 
 def next_doom_date(rows):
@@ -244,10 +252,10 @@ def views_per_day_by_series(rows):
 
 def genre_for(day, rows, data):
     wd = day.weekday()
+    if str(day) in DATE_OVERRIDES:
+        return DATE_OVERRIDES[str(day)], "override"
     if wd in WEEKLY:
         return WEEKLY[wd], "weekday"
-    if wd == 6:
-        return "family emotional", "sunday-golden"
     speed = views_per_day_by_series(rows)
     active = {s["id"]: s for s in data["series"] if s["status"] == "active" and s["genre"] != "family emotional"}
     ranked = [sid for sid in sorted(speed, key=speed.get, reverse=True) if sid in active]

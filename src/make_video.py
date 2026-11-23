@@ -45,6 +45,14 @@ def produce(row, upload=True, check_duration=True):
     sp = row["scene_prompts"]
     for old_style in PREVIOUS_IMAGE_STYLES:
         sp = sp.replace(old_style, IMAGE_STYLE)
+    # at most MAX_PICTURES pictures per video (free daily allowance): keep evenly spread scene changes
+    from config import MAX_PICTURES
+    from stories import PROMPT_SEP
+    pm = prompt_marks(sp)
+    if len(pm) > MAX_PICTURES and not os.environ.get("NO_NEW_ASSETS"):
+        keep = sorted({round(k * (len(pm) - 1) / (MAX_PICTURES - 1)) for k in range(MAX_PICTURES)})
+        sp = PROMPT_SEP.join((f"{pm[k][0]}::{pm[k][1]}" if pm[k][0] is not None else pm[k][1]) for k in keep)
+        log.info("Using %d of %d scene pictures (limit %d)", len(keep), len(pm), MAX_PICTURES)
     row = {**row, "scene_prompts": sp}
     prompts = split_prompts(row["scene_prompts"])
     if not story or not prompts:
