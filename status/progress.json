@@ -122,6 +122,31 @@
     "state": "done",
     "note": "written; style [8, 9, 9], 1 logic problems fixed, foreign letters checked",
     "at": "2026-11-22T17:28:30+00:00"
+   },
+   "voice": {
+    "state": "done",
+    "note": "Leda voice ready, listening check and click check passed",
+    "at": "2026-11-23T08:05:05+00:00"
+   },
+   "pictures": {
+    "state": "done",
+    "note": "21 pictures, all real and different",
+    "at": "2026-11-23T08:07:25+00:00"
+   },
+   "video": {
+    "state": "done",
+    "note": "9.8 min, quality check passed",
+    "at": "2026-11-23T08:12:30+00:00"
+   },
+   "short": {
+    "state": "done",
+    "note": "Short NQC7k7gGJvw scheduled 30 min after the video",
+    "at": "2026-11-23T08:13:10+00:00"
+   },
+   "upload": {
+    "state": "done",
+    "note": "https://youtu.be/FD2-7XzLeD4 scheduled 2026-11-24T20:00",
+    "at": "2026-11-23T08:14:34+00:00"
    }
   },
   "11": {
@@ -154,6 +179,18 @@
   }
  },
  "events": [
+  {
+   "at": "2026-11-23T08:14:34+00:00",
+   "row": "9",
+   "level": "info",
+   "msg": "Video scheduled on YouTube (FD2-7XzLeD4)"
+  },
+  {
+   "at": "2026-11-23T08:13:53+00:00",
+   "row": "",
+   "level": "info",
+   "msg": "Row 9: 1 extra Shorts scheduled (next afternoons, 1 PM)"
+  },
   {
    "at": "2026-11-22T18:18:28+00:00",
    "row": "14",
@@ -259,17 +296,17 @@
  ],
  "limits": {
   "cloudflare": {
-   "blocked_at": "2026-11-22T09:59:45+00:00",
-   "worked_at": "2026-11-21T18:15:05+00:00",
+   "blocked_at": "2026-11-23T08:12:30+00:00",
+   "worked_at": "2026-11-23T08:05:09+00:00",
    "note": "Cloudflare daily free allowance used up (HTTP 429: {\"errors\":[{\"message\":\"AiError: AiError: you have used up your daily free allocation of 10,000 neur",
-   "last_reset_seen": "2026-11-21T17:02:28+00:00"
+   "last_reset_seen": "2026-11-23T08:05:09+00:00"
   },
   "pollinations": {
-   "blocked_at": "2026-11-22T09:59:45+00:00",
+   "blocked_at": "2026-11-23T08:12:30+00:00",
    "note": "Pollinations free allowance used up"
   },
   "leda": {
-   "worked_at": "2026-11-21T20:44:07+00:00"
+   "worked_at": "2026-11-23T08:04:46+00:00"
   }
  },
  "community": {
@@ -313,6 +350,17 @@
     "பாட்டி கிட்டயே கொடுத்துடுவேன்"
    ],
    "at": "2026-11-21T18:42:11+00:00"
+  },
+  "9": {
+   "post": "👻 நிழல் மணியின் ஓசை - பகுதி 1\n\nநள்ளிரவு 12 மணிக்கு நாக்கே இல்லாத மணி எப்படி அடிக்கும்?\nசென்னிமலையில ஒலிக்குற அந்த மர்ம மணி சத்தத்துக்கு பின்னாடி என்ன இருக்கு?\nகவினும் ஓவியாவும் அந்த நிழல்கிட்ட இருந்து தப்பிப்பாங்களா?\n\n▶️ https://youtu.be/FD2-7XzLeD4\n⏰ சாயங்காலம் 8 மணிக்கு – நிலா கதைகள்\n#நிலாகதைகள் #TamilStory",
+   "poll": "🗳️ Part 1 கிளைமாக்ஸ் Twist பார்த்து உங்களுக்கு எப்படி இருந்துச்சு?",
+   "options": [
+    "செம Goosebumps!",
+    "ரொம்ப பயமா இருந்துச்சு!",
+    "அடுத்த Part-க்கு Waiting!",
+    "நிழல் யாருனு Guess பண்ணிட்டேன்!"
+   ],
+   "at": "2026-11-23T08:14:17+00:00"
   }
  }
 }
