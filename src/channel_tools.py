@@ -140,15 +140,23 @@ def analytics_report(days=28):
         lines.append(f"  {titles.get(vid, vid)} | {vv} | {m / 60:.1f}h | {int(a) // 60}:{int(a) % 60:02d} | {p:.0f}%")
     # where viewers leave, for the 3 most viewed long videos
     lines.append("\n📉 Viewers still watching at 10% / 25% / 50% / 75% of the video:")
+    curve = []
     for vid in ids[:3]:
         try:
             rr = q(dimensions="elapsedVideoTimeRatio", metrics="audienceWatchRatio",
                    filters=f"video=={vid}").get("rows", [])
             pts = {round(x, 2): y for x, y in rr}
             pick = [pts.get(k) for k in (0.1, 0.25, 0.5, 0.75)]
+            if all(y is not None for y in pick):
+                curve.append(pick)
             lines.append(f"  {titles.get(vid, vid)}: " + " / ".join(f"{y * 100:.0f}%" if y is not None else "-" for y in pick))
         except Exception as e:
             lines.append(f"  {vid}: retention not available yet ({str(e)[:60]})")
+    if curve:   # saved for the story writer: it adapts the opening / middle to where viewers leave
+        avg = [sum(c[k] for c in curve) / len(curve) for k in range(4)]
+        (ROOT / "status").mkdir(exist_ok=True)
+        (ROOT / "status" / "retention.json").write_text(json.dumps(
+            {"date": str(end), "at_10": avg[0], "at_25": avg[1], "at_50": avg[2], "at_75": avg[3]}), encoding="utf-8")
     src = q(s=end - timedelta(days=days), dimensions="insightTrafficSourceType", metrics="views", sort="-views")
     lines.append("\n🚦 Where views come from (last %d days): " % days +
                  ", ".join(f"{a} {b}" for a, b in (src.get("rows") or [])[:6]))

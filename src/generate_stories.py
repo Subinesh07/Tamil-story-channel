@@ -169,6 +169,25 @@ Each beat becomes ONE illustration, so describe a simple, paintable moment:
 PARTS = 4  # smaller pieces suit free models with short output limits
 
 
+def retention_lesson():
+    """What the daily analytics report says about where viewers leave -> one instruction for the writer."""
+    try:
+        from config import ROOT
+        d = json.loads((ROOT / "status" / "retention.json").read_text(encoding="utf-8"))
+    except Exception:
+        return ""
+    if d["at_10"] < 0.5:
+        return ("VIEWER DATA: most viewers leave in the first minute of our videos. The first 60 seconds must be "
+                "fast and gripping - no slow description, no introductions, a question the viewer needs answered. ")
+    if d["at_50"] < 0.3:
+        return ("VIEWER DATA: viewers stay for the opening but leave in the middle. Put a new twist, secret or "
+                "danger every 2 minutes and never let a scene drag. ")
+    if d["at_75"] < 0.25:
+        return ("VIEWER DATA: viewers leave before the end. Keep tension rising to the last scene and hint early "
+                "that the ending holds a big reveal. ")
+    return ""
+
+
 def write_part(plan, part, previous_text="", final_note=None, parts=PARTS, part_words="660-720"):
     PARTS = parts
     beats = plan["beats"]
@@ -176,7 +195,8 @@ def write_part(plan, part, previous_text="", final_note=None, parts=PARTS, part_
     chunk = beats[part * size:(part + 1) * size]
     chars = "\n".join(f"- {c['name']}: {c['role']}, {c.get('age', '')}" for c in plan["characters"])
     beat_text = "\n".join(f"{i + 1}. {b['summary_en']} ({b['emotion']})" for i, b in enumerate(chunk))
-    context = ("COLD OPEN: begin with 3-4 short gripping lines from the most dramatic moment of THIS episode "
+    lesson = retention_lesson()
+    context = (lesson + "COLD OPEN: begin with 3-4 short gripping lines from the most dramatic moment of THIS episode "
                "(a flash-forward, present tense, no names explained yet), then one bridge line such as "
                "'இதெல்லாம் எப்படி ஆரம்பிச்சது? கொஞ்சம் பின்னாடி போவோம்…', then tell the story from its start."
                if part == 0 else
