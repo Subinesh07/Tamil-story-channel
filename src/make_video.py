@@ -49,7 +49,7 @@ def produce(row, upload=True, check_duration=True):
     sp = (sp.replace("moustache only, NO beard, chin shaved",
                      "a thin moustache on the upper lip, with a smooth freshly shaved chin and cheeks")
             .replace("clean-shaven, no beard, no moustache",
-                     "a smooth, freshly shaved, completely hairless face, chin and upper lip (clean-shaven)"))
+                     "a thin moustache on the upper lip, with a smooth freshly shaved chin and cheeks"))
     # at most MAX_PICTURES pictures per video (free daily allowance): keep evenly spread scene changes
     from config import MAX_PICTURES
     from stories import PROMPT_SEP

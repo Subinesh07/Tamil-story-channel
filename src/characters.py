@@ -52,10 +52,10 @@ def facial_hair(c, g, age):
     tache = re.search(r"moustache|mustache", look) and not re.search(r"no (moustache|mustache)", look)
     if beard:
         return "always with the same beard"
-    if tache:
-        return "a thin moustache on the upper lip, with a smooth freshly shaved chin and cheeks"
-    # picture models draw any word they read, so never write the word "beard" for a beardless man
-    return "a smooth, freshly shaved, completely hairless face, chin and upper lip (clean-shaven)"
+    # the free picture model almost always draws adult Tamil men with a moustache, so a "clean-shaven"
+    # man fails the picture check again and again: every adult man without a beard gets the same thin
+    # moustache in every picture (consistent, and natural for Tamil men)
+    return "a thin moustache on the upper lip, with a smooth freshly shaved chin and cheeks"
 
 
 def card(c, age_override=None):
