@@ -223,6 +223,10 @@ async function main() {
       <div>Poll <button class="copy" data-t="${encodeURIComponent(poll)}">Copy</button></div><pre>${esc(poll)}</pre>
       <label><input type="checkbox" data-k="${key("post")}" ${chk("post")}> Post done ✅</label>
       <label><input type="checkbox" data-k="${key("poll")}" ${chk("poll")}> Poll done ✅</label>
+      <div class="fix">🖼️ Carousel post (a separate image post, next day): download
+        ${[1,2,3,4].map(k => `<a href="https://github.com/Subinesh07/Tamil-story-channel/releases/download/videos/row${r.id}_pic${k}.png" target="_blank">picture ${k}</a>`).join(" · ")}
+        → app: + → Post → add the pictures → write one teaser line + the video link</div>
+      <label><input type="checkbox" data-k="${key("car")}" ${chk("car")}> Carousel post ✅</label>
       <label><input type="checkbox" data-k="${key("pin")}" ${chk("pin")}> Pinned comment ✅</label>
       <label><input type="checkbox" data-k="${key("end")}" ${chk("end")}> End screen ✅</label>
       <label><input type="checkbox" data-k="${key("share")}" ${chk("share")}> Shared ✅</label></div>`;
