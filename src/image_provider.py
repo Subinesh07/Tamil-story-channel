@@ -89,12 +89,14 @@ class CloudflareProvider(ImageProvider):
     name = "cloudflare"
     MODEL = "@cf/black-forest-labs/flux-1-schnell"
 
-    def __init__(self, seed=None):
+    def __init__(self, seed=None, suffix=""):
         import requests
         self.session = requests.Session()
-        self.account = os.environ.get("CF_ACCOUNT_ID", "").strip()
-        self.token = os.environ.get("CF_API_TOKEN", "").strip()
+        self.account = os.environ.get("CF_ACCOUNT_ID" + suffix, "").strip()
+        self.token = os.environ.get("CF_API_TOKEN" + suffix, "").strip()
         self.seed = seed
+        if suffix:
+            self.name = "cloudflare" + suffix.lower()
 
     def available(self):
         return bool(self.account and self.token)
@@ -178,9 +180,10 @@ def get_provider(seed=None) -> ImageProvider:
         return CloudflareProvider(seed=seed)
     if name == "auto":
         chain = []
-        cf = CloudflareProvider(seed=seed)
-        if cf.available():
-            chain.append(cf)
+        for suffix in ("", "_2", "_3"):   # extra free Cloudflare accounts add their own daily allowance
+            cf = CloudflareProvider(seed=seed, suffix=suffix)
+            if cf.available():
+                chain.append(cf)
         if os.environ.get("IMAGE_API_KEY"):
             chain.append(PollinationsProvider(seed=seed))
         if not chain:

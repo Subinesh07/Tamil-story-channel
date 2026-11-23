@@ -74,6 +74,8 @@ jobs:
           IMAGE_API_KEY: ${{ secrets.IMAGE_API_KEY }}
           CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
           CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          CF_ACCOUNT_ID_2: ${{ secrets.CF_ACCOUNT_ID_2 }}
+          CF_API_TOKEN_2: ${{ secrets.CF_API_TOKEN_2 }}
           LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
           VOICE_API_KEY: ${{ secrets.VOICE_API_KEY }}
           VOICE_API_KEY_2: ${{ secrets.VOICE_API_KEY_2 }}
