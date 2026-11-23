@@ -238,6 +238,8 @@ def generate_all(provider, prompts, out_dir, check=True, base_seed=1000, cache_d
     """
     from image_check import CheckUnavailable, check as vision_check
     fresh = bool(os.environ.get("FRESH_PICTURES"))
+    if isinstance(provider, PlaceholderProvider):
+        check = False   # offline test pictures (sample test / --test runs) are never uploaded
     out_dir.mkdir(parents=True, exist_ok=True)
     paths, warnings = [], []
     used, loaded = set(), set()
