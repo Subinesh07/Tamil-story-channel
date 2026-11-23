@@ -462,7 +462,8 @@ def main():
                 return 0
         except Exception as e:
             log.warning("Duplicate check skipped: %s", str(e)[:150])
-    update_row(row["id"], status="processing", fail_reason="")
+    keep = " needs_approval" if os.environ.get("HOLD_FOR_APPROVAL") else ""   # survives pauses / retries
+    update_row(row["id"], status="processing", fail_reason=keep.strip())
     import status as ST
     try:
         upload = args.test_upload if args.test else not args.no_upload
@@ -473,18 +474,18 @@ def main():
             ST.stage(row["id"], "pictures", "waiting", str(e)[:150])
             ST.event(f"Paused: {str(e)[:150]}", row["id"], "warn")
             log.warning("Paused: %s. Pictures made so far are saved; the next run continues.", e)
-            update_row(row["id"], status="pending", fail_reason="waiting for free picture allowance")
+            update_row(row["id"], status="pending", fail_reason="waiting for free picture allowance" + keep)
             return 0
         if type(e).__name__ in ("GeminiQuota", "VoiceCheckFailed"):
             ST.stage(row["id"], "voice", "waiting", str(e)[:150])
             ST.event(f"Paused: {str(e)[:150]}", row["id"], "warn")
             log.warning("Paused: %s. Voiced parts are saved; the next run continues with Leda.", e)
-            update_row(row["id"], status="pending", fail_reason="waiting for Gemini voice daily limit")
+            update_row(row["id"], status="pending", fail_reason="waiting for Gemini voice daily limit" + keep)
             return 0
         log.error("Row %s failed: %s", row["id"], e)
         ST.event(f"FAILED: {str(e)[:180]}", row["id"], "error")
         log.debug(traceback.format_exc())
-        update_row(row["id"], status="failed", fail_reason=str(e)[:500].replace("\n", " "))
+        update_row(row["id"], status="failed", fail_reason=str(e)[:480].replace("\n", " ") + keep)
         return 1
     if video_id:
         update_row(row["id"], status="done", video_id=video_id)
