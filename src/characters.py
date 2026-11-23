@@ -53,8 +53,9 @@ def facial_hair(c, g, age):
     if beard:
         return "always with the same beard"
     if tache:
-        return "moustache only, NO beard, chin shaved"
-    return "clean-shaven, no beard, no moustache"
+        return "a thin moustache on the upper lip, with a smooth freshly shaved chin and cheeks"
+    # picture models draw any word they read, so never write the word "beard" for a beardless man
+    return "a smooth, freshly shaved, completely hairless face, chin and upper lip (clean-shaven)"
 
 
 def card(c, age_override=None):

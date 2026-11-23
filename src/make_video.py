@@ -45,6 +45,11 @@ def produce(row, upload=True, check_duration=True):
     sp = row["scene_prompts"]
     for old_style in PREVIOUS_IMAGE_STYLES:
         sp = sp.replace(old_style, IMAGE_STYLE)
+    # facial hair written positively (picture models draw any word they read, e.g. "beard" in "no beard")
+    sp = (sp.replace("moustache only, NO beard, chin shaved",
+                     "a thin moustache on the upper lip, with a smooth freshly shaved chin and cheeks")
+            .replace("clean-shaven, no beard, no moustache",
+                     "a smooth, freshly shaved, completely hairless face, chin and upper lip (clean-shaven)"))
     # at most MAX_PICTURES pictures per video (free daily allowance): keep evenly spread scene changes
     from config import MAX_PICTURES
     from stories import PROMPT_SEP
