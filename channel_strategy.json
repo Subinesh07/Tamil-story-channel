@@ -3,11 +3,20 @@
   "publish_hour": 19,
   "genre_mix": {
     "family emotional": 12,
-    "moral or life-lesson": 8,
+    "moral or life-lesson": 9,
     "suspense or mystery": 6,
-    "friendship or romance": 4
+    "friendship or romance": 3
   },
-  "trending_themes": [],
+  "trending_themes": [
+    "சோம்பேறி",
+    "நாத்தனார்",
+    "கழுதை",
+    "சபிக்கப்பட்ட",
+    "தையல்காரர்",
+    "ஆடை",
+    "தயாரிப்பவர்",
+    "இளவரசன்"
+  ],
   "engagement_push": false,
   "history": [
     {
@@ -17,6 +26,13 @@
         "Story writer will lean towards these popular themes (ideas only): ஒரு, ஊரே, ஏன், வரை, இந்த, மட்டும், எந்த, முருகனா",
         "Outros now ask viewers a question to get more comments",
         "(Corrected same day: filler-word themes and the test-video engagement switch were reset)"
+      ]
+    },
+    {
+      "date": "2026-11-23",
+      "changes": [
+        "Genre mix: +1 'moral or life-lesson', -1 'friendship or romance' per 30 stories (now family emotional 12, moral or life-lesson 9, suspense or mystery 6, friendship or romance 3)",
+        "Story writer will lean towards these popular themes (ideas only): சோம்பேறி, நாத்தனார், கழுதை, சபிக்கப்பட்ட, தையல்காரர், ஆடை, தயாரிப்பவர், இளவரசன்"
       ]
     }
   ]
