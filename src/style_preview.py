@@ -9,13 +9,8 @@ OUT = Path(__file__).resolve().parent.parent / "previews" / "styles"
 OUT.mkdir(parents=True, exist_ok=True)
 
 SCENES = {
-    "family": ("a 55-year-old South Indian mother in a cotton saree (grey hair in a bun, small bindi) secretly "
-               "hiding an old letter in a steel trunk at night while her 25-year-old son (short black hair, "
-               "moustache only, no beard) watches shocked from the doorway, small Tamil Nadu village house, "
-               "oil lamp light"),
-    "doomsday": ("a 28-year-old Tamil woman (long braided hair, salwar) and a 30-year-old man (short beard) "
-                 "standing on a Chennai rooftop staring up in fear at a huge glowing crack splitting the night "
-                 "sky, the city below in a blackout, wind blowing"),
+    "sample": ("a 55-year-old South Indian mother in a cotton saree with grey hair in a bun and her "
+               "25-year-old son with a moustache, in their small Tamil Nadu village house at night"),
 }
 STYLES = {
     "B_tanjore": ("in the style of a modern Tanjore painting: rich flat jewel colours (deep red, emerald, "
