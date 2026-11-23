@@ -128,7 +128,9 @@ def make_thumbnail(scene_png, title, out_path, variant=0):
 # Realistic emotional scene + quoted shocking dialogue on top + curiosity hook at the bottom.
 THUMB_STYLE = ("viral YouTube thumbnail art, cinematic semi-realistic digital painting like a Tamil TV serial "
                "poster, extremely dramatic moment, large close-up faces with intense emotion, high contrast, "
-               "vivid saturated colours, sharp focus, no text, no letters, no logos, no watermark")
+               "vivid saturated colours, sharp focus, shocking but not graphic: no blood, no gore, no injuries, no dead bodies, no weapons "
+               "pointed at people; the shock comes from faces, a secret or a surprising situation that really happens "
+               "in the story, no text, no letters, no logos, no watermark")
 BANDS = [((200, 20, 20), (255, 255, 255), (255, 214, 0)),     # red band, white quote, yellow hook
          ((255, 214, 0), (150, 0, 0), (255, 255, 255)),       # yellow band, dark red quote
          ((20, 20, 20), (255, 214, 0), (255, 60, 60))]        # black band, yellow quote, red hook

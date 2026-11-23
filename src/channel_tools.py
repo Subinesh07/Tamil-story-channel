@@ -149,6 +149,52 @@ def analytics_report(days=28):
     return report
 
 
+def review_before_apply(subs_goal=800, hours_goal=3000):
+    """Once the channel nears monetization: list weak videos to consider making private before applying.
+    Writes status/apply_review.md once (the workflow turns it into a GitHub issue)."""
+    import os
+    flag = ROOT / "status" / "apply_review_sent"
+    if flag.exists():
+        return
+    from google.oauth2.credentials import Credentials
+    from googleapiclient.discovery import build
+    creds = Credentials(None, refresh_token=os.environ["YT_REFRESH_TOKEN"].strip(),
+                        client_id=os.environ["YT_CLIENT_ID"].strip(),
+                        client_secret=os.environ["YT_CLIENT_SECRET"].strip(),
+                        token_uri="https://oauth2.googleapis.com/token")
+    ya = build("youtubeAnalytics", "v2", credentials=creds, cache_discovery=False)
+    end = date.today()
+    subs = int(_yt().channels().list(part="statistics", mine=True).execute()["items"][0]["statistics"]["subscriberCount"])
+    tot = ya.reports().query(ids="channel==MINE", startDate=str(end - timedelta(days=365)), endDate=str(end),
+                             metrics="estimatedMinutesWatched").execute()
+    hours = ((tot.get("rows") or [[0]])[0][0]) / 60
+    if subs < subs_goal and hours < hours_goal:
+        return
+    per = ya.reports().query(ids="channel==MINE", startDate=str(end - timedelta(days=365)), endDate=str(end),
+                             dimensions="video", metrics="views,estimatedMinutesWatched,averageViewPercentage",
+                             sort="averageViewPercentage", maxResults=50).execute().get("rows", [])
+    weak = [r for r in per if r[3] < 15]
+    titles = {}
+    for i in range(0, len(weak), 50):
+        ids = ",".join(r[0] for r in weak[i:i + 50])
+        if ids:
+            for it in _yt().videos().list(part="snippet", id=ids).execute().get("items", []):
+                titles[it["id"]] = it["snippet"]["title"][:60]
+    lines = [f"The channel is close to monetization ({subs} subscribers, {hours:.0f} public watch hours).",
+             "Before you apply, consider making these weak videos **private** (Studio → Content → Visibility).",
+             "",
+             "⚠️ Only PUBLIC videos' watch hours count. Making a video private removes its hours - "
+             "only hide a video if you still have enough hours without it.", "",
+             "| Video | Views | Watch hours | % watched |", "|---|---|---|---|"]
+    for vid, v, m, p in weak:
+        lines.append(f"| [{titles.get(vid, vid)}](https://studio.youtube.com/video/{vid}/edit) | {v} | {m / 60:.1f} | {p:.0f}% |")
+    if not weak:
+        lines.append("| (no weak videos – nothing needs hiding) | | | |")
+    (ROOT / "status").mkdir(exist_ok=True)
+    (ROOT / "status" / "apply_review.md").write_text("\n".join(lines), encoding="utf-8")
+    flag.write_text(str(end), encoding="utf-8")
+
+
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     if len(sys.argv) > 1 and sys.argv[1] == "backfill":
@@ -159,3 +205,7 @@ if __name__ == "__main__":
                 add_to_playlist(row, row["video_id"])
     else:
         analytics_report()
+        try:
+            review_before_apply()
+        except Exception as e:
+            log.warning("Apply review skipped: %s", str(e)[:150])

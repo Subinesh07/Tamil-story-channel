@@ -59,12 +59,34 @@ def produce(row, upload=True, check_duration=True):
     if part:
         title = f"{title}, பகுதி {part}"
     n = int(rid) if rid.isdigit() else 0
-    intro = split_sentences(INTRO_LINES[n % len(INTRO_LINES)].format(title=title))
+    from engage import FICTION_LINE
+    intro = split_sentences(INTRO_LINES[n % len(INTRO_LINES)].format(title=title)) + [FICTION_LINE]
     from strategy import load as load_strategy
     outro_pool = OUTRO_LINES
     if load_strategy().get("engagement_push"):
         outro_pool = [o for o in OUTRO_LINES if "?" in o or "கமெண்ட்" in o] or OUTRO_LINES
     outro = split_sentences(outro_pool[n % len(outro_pool)])
+    # viewer engagement before the outro: quiz winner, comment shout-out, today's quiz.
+    # Made once per video and saved, so a later Short-only run re-uses exactly the same lines.
+    end = []
+    if row.get("end_lines"):
+        try:
+            end = json.loads(row["end_lines"])
+        except ValueError:
+            end = []
+    elif upload and not os.environ.get("NO_NEW_ASSETS"):
+        try:
+            from engage import end_segment
+            end, fields = end_segment(row, story)
+            mark = fields.pop("_winner_for", None)
+            if mark:
+                update_row(mark[0], quiz_winner=mark[1])
+            update_row(rid, end_lines=json.dumps(end, ensure_ascii=False), **fields)
+            row.update(end_lines=json.dumps(end, ensure_ascii=False), **fields)
+        except Exception as e:
+            log.warning("Engagement lines skipped: %s", str(e)[:150])
+            end = []
+    outro = end + outro
     sentences = intro + story + outro
     log.info("Row %s '%s': %d story sentences (+%d intro, +%d outro), %d prompts", rid,
              row["title_en"], len(story), len(intro), len(outro), len(prompts))
@@ -217,8 +239,7 @@ def make_and_upload_short(row, video_id):
 
 
 def make_extra_shorts(row, video_id):
-    """Shorts 2 and 3: strongest middle moment + cliffhanger, cut from the same finished video
-    (no voice or picture credits). Posted the next two afternoons."""
+    """Short 2: cut from the same finished video (no voice or picture credits), next day 1 PM."""
     try:
         from shorts import EXTRA, extra_when, make_short, pick_extra_segments, upload_short
         import series as S
@@ -232,9 +253,12 @@ def make_extra_shorts(row, video_id):
         story_t = {**t, "sentences": t["sentences"][:len(t["sentences"]) - LAST.get("outro", 0)]}
         texts = [x.get("text", "") for x in story_t["sentences"]]
         segs = pick_extra_segments(story_t, LAST["intro"], texts if any(texts) else None, final)
+        # 2 Shorts per video in total (more near-identical Shorts can look mass-produced):
+        # the cliffhanger for a serial part, the mid-story twist for a final part / standalone story
+        segs = segs[:1] if final else segs[-1:]
         ids = []
-        for k, seg in enumerate(segs[:2]):
-            ending, cta = EXTRA[k]
+        for k, seg in enumerate(segs):
+            ending, cta = EXTRA[0 if final else 1]
             out = OUTPUT_DIR.resolve() / f"story_{row['id']}_short{k + 2}.mp4"
             clip = make_short(LAST["video"], LAST["timings"], LAST["intro"], row["title_ta"].split(" | ")[0],
                               out, seg=seg, cta=cta)

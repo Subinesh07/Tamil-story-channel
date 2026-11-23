@@ -13,6 +13,7 @@ CSV_COLUMNS = [
     "id", "genre", "title_ta", "title_en", "script_ta", "scene_prompts",
     "publish_at", "status", "video_id", "fail_reason", "description_ta",
     "thumb_quote_ta", "thumb_hook_ta", "thumb_prompt", "series_id", "part", "thumb_text",
+    "end_lines", "quiz_q", "quiz_a", "quiz_winner",
 ]
 
 # --- Story rules ---
@@ -80,7 +81,7 @@ PUBLISH_HOUR = 19
 MIN_PENDING = 10
 YT_CATEGORY_ID = "22"   # People & Blogs
 HASHTAGS = "#TamilStory #TamilFamilyStory #TamilEmotionalStory"
-DISCLOSURE_LINE = "Original Tamil story | Narration by AI"
+DISCLOSURE_LINE = "இது ஒரு கற்பனை கதை (fictional story) | Original Tamil story | Narration by AI"
 
 # --- Branding ---
 CHANNEL_NAME_TA = "நிலா கதைகள்"
@@ -105,7 +106,7 @@ OUTRO_LINES = [
     "இந்த கதை உங்க மனசை தொட்டிருந்தா, கமெண்ட்ல சொல்லுங்க। சப்ஸ்க்ரைப் பண்ண மறந்துடாதீங்க",
     "உங்களுக்கு பிடிச்ச பகுதி எது? கமெண்ட்ல எழுதுங்க। தினமும் ஒரு கதைக்கு நிலா கதைகளை சப்ஸ்க்ரைப் பண்ணுங்க",
     "இந்த கதையை உங்க குடும்பத்தோட பகிர்ந்துக்கோங்க। பெல் ஐகானை அழுத்துங்க, நாளைக்கு சந்திப்போம்",
-    "நன்றி நண்பர்களே! நிலா கதைகளை சப்ஸ்க்ரைப் பண்ணுங்க। நாளை சாயங்காலம் ஏழு மணிக்கு புது கதை",
+    "நன்றி நண்பர்களே! நிலா கதைகளை சப்ஸ்க்ரைப் பண்ணுங்க। நாளைக்கு இன்னொரு புது கதையோட வர்றோம்",
 ]
 
 # --- Gemini voice (main narrator) ---
