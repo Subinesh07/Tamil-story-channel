@@ -64,7 +64,7 @@ TTS_RETRY_WAIT = 5
 
 # --- Images ---
 WIDTH, HEIGHT = 1280, 720
-IMAGE_RETRIES = 3
+IMAGE_RETRIES = 5
 SECONDS_PER_IMAGE_MIN, SECONDS_PER_IMAGE_MAX = 25, 40   # fallback when a story has no scene marks
 
 # --- Video ---

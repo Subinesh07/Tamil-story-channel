@@ -228,6 +228,29 @@ def make_outro_card(png_path, out_path):
     return out_path
 
 
+def simpler_prompt(prompt, reasons, context=""):
+    """After two rejected pictures: Gemini rewrites the description so the same story moment is easier to
+    draw correctly (fewer people in frame, one clear action, explicit positions). Keeps character looks."""
+    try:
+        from llm import complete
+        d = complete(
+            "A picture generator keeps drawing this story picture wrong. Rewrite the picture description so the "
+            "SAME story moment is much easier to draw correctly: show only the 1-2 people that matter, one clear "
+            "action, explicit simple positions (e.g. 'he is driving, seen from the passenger side'), a simple "
+            "camera angle. Keep every character's age, look, clothes and facial-hair wording exactly as given, "
+            "and keep the art style sentence unchanged. Never mention things that should NOT appear.\n\n"
+            f"Description:\n{prompt}\n\nWhat went wrong:\n- " + "\n- ".join(reasons[-3:]) +
+            f"\n\nNarration at this moment (Tamil): {context[:500]}\n\n"
+            'Return JSON {"prompt": "..."}', want_json=True, max_tokens=2000, rounds=1)
+        new = d["prompt"].strip()
+        if len(new) > 80:
+            log.info("Rewrote a hard picture description: %s", new[:200])
+            return new
+    except Exception as e:
+        log.info("Prompt rewrite skipped: %s", str(e)[:100])
+    return prompt
+
+
 def generate_all(provider, prompts, out_dir, check=True, base_seed=1000, cache_dir=None, contexts=None):
     """Generate every scene image.
 
@@ -307,9 +330,12 @@ def generate_all(provider, prompts, out_dir, check=True, base_seed=1000, cache_d
         if os.environ.get("NO_NEW_ASSETS"):
             raise ImageQuota(f"Short-only run: saved picture {i} is missing - not making new pictures")
         data, reason = None, ""
+        draw_prompt, reasons = prompt, []
         for attempt in range(1 + IMAGE_RETRIES):
+            if check and len(reasons) >= 2 and draw_prompt == prompt:
+                draw_prompt = simpler_prompt(prompt, reasons, ctx)   # same moment, easier to draw right
             try:
-                candidate = provider.generate(prompt, seed=base_seed + i * 10 + attempt)
+                candidate = provider.generate(draw_prompt, seed=base_seed + i * 10 + attempt)
             except ImageQuota:
                 log.warning("Scene %02d still needs a picture. Prompt: %s", i, prompt[:400])
                 raise   # pictures made so far are cached; the next run continues from here
@@ -321,13 +347,14 @@ def generate_all(provider, prompts, out_dir, check=True, base_seed=1000, cache_d
             if not check:
                 break
             try:
-                ok, reason = vision_check(candidate, prompt, ctx)
+                ok, reason = vision_check(candidate, draw_prompt, ctx)
             except CheckUnavailable as e:
                 raise PictureFailed(str(e))   # pictures accepted so far stay saved
             if ok:
                 if reason:
                     log.info("Image %d: %s", i, reason)
                 break
+            reasons.append(reason)
             log.warning("Image %d rejected by checker (%s); regenerating", i, reason)
         else:
             if data is not None and check:
