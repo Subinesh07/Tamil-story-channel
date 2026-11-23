@@ -13,6 +13,15 @@ from stories import update_row  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 rid = sys.argv[1]
+if rid.startswith("video:"):   # a single video (e.g. Viewers' Corner): next day 4 PM IST
+    from zoneinfo import ZoneInfo
+    vid = rid.split(":", 1)[1]
+    when = (datetime.now(ZoneInfo("Asia/Kolkata")) + timedelta(days=1)).replace(hour=16, minute=0, second=0, microsecond=0)
+    client().videos().update(part="status", body={"id": vid, "status": {
+        "privacyStatus": "private", "publishAt": when.astimezone(timezone.utc).isoformat().replace("+00:00", "Z"),
+        "selfDeclaredMadeForKids": False, "containsSyntheticMedia": False}}).execute()
+    print(f"{vid}: scheduled for {when.isoformat()}")
+    sys.exit(0)
 row = next(r for r in csv.DictReader(open(ROOT / "stories.csv", encoding="utf-8")) if r["id"] == rid)
 yt = client()
 pub = datetime.fromisoformat(row["publish_at"])

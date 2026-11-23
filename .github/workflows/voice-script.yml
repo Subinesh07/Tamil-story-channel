@@ -1,0 +1,44 @@
+name: Viewers Corner script
+
+# 1st and 15th of each month: pick the best viewer comments and write a short reaction script
+# for the creator to read in his own voice (docs/record.html). Opens a GitHub notification.
+on:
+  schedule:
+    - cron: "23 6 1,15 * *"   # 11:53 AM IST
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  script:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Write the script
+        id: w
+        env:
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
+          YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
+          YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
+        run: python src/voice_script.py && echo "ready=1" >> "$GITHUB_OUTPUT" || echo "Not enough comments yet"
+      - name: Save and notify
+        if: steps.w.outputs.ready == '1'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name "nila-bot"; git config user.email "bot@users.noreply.github.com"
+          git add voice/
+          git commit -m "Viewers Corner script ready [skip ci]" && (git push || (git pull --rebase -X theirs && git push))
+          gh issue create --title "🎙️ Viewers' Corner – time to record (about 5 minutes)" \
+            --body "A new script is ready. Open on your phone and record line by line: https://subinesh07.github.io/Tamil-story-channel/record.html"

@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>நிலா கதைகள் – Record your voice</title>
+<style>
+  :root { --bg:#0f1220; --card:#1a1f35; --text:#f1f1f6; --muted:#a6abc4; --accent:#f5c542; --ok:#4cd28a; --bad:#ff6b6b; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family: system-ui, "Noto Sans Tamil", sans-serif; background:var(--bg); color:var(--text); }
+  main { max-width:640px; margin:0 auto; padding:18px; }
+  h1 { font-size:20px; margin:4px 0 12px; }
+  .card { background:var(--card); border-radius:14px; padding:16px; margin:12px 0; }
+  .muted { color:var(--muted); font-size:14px; }
+  .line { font-size:26px; line-height:1.5; margin:12px 0; }
+  .tip { color:var(--accent); font-size:15px; }
+  .comment { border-left:3px solid var(--accent); padding:6px 10px; margin:8px 0; font-size:15px; color:var(--muted); }
+  button { font-size:18px; padding:14px 18px; border-radius:12px; border:0; margin:6px 6px 0 0; cursor:pointer; }
+  .rec { background:var(--bad); color:#fff; width:100%; font-size:22px; padding:20px; }
+  .rec.on { animation: pulse 1s infinite; }
+  @keyframes pulse { 50% { opacity:.6; } }
+  .sec { background:#2b3150; color:var(--text); }
+  .go { background:var(--ok); color:#06210f; width:100%; font-weight:700; }
+  input { width:100%; font-size:16px; padding:12px; border-radius:10px; border:0; margin:8px 0; }
+  .dots span { display:inline-block; width:12px; height:12px; border-radius:50%; background:#2b3150; margin:2px; }
+  .dots span.done { background:var(--ok); } .dots span.cur { outline:2px solid var(--accent); }
+  #log { white-space:pre-wrap; font-size:14px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>🎙️ நிலா கதைகள் – உங்க குரல்</h1>
+
+  <div class="card" id="setup" hidden>
+    <b>One-time setup</b>
+    <p class="muted">Paste the GitHub key (fine-grained token for this repo only: Contents + Actions read/write).
+      It stays saved on this phone only.</p>
+    <input id="tok" type="password" placeholder="github_pat_...">
+    <button class="go" onclick="saveTok()">Save</button>
+  </div>
+
+  <div class="card">
+    <b>Before you start</b>
+    <div class="muted">• Quiet room, phone about 20 cm from your mouth<br>
+      • Talk like you're telling a friend – smile, don't act<br>
+      • Small mistakes are fine – they sound human. Re-record only if you stumble a lot</div>
+  </div>
+
+  <div id="empty" class="card" hidden>No new script yet. GitHub writes one twice a month (1st and 15th) when there are enough comments.</div>
+
+  <div id="studio" hidden>
+    <div class="muted" id="title"></div>
+    <div class="dots" id="dots"></div>
+    <div class="card">
+      <div class="muted" id="pos"></div>
+      <div class="comment" id="cmt" hidden></div>
+      <div class="line" id="text"></div>
+      <div class="tip" id="tip"></div>
+      <button class="rec" id="recBtn" onclick="toggleRec()">🎙️ Record</button>
+      <button class="sec" id="playBtn" onclick="play()" disabled>▶ Listen</button>
+      <button class="sec" onclick="move(-1)">◀ Back</button>
+      <button class="sec" onclick="move(1)">Next ▶</button>
+    </div>
+    <button class="go" id="sendBtn" onclick="send()" disabled>✅ Send all to GitHub – make the video</button>
+    <div class="card" id="log" hidden></div>
+  </div>
+</main>
+
+<script>
+const REPO = "Subinesh07/Tamil-story-channel";
+const RAW = `https://raw.githubusercontent.com/${REPO}/main/voice/next.json?t=${Date.now()}`;
+let script = null, idx = 0, takes = [], rec = null, chunks = [], audio = null;
+
+function store(k, v) { try { v === undefined ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch (e) {} }
+function load(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+function token() { return load("nila_gh_token"); }
+function saveTok() {
+  const t = document.getElementById("tok").value.trim();
+  if (!t) return;
+  store("nila_gh_token", t);
+  document.getElementById("setup").hidden = true;
+}
+
+async function init() {
+  if (!token()) document.getElementById("setup").hidden = false;
+  try {
+    const r = await fetch(RAW);
+    if (!r.ok) throw new Error("none");
+    script = await r.json();
+  } catch (e) { document.getElementById("empty").hidden = false; return; }
+  if (load("nila_sent_" + script.episode)) {
+    document.getElementById("empty").hidden = false;
+    document.getElementById("empty").textContent = `Viewers' Corner #${script.episode} is already sent. The next script comes in about 2 weeks.`;
+    return;
+  }
+  takes = new Array(script.lines.length).fill(null);
+  document.getElementById("title").textContent = `Viewers' Corner #${script.episode} – ${script.title || ""}`;
+  document.getElementById("studio").hidden = false;
+  show();
+}
+
+function show() {
+  const ln = script.lines[idx];
+  document.getElementById("pos").textContent = `Line ${idx + 1} of ${script.lines.length}`;
+  document.getElementById("text").textContent = ln.text;
+  document.getElementById("tip").textContent = "💡 " + ln.tip;
+  const c = document.getElementById("cmt");
+  if (ln.comment) { c.hidden = false; c.textContent = `💬 ${ln.comment.author}: ${ln.comment.text}`; } else c.hidden = true;
+  document.getElementById("playBtn").disabled = !takes[idx];
+  document.getElementById("recBtn").textContent = takes[idx] ? "🎙️ Record again" : "🎙️ Record";
+  document.getElementById("dots").innerHTML = script.lines.map((_, i) =>
+    `<span class="${takes[i] ? "done" : ""} ${i === idx ? "cur" : ""}"></span>`).join("");
+  document.getElementById("sendBtn").disabled = takes.some(t => !t);
+}
+
+function move(d) { if (rec) return; idx = Math.max(0, Math.min(script.lines.length - 1, idx + d)); show(); }
+
+async function toggleRec() {
+  const btn = document.getElementById("recBtn");
+  if (rec) { rec.stop(); return; }
+  let stream;
+  try { stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } }); }
+  catch (e) { alert("Please allow the microphone for this page."); return; }
+  chunks = [];
+  rec = new MediaRecorder(stream);
+  rec.ondataavailable = e => chunks.push(e.data);
+  rec.onstop = () => {
+    takes[idx] = new Blob(chunks, { type: rec.mimeType || "audio/webm" });
+    stream.getTracks().forEach(t => t.stop());
+    rec = null; btn.classList.remove("on");
+    show();
+  };
+  rec.start(); btn.classList.add("on"); btn.textContent = "⏹ Stop";
+}
+
+function play() {
+  if (!takes[idx]) return;
+  if (audio) audio.pause();
+  audio = new Audio(URL.createObjectURL(takes[idx])); audio.play();
+}
+
+function b64(blob) {
+  return new Promise(res => { const r = new FileReader(); r.onload = () => res(r.result.split(",")[1]); r.readAsDataURL(blob); });
+}
+
+function log(msg) { const l = document.getElementById("log"); l.hidden = false; l.textContent += msg + "\n"; }
+
+async function send() {
+  const t = token();
+  if (!t) { document.getElementById("setup").hidden = false; alert("Add the GitHub key first."); return; }
+  document.getElementById("sendBtn").disabled = true;
+  const h = { "Authorization": "Bearer " + t, "Accept": "application/vnd.github+json" };
+  const shas = [];
+  try {
+    for (let i = 0; i < takes.length; i++) {
+      log(`Sending line ${i + 1}…`);
+      const r = await fetch(`https://api.github.com/repos/${REPO}/git/blobs`, { method: "POST", headers: h,
+        body: JSON.stringify({ content: await b64(takes[i]), encoding: "base64" }) });
+      if (!r.ok) throw new Error(`line ${i + 1}: ${r.status} ${await r.text()}`);
+      shas.push((await r.json()).sha);
+    }
+    const d = await fetch(`https://api.github.com/repos/${REPO}/actions/workflows/voice-video.yml/dispatches`, {
+      method: "POST", headers: h,
+      body: JSON.stringify({ ref: "main", inputs: { episode: String(script.episode), blobs: shas.join(",") } }) });
+    if (!d.ok) throw new Error(`start: ${d.status} ${await d.text()}`);
+    store("nila_sent_" + script.episode, "1");
+    log("✅ Sent! GitHub is making the video now (about 10 minutes). It will be uploaded PRIVATE for your approval.");
+  } catch (e) {
+    log("❌ " + e.message + "\nNothing is lost – press Send again.");
+    document.getElementById("sendBtn").disabled = false;
+  }
+}
+
+init();
+</script>
+</body>
+</html>
