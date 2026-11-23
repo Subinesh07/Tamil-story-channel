@@ -65,12 +65,25 @@ def add_to_playlist(row, video_id):
     try:
         yt, known = _yt(), _load()
         name = _playlist_name(row)
+        import time
+        fresh = name not in known
         pid = _find_or_create(yt, name, known)
-        items = yt.playlistItems().list(part="contentDetails", playlistId=pid, maxResults=50).execute()
-        if any(i["contentDetails"]["videoId"] == video_id for i in items.get("items", [])):
-            return pid
-        yt.playlistItems().insert(part="snippet", body={"snippet": {
-            "playlistId": pid, "resourceId": {"kind": "youtube#video", "videoId": video_id}}}).execute()
+        if not fresh:
+            try:
+                items = yt.playlistItems().list(part="contentDetails", playlistId=pid, maxResults=50).execute()
+                if any(i["contentDetails"]["videoId"] == video_id for i in items.get("items", [])):
+                    return pid
+            except Exception:
+                pass
+        for attempt in range(4):   # a brand-new playlist needs a few seconds before it can be used
+            try:
+                yt.playlistItems().insert(part="snippet", body={"snippet": {
+                    "playlistId": pid, "resourceId": {"kind": "youtube#video", "videoId": video_id}}}).execute()
+                break
+            except Exception:
+                if attempt == 3:
+                    raise
+                time.sleep(15)
         PLAYLIST_FILE.write_text(json.dumps(known, ensure_ascii=False, indent=1), encoding="utf-8")
         log.info("Added %s to playlist %s", video_id, name)
         return pid
@@ -197,7 +210,12 @@ def review_before_apply(subs_goal=800, hours_goal=3000):
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-    if len(sys.argv) > 1 and sys.argv[1] == "backfill":
+    if len(sys.argv) > 2 and sys.argv[1] == "add":
+        import csv
+        for row in csv.DictReader(open(ROOT / "stories.csv", encoding="utf-8")):
+            if row["id"] in sys.argv[2].split(",") and row.get("video_id"):
+                add_to_playlist(row, row["video_id"])
+    elif len(sys.argv) > 1 and sys.argv[1] == "backfill":
         # add every uploaded long video to its playlist
         import csv
         for row in csv.DictReader(open(ROOT / "stories.csv", encoding="utf-8")):

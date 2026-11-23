@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: "report or backfill (add old videos to playlists)"
+        description: "report, backfill (add old videos to playlists) or add:<row ids> e.g. add:8"
         default: report
 
 permissions:
@@ -32,7 +32,9 @@ jobs:
           YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
           YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
         run: |
-          if [ "${{ github.event.inputs.mode }}" = "backfill" ]; then python src/channel_tools.py backfill; fi
+          MODE="${{ github.event.inputs.mode }}"
+          if [ "$MODE" = "backfill" ]; then python src/channel_tools.py backfill; fi
+          case "$MODE" in add:*) python src/channel_tools.py add "${MODE#add:}";; esac
           python src/channel_tools.py
       - name: Reminder before applying for monetization
         env:
