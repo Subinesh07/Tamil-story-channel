@@ -141,8 +141,10 @@ def main():
             bad(label, str(e)[:120])
     # Facebook Page (Reels)
     pid, ptok = os.environ.get("FB_PAGE_ID", "").strip(), os.environ.get("FB_PAGE_TOKEN", "").strip()
-    if pid and ptok:
+    if ptok:
         try:
+            # the Page key knows its own Page: no need for a separate (easy to mistype) id
+            pid = str(requests.get("https://graph.facebook.com/v21.0/me", params={"access_token": ptok}, timeout=30).json().get("id", pid))
             r = requests.get(f"https://graph.facebook.com/v21.0/{pid}", params={"fields": "name,fan_count", "access_token": ptok}, timeout=30)
             d = requests.get("https://graph.facebook.com/v21.0/debug_token", params={"input_token": ptok, "access_token": ptok}, timeout=30).json().get("data", {})
             if r.status_code == 200:
