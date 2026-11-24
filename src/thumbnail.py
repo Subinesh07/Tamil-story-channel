@@ -126,8 +126,8 @@ def make_thumbnail(scene_png, title, out_path, variant=0):
 # ---------------------------------------------------------------------------
 # "Drama" thumbnail: what top Tamil family-story channels use.
 # Realistic emotional scene + quoted shocking dialogue on top + curiosity hook at the bottom.
-THUMB_STYLE = ("viral YouTube thumbnail art, 2D semi-realistic painted Tamil drama art (soft oval faces, large "
-               "expressive almond eyes, silver crescent-moon pendant, blue moonlight and warm lamp glow), extremely dramatic moment, large close-up faces with intense emotion, high contrast, "
+THUMB_STYLE = ("viral YouTube thumbnail art, cinematic semi-realistic digital painting like a Tamil TV serial "
+               "poster, extremely dramatic moment, large close-up faces with intense emotion, high contrast, "
                "vivid saturated colours, sharp focus, shocking but not graphic: no blood, no gore, no injuries, no dead bodies, no weapons "
                "pointed at people; the shock comes from faces, a secret or a surprising situation that really happens "
                "in the story, no text, no letters, no logos, no watermark")

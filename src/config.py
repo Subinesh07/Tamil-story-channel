@@ -31,8 +31,8 @@ PHOTO_IMAGE_STYLE = ("photorealistic cinematic film still, South Indian people a
                "mysterious moment that makes you want to know what happens next, dramatic movie lighting "
                "with strong contrast and rim light, shallow depth of field, rich detail, expressive faces, "
                "natural skin, sharp focus, 35mm film look, no text, no letters, no logos")
-# House look since 23 Nov: Gemini-like painted drama art with the "Nila face" design
-IMAGE_STYLE = ("2D digital painting, semi-realistic illustrated Tamil drama art, smooth painterly shading, clean soft "
+# Painted look tried on 23-24 Nov (dropped: the free model drew it badly)
+PAINTED_IMAGE_STYLE = ("2D digital painting, semi-realistic illustrated Tamil drama art, smooth painterly shading, clean soft "
                "outlines, rich natural colours. NILA FACE DESIGN: soft oval face, high rounded cheekbones, large "
                "expressive deep-brown almond eyes with a bright catch-light, thick defined eyebrows, straight nose with "
                "a softly rounded tip, full lips, warm brown skin; realistic adult proportions for adults, every "
@@ -40,15 +40,19 @@ IMAGE_STYLE = ("2D digital painting, semi-realistic illustrated Tamil drama art,
                "blue moonlight on one side and warm orange lamp glow on the other. Every character wears a clearly "
                "visible small silver crescent-moon pendant. Every person's whole head and face fully inside the frame, natural "
                "anatomy, correct number of people. Detailed Tamil Nadu background, no text, no letters, no logos")
+# House look (back to the proven photorealistic cinematic style, 24 Nov)
+IMAGE_STYLE = PHOTO_IMAGE_STYLE.replace("no text, no letters, no logos",
+    "every person's whole head and face fully inside the frame, natural anatomy, correct number of people, "
+    "no text, no letters, no logos")
 # Short style that goes FIRST in every drawn prompt: the free picture model reads only about the first
 # 250 words, so a style sentence at the end of a long description can be cut off (photo instead of painting)
-STYLE_PREFIX = ("2D digital painting, semi-realistic illustrated Tamil drama art, smooth painterly shading, soft "
-                "outlines, cool blue moonlight and warm orange lamp glow, NOT a photograph: ")
+STYLE_PREFIX = "photorealistic cinematic film still, South Indian people and setting, dramatic movie lighting: "
 # every earlier picture style: stored prompts are switched to the current style, saved pictures still match
 PREVIOUS_IMAGE_STYLES = [
     "warm watercolor illustration, South Indian home, soft natural light, no text, no logos",
     OLD_IMAGE_STYLE,
     PHOTO_IMAGE_STYLE,
+    PAINTED_IMAGE_STYLE,
 ]
 GENRE_MIX = {  # used by generate_stories.py for each new batch of 30
     "family emotional": 12,

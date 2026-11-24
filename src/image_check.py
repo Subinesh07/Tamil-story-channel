@@ -17,11 +17,11 @@ import requests
 
 log = logging.getLogger(__name__)
 
-CHECK_VERSION = "v3"   # bump when the rules change: saved pictures checked under older rules are checked again
+CHECK_VERSION = "v4"   # bump when the rules change: saved pictures checked under older rules are checked again
 
 RULES = """Reject a picture (ok=false) if ANY of these is true:
-- STYLE: it must be a 2D painted / illustrated drama-art picture (smooth painterly shading, soft outlines).
-  Reject photographs, photo-realistic 3D renders or any other art style
+- STYLE: it must look like a photorealistic cinematic film still. Reject cartoons, paintings, drawings,
+  anime or 3D-render looks
 - HANDS: look at every visible hand. Reject any hand with more or fewer than five fingers, fused or
   merged hands, two hands joined together, an extra hand or arm, a hand not attached to an arm
 - deformed people: missing head, headless or disembodied body parts, extra or missing limbs,
