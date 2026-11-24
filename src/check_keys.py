@@ -149,7 +149,10 @@ def main():
                 exp = d.get("expires_at", 0)
                 ok("Facebook Page", f"{r.json().get('name')} | key expires: {'never' if not exp else exp} | permissions: {', '.join(d.get('scopes', []))}")
             else:
-                bad("Facebook Page", r.text[:200])
+                me = requests.get("https://graph.facebook.com/v21.0/me", params={"fields": "id,name", "access_token": ptok}, timeout=30).json()
+                info = (f"key belongs to '{me.get('name')}' (type {d.get('type')}); "
+                        f"page id in FB_PAGE_ID {'matches' if str(me.get('id')) == pid else 'does NOT match'} the key's own id")
+                bad("Facebook Page", info)
         except Exception as e:
             bad("Facebook Page", str(e)[:150])
     # Pollinations
