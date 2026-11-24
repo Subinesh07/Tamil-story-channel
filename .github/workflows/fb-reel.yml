@@ -24,8 +24,14 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          id=$(gh api "repos/${{ github.repository }}/actions/artifacts?name=video-${{ inputs.row_id }}&per_page=5" -q '[.artifacts[]|select(.expired==false)][0].id')
-          mkdir -p output && gh api "repos/${{ github.repository }}/actions/artifacts/$id/zip" > a.zip && unzip -o -q a.zip -d output && ls output
+          mkdir -p output
+          # newest saved run files (artifact names are run numbers) that contain this story's Shorts
+          for id in $(gh api "repos/${{ github.repository }}/actions/artifacts?per_page=60" -q '.artifacts | sort_by(.created_at) | reverse | .[] | select(.expired==false and (.name|startswith("video-")) and .size_in_bytes > 1000000) | .id'); do
+            gh api "repos/${{ github.repository }}/actions/artifacts/$id/zip" > a.zip && unzip -o -q a.zip -d tmp
+            if ls tmp/story_${{ inputs.row_id }}_short*.mp4 >/dev/null 2>&1; then cp tmp/story_${{ inputs.row_id }}_short*.mp4 output/; break; fi
+            rm -rf tmp a.zip
+          done
+          ls output
       - name: Post Reels
         env:
           FB_PAGE_TOKEN: ${{ secrets.FB_PAGE_TOKEN }}
