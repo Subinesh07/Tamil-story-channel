@@ -230,8 +230,11 @@ def make_outro_card(png_path, out_path):
 
 
 def with_style(p):
-    """Every picture that is drawn carries the house art style (rewrites sometimes drop it)."""
-    from config import IMAGE_STYLE
+    """Every drawn picture starts with the short house style (the model may ignore the end of a long prompt);
+    the full style text stays at the end."""
+    from config import IMAGE_STYLE, STYLE_PREFIX
+    if not p.startswith(STYLE_PREFIX):
+        p = STYLE_PREFIX + p
     return p if IMAGE_STYLE[:60] in p else f"{p.rstrip('. ')}. {IMAGE_STYLE}"
 
 
@@ -280,7 +283,9 @@ def drawable_prompts(prompts, contexts=None):
             "- state simple, explicit positions and camera angle (e.g. 'seen from the front, she sits in the car's "
             "passenger seat')\n- hands relaxed or out of frame when possible\n"
             "- keep every character's age, look, clothes, glasses and facial-hair wording EXACTLY as written\n"
-            "- keep the art-style sentence exactly as written\n- never mention things that should NOT appear\n"
+            "- keep each description SHORT: under 90 words including the character details (drop decoration)\n"
+            "- leave out the art-style sentence (it is added automatically)\n"
+            "- never mention things that should NOT appear\n"
             f"Return JSON {{\"prompts\": [exactly {len(prompts)} strings in the same order]}}\n\n" + items,
             want_json=True, max_tokens=30000, rounds=1)
         out = [x.strip() for x in d["prompts"]]

@@ -40,6 +40,10 @@ IMAGE_STYLE = ("2D digital painting, semi-realistic illustrated Tamil drama art,
                "blue moonlight on one side and warm orange lamp glow on the other. Every character wears a clearly "
                "visible small silver crescent-moon pendant. Every person's whole head and face fully inside the frame, natural "
                "anatomy, correct number of people. Detailed Tamil Nadu background, no text, no letters, no logos")
+# Short style that goes FIRST in every drawn prompt: the free picture model reads only about the first
+# 250 words, so a style sentence at the end of a long description can be cut off (photo instead of painting)
+STYLE_PREFIX = ("2D digital painting, semi-realistic illustrated Tamil drama art, smooth painterly shading, soft "
+                "outlines, cool blue moonlight and warm orange lamp glow, NOT a photograph: ")
 # every earlier picture style: stored prompts are switched to the current style, saved pictures still match
 PREVIOUS_IMAGE_STYLES = [
     "warm watercolor illustration, South Indian home, soft natural light, no text, no logos",
