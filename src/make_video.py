@@ -139,8 +139,13 @@ def produce(row, upload=True, check_duration=True):
     sents = timings["sentences"]
     contexts = [" ".join(sents[k].get("text", "") for k in range(s["first"], s["last"] + 1))
                 for s in story_scenes]
-    story_imgs, img_warnings = generate_all(provider, [prompts[s["prompt_index"]] for s in story_scenes],
+    scene_prompts = [prompts[s["prompt_index"]] for s in story_scenes]
+    from image_provider import PlaceholderProvider, drawable_prompts
+    draw = (None if os.environ.get("NO_NEW_ASSETS") or isinstance(provider, PlaceholderProvider)
+            else drawable_prompts(scene_prompts, contexts))
+    story_imgs, img_warnings = generate_all(provider, scene_prompts,
                                             work / "images", base_seed=n * 1000 + 7, contexts=contexts,
+                                            draw_prompts=draw,
                                             cache_dir=ROOT / "cache" / "images" / f"row_{rid}")
     from image_provider import PictureFailed, validate_pictures
     bad_pics = validate_pictures(story_imgs)

@@ -254,7 +254,41 @@ def simpler_prompt(prompt, reasons, context=""):
     return prompt
 
 
-def generate_all(provider, prompts, out_dir, check=True, base_seed=1000, cache_dir=None, contexts=None):
+def drawable_prompts(prompts, contexts=None):
+    """ONE Gemini request for the whole video: rewrite every picture description so the free picture model
+    can draw it right the first time (one main person acting, simple positions, simple camera), keeping the
+    same story moment, character looks and art style. Falls back to the originals on any problem."""
+    if not prompts:
+        return prompts
+    try:
+        from llm import complete
+        items = "\n\n".join(f"[{k}] narration: {(contexts[k] if contexts and k < len(contexts) else '')[:300]}"
+                             f"\ndescription: {p}" for k, p in enumerate(prompts))
+        d = complete(
+            "These are picture descriptions for one Tamil story video. A free picture model will draw them; it often "
+            "gets wrong WHICH person does an action when two or more people interact, draws extra people, and "
+            "struggles with hands and complex poses. Rewrite EACH description so it is easy to draw correctly the "
+            "first time while showing the same story moment that matches its narration:\n"
+            "- one main person doing one clear action, framed medium or close; a second person only if essential, "
+            "standing apart and not touching (never two people doing actions with each other)\n"
+            "- state simple, explicit positions and camera angle (e.g. 'seen from the front, she sits in the car's "
+            "passenger seat')\n- hands relaxed or out of frame when possible\n"
+            "- keep every character's age, look, clothes, glasses and facial-hair wording EXACTLY as written\n"
+            "- keep the art-style sentence exactly as written\n- never mention things that should NOT appear\n"
+            f"Return JSON {{\"prompts\": [exactly {len(prompts)} strings in the same order]}}\n\n" + items,
+            want_json=True, max_tokens=30000, rounds=1)
+        out = [x.strip() for x in d["prompts"]]
+        if len(out) == len(prompts) and all(len(x) > 80 for x in out):
+            log.info("Picture descriptions made easier to draw (%d)", len(out))
+            return out
+        log.info("Drawable rewrite returned %d of %d descriptions - using originals", len(out), len(prompts))
+    except Exception as e:
+        log.info("Drawable rewrite skipped: %s", str(e)[:120])
+    return prompts
+
+
+def generate_all(provider, prompts, out_dir, check=True, base_seed=1000, cache_dir=None, contexts=None,
+                 draw_prompts=None):
     """Generate every scene image.
 
     Each image goes through the automatic checker (image_check.py). A rejected image is
@@ -265,7 +299,7 @@ def generate_all(provider, prompts, out_dir, check=True, base_seed=1000, cache_d
     A scene that cannot be generated at all STOPS the video (PictureFailed): no test pattern and
     no repeated picture is ever put into a real video. Pictures made so far stay cached.
     """
-    from image_check import CheckUnavailable, check as vision_check
+    from image_check import CheckUnavailable, check as vision_check, check_many
     fresh = bool(os.environ.get("FRESH_PICTURES"))
     if isinstance(provider, PlaceholderProvider):
         check = False   # offline test pictures (sample test / --test runs) are never uploaded
@@ -333,36 +367,46 @@ def generate_all(provider, prompts, out_dir, check=True, base_seed=1000, cache_d
         if os.environ.get("NO_NEW_ASSETS"):
             raise ImageQuota(f"Short-only run: saved picture {i} is missing - not making new pictures")
         data, reason = None, ""
-        draw_prompt, reasons = prompt, []
-        for attempt in range(1 + IMAGE_RETRIES):
-            if check and draw_prompt == prompt and (len(reasons) >= 2 or (reasons and re.search(
-                    r"instead of|reversed|wrong person|swapped|extra person", reasons[-1], re.I))):
-                draw_prompt = simpler_prompt(prompt, reasons, ctx)   # same moment, easier to draw right
-            try:
-                candidate = provider.generate(draw_prompt, seed=base_seed + i * 10 + attempt)
-            except ImageQuota:
-                log.warning("Scene %02d still needs a picture. Prompt: %s", i, prompt[:400])
-                raise   # pictures made so far are cached; the next run continues from here
-            except Exception as e:
-                log.warning("Image %d attempt %d failed: %s", i, attempt + 1, e)
-                time.sleep(5 * (attempt + 1))
+        first = draw_prompts[i] if draw_prompts and i < len(draw_prompts) else prompt
+        draw_prompt, reasons = first, []
+        # rounds of BATCH candidates; the checker judges a whole batch in ONE request (saves its daily limit)
+        batch = 1 if not check else 3
+        for rnd in range(3 if check else 1 + IMAGE_RETRIES):
+            if check and draw_prompt == first and reasons:
+                draw_prompt = simpler_prompt(first, reasons, ctx)   # same moment, even easier to draw right
+            cands = []
+            for k in range(batch):
+                try:
+                    cands.append(provider.generate(draw_prompt, seed=base_seed + i * 10 + rnd * batch + k))
+                except ImageQuota:
+                    if cands:
+                        break   # check what we have
+                    log.warning("Scene %02d still needs a picture. Prompt: %s", i, prompt[:400])
+                    raise   # pictures made so far are cached; the next run continues from here
+                except Exception as e:
+                    log.warning("Image %d candidate failed: %s", i, e)
+                    time.sleep(5)
+            cands = [c for c in cands if hashlib.md5(c).hexdigest() not in loaded]
+            if not cands:
                 continue
-            data = candidate
             if not check:
+                data = cands[0]
                 break
             try:
-                ok, reason = vision_check(candidate, draw_prompt, ctx)
+                verdicts = check_many(cands, draw_prompt, ctx)
             except CheckUnavailable as e:
                 raise PictureFailed(str(e))   # pictures accepted so far stay saved
-            if ok:
-                if reason:
-                    log.info("Image %d: %s", i, reason)
+            good = [c for c, (ok, _) in zip(cands, verdicts) if ok]
+            if good:
+                data = good[0]
                 break
-            reasons.append(reason)
-            log.warning("Image %d rejected by checker (%s); regenerating", i, reason)
+            data = cands[0]
+            reasons += [r for _, r in verdicts if r]
+            reason = reasons[-1] if reasons else "rejected"
+            log.warning("Scene %d: all %d candidates rejected (%s)", i, len(cands), "; ".join(r for _, r in verdicts)[:300])
         else:
             if data is not None and check:
-                raise PictureFailed(f"scene {i}: every attempt was rejected by the checker ({reason}); "
+                raise PictureFailed(f"scene {i}: every candidate was rejected by the checker ({reason}); "
                                     "pausing - the next run tries again")
         if data is None:
             if isinstance(provider, PlaceholderProvider):
