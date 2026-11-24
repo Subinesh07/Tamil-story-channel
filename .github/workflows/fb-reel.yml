@@ -1,0 +1,32 @@
+name: Facebook Reel (manual)
+
+# Posts the Shorts of an already-made story as Facebook Reels (from the run's saved files).
+# Scheduled ones keep their YouTube time; ones already public on YouTube are posted now.
+on:
+  workflow_dispatch:
+    inputs:
+      row_id:
+        description: "Story id"
+        required: true
+
+jobs:
+  reel:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Download the story's files
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          id=$(gh api "repos/${{ github.repository }}/actions/artifacts?name=video-${{ inputs.row_id }}&per_page=5" -q '[.artifacts[]|select(.expired==false)][0].id')
+          mkdir -p output && gh api "repos/${{ github.repository }}/actions/artifacts/$id/zip" > a.zip && unzip -o -q a.zip -d output && ls output
+      - name: Post Reels
+        env:
+          FB_PAGE_TOKEN: ${{ secrets.FB_PAGE_TOKEN }}
+        run: python src/fb_backfill.py ${{ inputs.row_id }}

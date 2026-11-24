@@ -6,6 +6,7 @@ Layout (1080x1920): blurred, darkened copy of the video as background; the video
 middle (with its Tamil subtitles); the story title on top; "முழு கதை சேனல்ல" at the bottom.
 """
 import logging
+import os
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -195,4 +196,10 @@ def upload_short(path, row, long_video_id, long_publish_at, when=None, ending=""
                  "chapters": ""}
     vid = yt_upload(path, short_row)
     log.info("Short uploaded: %s (goes public %s)", vid, when.isoformat())
+    try:   # same Short as a Facebook Reel, public at the same time
+        import facebook
+        if facebook.available() and not os.environ.get("HOLD_FOR_APPROVAL"):
+            facebook.post_reel(path, facebook.caption_for(row, ending), when)
+    except Exception as e:
+        log.warning("Facebook Reel skipped: %s", str(e)[:150])
     return vid
