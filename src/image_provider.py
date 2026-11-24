@@ -361,7 +361,10 @@ def generate_all(provider, prompts, out_dir, check=True, base_seed=1000, cache_d
             cached.unlink()
         if cached and cached.exists() and check and not os.environ.get("NO_NEW_ASSETS") \
                 and not (cached.with_suffix(".ok").exists()
-                         and cached.with_suffix(".ok").read_text().strip() == CHECK_VERSION):
+                         and (cached.with_suffix(".ok").read_text().strip() == CHECK_VERSION
+                              # v4 checks were complete except for scenes without people (style unchecked)
+                              or (cached.with_suffix(".ok").read_text().strip() == "v4"
+                                  and "No people in the picture" not in prompt))):
             try:
                 ok, reason = vision_check(cached.read_bytes(), prompt, ctx)
             except CheckUnavailable as e:

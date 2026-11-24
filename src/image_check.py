@@ -17,7 +17,7 @@ import requests
 
 log = logging.getLogger(__name__)
 
-CHECK_VERSION = "v4"   # bump when the rules change: saved pictures checked under older rules are checked again
+CHECK_VERSION = "v5"   # bump when the rules change: saved pictures checked under older rules are checked again
 
 RULES = """Reject a picture (ok=false) if ANY of these is true:
 - STYLE: it must look like a photorealistic cinematic film still. Reject cartoons, paintings, drawings,
@@ -129,8 +129,6 @@ def check_many(pngs, prompt, context=""):
     """Judge several candidates of one scene in ONE request. Returns a list of (ok, reason), one per picture."""
     if os.environ.get("IMAGE_CHECK", "on") == "off":
         return [(True, "check switched off by setting")] * len(pngs)
-    if "No people in the picture" in prompt:
-        return [(True, "check skipped (no people: low risk)")] * len(pngs)
     parts = []
     for k, png in enumerate(pngs, 1):
         parts.append({"text": f"Picture {k}:"})
