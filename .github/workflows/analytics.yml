@@ -34,7 +34,7 @@ jobs:
         run: |
           MODE="${{ github.event.inputs.mode }}"
           if [ "$MODE" = "backfill" ]; then python src/channel_tools.py backfill; fi
-          case "$MODE" in add:*) python src/channel_tools.py add "${MODE#add:}";; esac
+          case "$MODE" in add:*) python src/channel_tools.py add "${MODE#add:}";; comment:*) python src/channel_tools.py comment "${MODE#comment:}";; esac
           python src/channel_tools.py
       - name: Reminder before applying for monetization
         env:

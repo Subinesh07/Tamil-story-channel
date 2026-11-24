@@ -218,7 +218,12 @@ def review_before_apply(subs_goal=800, hours_goal=3000):
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-    if len(sys.argv) > 2 and sys.argv[1] == "add":
+    if len(sys.argv) > 2 and sys.argv[1] == "comment":
+        import csv
+        for row in csv.DictReader(open(ROOT / "stories.csv", encoding="utf-8")):
+            if row["id"] in sys.argv[2].split(",") and row.get("video_id"):
+                print("comment:", post_comment(row, row["video_id"], row.get("quiz_q") or None))
+    elif len(sys.argv) > 2 and sys.argv[1] == "add":
         import csv
         for row in csv.DictReader(open(ROOT / "stories.csv", encoding="utf-8")):
             if row["id"] in sys.argv[2].split(",") and row.get("video_id"):
