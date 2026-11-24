@@ -186,9 +186,22 @@
     "note": "written; style [9, 8, 9], 4 logic problems fixed, foreign letters checked",
     "at": "2026-11-22T18:18:28+00:00"
    }
+  },
+  "17": {
+   "script": {
+    "state": "done",
+    "note": "written; style [10, 9, 10], 4 logic problems fixed, foreign letters checked",
+    "at": "2026-11-24T16:42:43+00:00"
+   }
   }
  },
  "events": [
+  {
+   "at": "2026-11-24T16:42:43+00:00",
+   "row": "17",
+   "level": "info",
+   "msg": "Story written: கடலுக்கு அடியில் 400 வருசத்து மர்மம்... அந்த விளக்கு சொன்ன… | கடலும் காடும் கோயி"
+  },
   {
    "at": "2026-11-24T16:26:32+00:00",
    "row": "11",

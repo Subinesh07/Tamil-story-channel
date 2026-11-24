@@ -18,5 +18,6 @@ One story a day (time varies by weekday) + Doomsday Sat/Sun 11 AM, IST. Updated 
 | 2026-11-28 | 15 | Doomsday Part 3: The Secret They Hide | Doomsday: The Last 7 Days Part 3 | pending |  |
 | 2026-11-28 | 14 | If The Shadow Becomes Real: Part 3 | If The Shadow Becomes Real Part 3 | pending |  |
 | 2026-11-29 | 16 | Doomsday: Day 4 - The Classified Bunker List | Doomsday: The Last 7 Days Part 4 | pending |  |
+| 2026-11-29 | 17 | The Sunken Lamp's Secret | Sea, Forest, Temple: The Palm-Leaf Trail Part 3 | pending |  |
 
-Pending stories: **6** ⚠️ below 10, the Generate stories workflow will top this up.
+Pending stories: **7** ⚠️ below 10, the Generate stories workflow will top this up.
