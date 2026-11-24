@@ -63,15 +63,19 @@ YouTube Studio → Audio Library). It's mixed in quietly under the narration.
 **Branding:** logo and banner are in `assets/brand/` (made with `python src/brand_assets.py`).
 Upload them in YouTube Studio → Customisation → Branding.
 
-## Weekly series plan (niche: horror + family emotional, from 30 Nov 2026)
+## Weekly series plan
+**Now:** the series already running finish in full on their old days
+(Mon adventure, Tue horror, Wed + Sat family serial, Thu real lives, Fri family moral, Sun adventure;
+Doomsday Sat + Sun 11 AM).
+
+**As each one ends, its day switches to the niche plan:**
 | Day | Video |
 |---|---|
-| Mon, Wed, Fri, Sat | Horror story in 4 parts (திகில் தொடர், no gore) |
-| Tue, Thu, Sun | Family emotional story in 3 parts (குடும்பத் தொடர்) |
+| Mon, Wed, Fri, Sat | Horror story in 4 parts (no gore) |
+| Tue, Thu, Sun | Family emotional story in 3 parts |
 | Sat, Sun 11 AM | Weekend special: Doomsday-type serial, later experiments |
 
-Every video: at most 20 pictures (fits the free daily picture allowance), 10-12 min, cold open,
-fiction note, quiz + winner shout-out, 2 Shorts. `src/series.py` (WEEKLY, DATE_OVERRIDES) holds the plan.
+`src/series.py` (OLD_WEEKLY, LEGACY_SERIES, WEEKLY) holds the plan.
 
 `series.json` holds each series' characters, planned arc and story so far, so every part continues
 the last one: a recap at the start, a cliffhanger at the end, and the final part wraps it all up.

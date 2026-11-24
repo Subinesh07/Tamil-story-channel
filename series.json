@@ -4,7 +4,7 @@
       "id": "family-1",
       "genre": "family serial",
       "status": "active",
-      "parts_total": 4,
+      "parts_total": 8,
       "parts_done": 3,
       "so_far": [
         "Iniya begins renovating her ancestral home to distract herself from her father's death. While clearing out his study, she finds a hidden compartment containing documents that suggest her uncle Kathiravan has forged a will. The episode ends with Kathiravan confronting her in the study, creating a tense standoff.",
@@ -46,7 +46,7 @@
         "Iniya discovers the forged will during a routine renovation of the family house.",
         "Kathiravan successfully gaslights the family into believing Iniya is mentally unstable.",
         "Iniya begins documenting the financial irregularities in the family business secretly.",
-        "Vetri attempts to sabotage Iniya's career, leading to a public confrontation at a family function. FINAL PART: resolve the property fight and every secret; justice and a warm, emotional ending.",
+        "Vetri attempts to sabotage Iniya's career, leading to a public confrontation at a family function.",
         "Iniya finds an unlikely ally in a former employee who witnessed the forgery years ago.",
         "The family secret involving a hidden debt is revealed, turning the siblings against Kathiravan.",
         "A tense legal standoff occurs where Iniya presents evidence that shifts the power balance.",
@@ -59,7 +59,7 @@
       "id": "adventure-2",
       "genre": "adventure",
       "status": "active",
-      "parts_total": 3,
+      "parts_total": 5,
       "parts_done": 2,
       "so_far": [
         "On her deathbed, Sevvali Paati gives Vaanathi a bundle of palm leaves. The siblings and fisher boy Paal decode the first clue pointing to a hollow tamarind tree in a monsoon forest. With forest guide Ilavarasu, they trek through rain and leeches, find the tree, and extract a carved stone marker. As they examine it, Kalai spots fresh footprints and cut marks — Marudhan's men have been there. The episode ends with the group realizing they are being watched from the tree line, and Marudhan himself steps into view, stick raised.",
@@ -127,7 +127,7 @@
       "arc": [
         "Sevvali Paati's palm-leaf bundle sends Vaanathi, Thennavan, Kalai and Paal into a monsoon forest, where a hollow tamarind tree yields a carved stone marker and they realise Marudhan's men are tracking them.",
         "Guided by Ilavarasu across a flooded river gorge, the children reach a hidden rock shelter and copy a coastal survey map, but Marudhan snatches the original and a landslide traps the group overnight.",
-        "In a fishing village, Surangi and Paal take the children to a reef wreck where they raise a bronze lamp whose inscription names a hill temple and the ninth lamp of its festival corridor. FINAL PART: bring every thread to a satisfying, complete ending.",
+        "In a fishing village, Surangi and Paal take the children to a reef wreck where they raise a bronze lamp whose inscription names a hill temple and the ninth lamp of its festival corridor.",
         "Climbing to the hill temple during the lamp festival, the children solve Deivashigamani's shadow-and-lamp riddle and open a sealed vault beneath the sanctum, finding granary records, manuscripts and a sluice plan instead of gold.",
         "When Marudhan breaks the vault's water channel, the children rescue him from the flood and restore the ancient spring line to the drought-hit village, revealing their ancestors built the secret to give water, not to hoard it."
       ],
@@ -245,7 +245,7 @@
     {
       "id": "real-5",
       "genre": "real lives",
-      "status": "paused",
+      "status": "active",
       "parts_total": 4,
       "parts_done": 1,
       "so_far": [
@@ -306,7 +306,7 @@
     {
       "id": "family-6",
       "genre": "family moral",
-      "status": "paused",
+      "status": "active",
       "parts_total": 6,
       "parts_done": 1,
       "so_far": [

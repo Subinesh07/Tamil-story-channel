@@ -19,13 +19,16 @@ log = logging.getLogger(__name__)
 PATH = ROOT / "series.json"
 TZ = ZoneInfo(TIMEZONE)
 
-# Niche from 30 Nov: horror (4-part stories Mon/Wed/Fri/Sat) + family emotional (3-part Tue/Thu/Sun).
-# Weekend specials (11 AM) stay: Doomsday-type serial / experiments.
+# Niche plan: horror (4-part stories Mon/Wed/Fri/Sat) + family emotional (3-part Tue/Thu/Sun).
 WEEKLY = {0: "horror", 1: "family serial", 2: "horror", 3: "family serial", 4: "horror", 5: "horror",
           6: "family serial"}
 WEEKEND_DEFAULT = {5: "horror", 6: "family serial"}
-# transition week (finish the adventure serial, keep the horror story moving)
-DATE_OVERRIDES = {"2026-11-26": "adventure", "2026-11-27": "horror", "2026-11-29": "horror"}
+# The series that were already running finish in full first, on their old days; as each one ends,
+# its day switches to the niche plan above.
+OLD_WEEKLY = {0: "adventure", 1: "horror", 2: "family serial", 3: "real lives", 4: "family moral",
+              5: "family serial", 6: "adventure"}
+LEGACY_SERIES = {"adventure": "adventure-2", "family serial": "family-1", "real lives": "real-5",
+                 "family moral": "family-6", "horror": "horror-4"}
 
 GENRES = {
     "adventure": {"ta": "சாகசத் தொடர்", "parts": 5,
@@ -252,8 +255,11 @@ def views_per_day_by_series(rows):
 
 def genre_for(day, rows, data):
     wd = day.weekday()
-    if str(day) in DATE_OVERRIDES:
-        return DATE_OVERRIDES[str(day)], "override"
+    g_old = OLD_WEEKLY[wd]
+    sid = LEGACY_SERIES.get(g_old)
+    leg = next((x for x in data["series"] if x["id"] == sid), None) if sid else None
+    if leg and leg["status"] == "active" and leg["parts_done"] < leg["parts_total"]:
+        return g_old, "finishing a started series"
     if wd in WEEKLY:
         return WEEKLY[wd], "weekday"
     speed = views_per_day_by_series(rows)
