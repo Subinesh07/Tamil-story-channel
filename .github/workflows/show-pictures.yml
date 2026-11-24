@@ -1,0 +1,35 @@
+name: Show saved pictures
+
+# Copies the checked (accepted) saved pictures of one story into previews/row_<id>/ so they can be viewed.
+on:
+  workflow_dispatch:
+    inputs:
+      row_id:
+        description: "Story id"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  show:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/cache/restore@v5
+        with:
+          path: |
+            cache/tts
+            cache/images
+          key: leda-none
+          restore-keys: leda-
+      - run: |
+          d=previews/row_${{ inputs.row_id }}; mkdir -p $d; rm -f $d/*.png
+          for ok in cache/images/row_${{ inputs.row_id }}/*.ok; do
+            [ -f "$ok" ] || continue
+            p="${ok%.ok}.png"; [ -f "$p" ] && cp "$p" $d/
+          done
+          ls -la $d
+          git config user.name "nila-bot"; git config user.email "bot@users.noreply.github.com"
+          git add $d; git diff --cached --quiet || (git commit -m "Saved pictures of row ${{ inputs.row_id }} [skip ci]" && (git push || (git pull --rebase -X theirs && git push)))
