@@ -8,21 +8,20 @@ logging.basicConfig(level=logging.INFO)
 OUT = Path(__file__).resolve().parent.parent / "previews" / "styles"
 OUT.mkdir(parents=True, exist_ok=True)
 
-SCENES = {
-    "pair": ("a 55-year-old South Indian mother (grey hair in a bun, maroon cotton saree) and her 25-year-old son "
-             "(short black hair, thin moustache only, clean-shaven chin, plain white shirt, a grown man), talking in their "
-             "small Tamil Nadu village house at night"),
-    "girl": ("a 19-year-old Tamil college girl (long single braid, mustard churidar) looking worried, "
-             "standing near a village temple wall at dusk"),
-}
-from config import IMAGE_STYLE
-STYLES = {"house": IMAGE_STYLE}
+from config import IMAGE_STYLE, STYLE_PREFIX
+SCENE = ("Kavin, a 30-year-old Tamil man with short wavy black hair, round glasses, a thin moustache and a smooth "
+         "shaved chin, navy jacket over a beige shirt, drives a car on a misty village road, seen from the front "
+         "through the windshield; Oviya, a 27-year-old Tamil woman with long black hair and a green kurta, sits "
+         "calmly in the passenger seat beside him looking ahead. Both faces fully in frame. ")
+SCENES = {"car": SCENE}
+STYLES = {"fixed": None}
 prov = get_provider()
 for s_name, style in STYLES.items():
     for sc_name, scene in SCENES.items():
-        out = OUT / f"{s_name}_{sc_name}.png"
+      for k in range(3):
+        out = OUT / f"{s_name}_{sc_name}_{k}.png"
         try:
-            out.write_bytes(prov.generate(f"{scene}, {style}", seed=7))
+            out.write_bytes(prov.generate(STYLE_PREFIX + scene + IMAGE_STYLE, seed=7 + k))
             logging.info("made %s", out.name)
         except Exception as e:
             logging.warning("%s failed: %s", out.name, str(e)[:150])
