@@ -25,10 +25,11 @@ jobs:
           key: leda-none
           restore-keys: leda-
       - run: |
-          d=previews/row_${{ inputs.row_id }}; mkdir -p $d; rm -f $d/*.png
+          d=previews/row_${{ inputs.row_id }}; mkdir -p $d; rm -f $d/*.png $d/*.txt
           for ok in cache/images/row_${{ inputs.row_id }}/*.ok; do
             [ -f "$ok" ] || continue
             p="${ok%.ok}.png"; [ -f "$p" ] && cp "$p" $d/
+            t="${ok%.ok}.prompt.txt"; [ -f "$t" ] && cp "$t" $d/
           done
           ls -la $d
           git config user.name "nila-bot"; git config user.email "bot@users.noreply.github.com"

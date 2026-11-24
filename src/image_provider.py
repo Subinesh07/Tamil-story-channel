@@ -432,6 +432,7 @@ def generate_all(provider, prompts, out_dir, check=True, base_seed=1000, cache_d
         path.write_bytes(data)
         if cached and not isinstance(provider, PlaceholderProvider):
             cached.write_bytes(data)
+            cached.with_suffix(".prompt.txt").write_text(draw_prompt if check else prompt, encoding="utf-8")
             if check:
                 cached.with_suffix(".ok").write_text(CHECK_VERSION)
         paths.append(path)
