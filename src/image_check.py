@@ -17,7 +17,11 @@ import requests
 
 log = logging.getLogger(__name__)
 
+CHECK_VERSION = "v3"   # bump when the rules change: saved pictures checked under older rules are checked again
+
 RULES = """Reject a picture (ok=false) if ANY of these is true:
+- STYLE: it must be a 2D painted / illustrated drama-art picture (smooth painterly shading, soft outlines).
+  Reject photographs, photo-realistic 3D renders or any other art style
 - HANDS: look at every visible hand. Reject any hand with more or fewer than five fingers, fused or
   merged hands, two hands joined together, an extra hand or arm, a hand not attached to an arm
 - deformed people: missing head, headless or disembodied body parts, extra or missing limbs,
@@ -28,8 +32,9 @@ RULES = """Reject a picture (ok=false) if ANY of these is true:
   pointing, holding what, who is inside or outside a car / room)
 - a person's age clearly does not match (a child or teenager drawn for an adult, an adult for a
   child, a young person for an elderly one; allow about plus or minus 8 years)
-- appearance contradicts the description: facial hair (beard / thin moustache / clean-shaven),
-  glasses or no glasses, hair style, clothes colour
+- appearance contradicts the description: facial hair (beard / thin moustache / clean-shaven; chin or
+  cheek stubble counts as a beard when the description says a shaved chin), glasses or no glasses,
+  hair style, clothes colour
 - deformed objects (merged wheels, melted furniture, broken weapons)
 - visible text, letters, watermarks or logos
 - the picture does not show the described moment, or contradicts what the narrator says: places,

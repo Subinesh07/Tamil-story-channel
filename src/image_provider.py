@@ -229,6 +229,12 @@ def make_outro_card(png_path, out_path):
     return out_path
 
 
+def with_style(p):
+    """Every picture that is drawn carries the house art style (rewrites sometimes drop it)."""
+    from config import IMAGE_STYLE
+    return p if IMAGE_STYLE[:60] in p else f"{p.rstrip('. ')}. {IMAGE_STYLE}"
+
+
 def simpler_prompt(prompt, reasons, context=""):
     """After two rejected pictures: Gemini rewrites the description so the same story moment is easier to
     draw correctly (fewer people in frame, one clear action, explicit positions). Keeps character looks."""
@@ -299,7 +305,7 @@ def generate_all(provider, prompts, out_dir, check=True, base_seed=1000, cache_d
     A scene that cannot be generated at all STOPS the video (PictureFailed): no test pattern and
     no repeated picture is ever put into a real video. Pictures made so far stay cached.
     """
-    from image_check import CheckUnavailable, check as vision_check, check_many
+    from image_check import CHECK_VERSION, CheckUnavailable, check as vision_check, check_many
     fresh = bool(os.environ.get("FRESH_PICTURES"))
     if isinstance(provider, PlaceholderProvider):
         check = False   # offline test pictures (sample test / --test runs) are never uploaded
@@ -349,13 +355,14 @@ def generate_all(provider, prompts, out_dir, check=True, base_seed=1000, cache_d
             log.warning("Scene %d: saved picture is a copy of an earlier scene - making a new one", i)
             cached.unlink()
         if cached and cached.exists() and check and not os.environ.get("NO_NEW_ASSETS") \
-                and not cached.with_suffix(".ok").exists():
+                and not (cached.with_suffix(".ok").exists()
+                         and cached.with_suffix(".ok").read_text().strip() == CHECK_VERSION):
             try:
                 ok, reason = vision_check(cached.read_bytes(), prompt, ctx)
             except CheckUnavailable as e:
                 raise PictureFailed(str(e))
             if ok:
-                cached.with_suffix(".ok").write_text("checked")
+                cached.with_suffix(".ok").write_text(CHECK_VERSION)
             else:
                 log.warning("Scene %d: saved picture fails the check (%s) - making a new one", i, reason)
                 cached.unlink()
@@ -367,13 +374,13 @@ def generate_all(provider, prompts, out_dir, check=True, base_seed=1000, cache_d
         if os.environ.get("NO_NEW_ASSETS"):
             raise ImageQuota(f"Short-only run: saved picture {i} is missing - not making new pictures")
         data, reason = None, ""
-        first = draw_prompts[i] if draw_prompts and i < len(draw_prompts) else prompt
+        first = with_style(draw_prompts[i] if draw_prompts and i < len(draw_prompts) else prompt)
         draw_prompt, reasons = first, []
         # rounds of BATCH candidates; the checker judges a whole batch in ONE request (saves its daily limit)
         batch = 1 if not check else 3
         for rnd in range(3 if check else 1 + IMAGE_RETRIES):
             if check and draw_prompt == first and reasons:
-                draw_prompt = simpler_prompt(first, reasons, ctx)   # same moment, even easier to draw right
+                draw_prompt = with_style(simpler_prompt(first, reasons, ctx))   # same moment, easier to draw
             cands = []
             for k in range(batch):
                 try:
@@ -418,7 +425,7 @@ def generate_all(provider, prompts, out_dir, check=True, base_seed=1000, cache_d
         if cached and not isinstance(provider, PlaceholderProvider):
             cached.write_bytes(data)
             if check:
-                cached.with_suffix(".ok").write_text("checked")
+                cached.with_suffix(".ok").write_text(CHECK_VERSION)
         paths.append(path)
     return paths, warnings
 
