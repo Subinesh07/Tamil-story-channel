@@ -139,6 +139,19 @@ def main():
                 bad(label, f"HTTP {r.status_code}: {r.text[:120]} - check the account id and that the token has Workers AI permission")
         except Exception as e:
             bad(label, str(e)[:120])
+    # Facebook Page (Reels)
+    pid, ptok = os.environ.get("FB_PAGE_ID", "").strip(), os.environ.get("FB_PAGE_TOKEN", "").strip()
+    if pid and ptok:
+        try:
+            r = requests.get(f"https://graph.facebook.com/v21.0/{pid}", params={"fields": "name,fan_count", "access_token": ptok}, timeout=30)
+            d = requests.get("https://graph.facebook.com/v21.0/debug_token", params={"input_token": ptok, "access_token": ptok}, timeout=30).json().get("data", {})
+            if r.status_code == 200:
+                exp = d.get("expires_at", 0)
+                ok("Facebook Page", f"{r.json().get('name')} | key expires: {'never' if not exp else exp} | permissions: {', '.join(d.get('scopes', []))}")
+            else:
+                bad("Facebook Page", r.text[:200])
+        except Exception as e:
+            bad("Facebook Page", str(e)[:150])
     # Pollinations
     k = os.environ.get("IMAGE_API_KEY", "").strip()
     (ok if k else bad)("Pollinations", "IMAGE_API_KEY set" if k else "IMAGE_API_KEY not set")
