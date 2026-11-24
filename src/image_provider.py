@@ -105,7 +105,8 @@ class CloudflareProvider(ImageProvider):
     def generate(self, prompt, seed=None):
         import base64
         url = f"https://api.cloudflare.com/client/v4/accounts/{self.account}/ai/run/{self.MODEL}"
-        body = {"prompt": prompt[:2000], "steps": 4}   # this model takes no seed (random each time)
+        # 8 steps = the model's best quality (hands, faces, detail); 4 was the fast minimum
+        body = {"prompt": prompt[:2000], "steps": 8}   # this model takes no seed (random each time)
         r = self.session.post(url, json=body, headers={"Authorization": f"Bearer {self.token}"}, timeout=120)
         text = r.text[:300]
         if r.status_code == 429 or "4006" in text or "allocation" in text.lower() or "neurons" in text.lower():
@@ -229,6 +230,9 @@ def make_outro_card(png_path, out_path):
     return out_path
 
 
+STATS = {"drawn": 0, "rounds": 0, "scenes": []}   # picture tries in this run (reported per video)
+
+
 def with_style(p):
     """Every drawn picture starts with the short house style (the model may ignore the end of a long prompt);
     the full style text stays at the end."""
@@ -274,18 +278,20 @@ def drawable_prompts(prompts, contexts=None):
         items = "\n\n".join(f"[{k}] narration: {(contexts[k] if contexts and k < len(contexts) else '')[:300]}"
                              f"\ndescription: {p}" for k, p in enumerate(prompts))
         d = complete(
-            "These are picture descriptions for one Tamil story video. A free picture model will draw them; it often "
-            "gets wrong WHICH person does an action when two or more people interact, draws extra people, and "
-            "struggles with hands and complex poses. Rewrite EACH description so it is easy to draw correctly the "
-            "first time while showing the same story moment that matches its narration:\n"
-            "- one main person doing one clear action, framed medium or close; a second person only if essential, "
-            "standing apart and not touching (never two people doing actions with each other)\n"
-            "- state simple, explicit positions and camera angle (e.g. 'seen from the front, she sits in the car's "
-            "passenger seat')\n- hands relaxed or out of frame when possible\n"
-            "- keep every character's age, look, clothes, glasses and facial-hair wording EXACTLY as written\n"
-            "- keep each description SHORT: under 90 words including the character details (drop decoration)\n"
-            "- leave out the art-style sentence (it is added automatically)\n"
-            "- never mention things that should NOT appear\n"
+            "These are picture descriptions for one Tamil story video. A free picture model (FLUX) will draw them. "
+            "Rewrite EACH one with this exact template, in this order, under 70 words:\n"
+            "1) camera shot first: 'Medium shot, whole heads visible with space above,' (or close-up / wide shot)\n"
+            "2) ONE main person and the ONE action they do (only one person acts in a picture)\n"
+            "3) any other person only present and still, placed with 'on the left of the frame' / 'on the right of the "
+            "frame' (never 'beside him', never two people interacting or touching)\n"
+            "4) each character as a short ID line: age + gender + 3-4 identity details (hair, glasses, facial hair, main "
+            "clothes colour) copied from the original; facial hair only in positive words (e.g. 'thin moustache, smooth "
+            "shaved chin'), never the words 'no beard'\n"
+            "5) hands given a simple job ('hands on the steering wheel', 'hands resting on her lap') or out of frame\n"
+            "6) place and time of day in a few words, then the light\n"
+            "- only positive words: never mention what should NOT appear; drop decoration (jewellery, sleeves, patterns)\n"
+            "- for vehicles say where the camera is (e.g. 'seen through the windshield from outside the car')\n"
+            "- keep the same story moment as the narration; leave out the art style (it is added automatically)\n"
             f"Return JSON {{\"prompts\": [exactly {len(prompts)} strings in the same order]}}\n\n" + items,
             want_json=True, max_tokens=30000, rounds=1)
         out = [x.strip() for x in d["prompts"]]
@@ -385,7 +391,7 @@ def generate_all(provider, prompts, out_dir, check=True, base_seed=1000, cache_d
         first = with_style(draw_prompts[i] if draw_prompts and i < len(draw_prompts) else prompt)
         draw_prompt, reasons = first, []
         # rounds of BATCH candidates; the checker judges a whole batch in ONE request (saves its daily limit)
-        batch = 1 if not check else 3
+        batch = 1 if not check else 2
         for rnd in range(3 if check else 1 + IMAGE_RETRIES):
             if check and draw_prompt == first and reasons:
                 draw_prompt = with_style(simpler_prompt(first, reasons, ctx))   # same moment, easier to draw
@@ -401,6 +407,8 @@ def generate_all(provider, prompts, out_dir, check=True, base_seed=1000, cache_d
                 except Exception as e:
                     log.warning("Image %d candidate failed: %s", i, e)
                     time.sleep(5)
+            STATS["drawn"] += len(cands)
+            STATS["rounds"] += 1
             cands = [c for c in cands if hashlib.md5(c).hexdigest() not in loaded]
             if not cands:
                 continue
@@ -414,6 +422,8 @@ def generate_all(provider, prompts, out_dir, check=True, base_seed=1000, cache_d
             good = [c for c, (ok, _) in zip(cands, verdicts) if ok]
             if good:
                 data = good[0]
+                STATS["scenes"].append({"scene": i, "rounds": rnd + 1,
+                                        "first_try": rnd == 0 and verdicts[0][0]})
                 break
             data = cands[0]
             reasons += [r for _, r in verdicts if r]

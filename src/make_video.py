@@ -140,6 +140,7 @@ def produce(row, upload=True, check_duration=True):
     contexts = [" ".join(sents[k].get("text", "") for k in range(s["first"], s["last"] + 1))
                 for s in story_scenes]
     scene_prompts = [prompts[s["prompt_index"]] for s in story_scenes]
+    import image_provider as IP
     from image_provider import PlaceholderProvider, drawable_prompts
     draw = (None if os.environ.get("NO_NEW_ASSETS") or isinstance(provider, PlaceholderProvider)
             else drawable_prompts(scene_prompts, contexts))
@@ -147,6 +148,17 @@ def produce(row, upload=True, check_duration=True):
                                             work / "images", base_seed=n * 1000 + 7, contexts=contexts,
                                             draw_prompts=draw,
                                             cache_dir=ROOT / "cache" / "images" / f"row_{rid}")
+    _st = IP.STATS
+    if _st["scenes"]:
+        first = sum(1 for x in _st["scenes"] if x["first_try"])
+        msg = (f"Pictures: {len(_st['scenes'])} new, {first} right on the first try, "
+               f"{_st['drawn']} drawn in total ({_st['drawn'] / len(_st['scenes']):.1f} per picture)")
+        log.info(msg)
+        try:
+            import status as ST
+            ST.event(f"Row {rid}: {msg}")
+        except Exception:
+            pass
     from image_provider import PictureFailed, validate_pictures
     bad_pics = validate_pictures(story_imgs)
     if bad_pics:
