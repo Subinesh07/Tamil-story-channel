@@ -32,9 +32,11 @@ RULES = """Reject a picture (ok=false) if ANY of these is true:
   pointing, holding what, who is inside or outside a car / room)
 - a person's age clearly does not match (a child or teenager drawn for an adult, an adult for a
   child, a young person for an elderly one; allow about plus or minus 8 years)
-- appearance contradicts the description: facial hair (beard / thin moustache / clean-shaven; chin or
-  cheek stubble counts as a beard when the description says a shaved chin), glasses or no glasses,
-  hair style, clothes colour
+- the person is clearly not the described character: wrong gender, wrong age group, glasses missing or
+  added, wrong facial hair (a full beard on a man described with a shaved chin), clearly different
+  clothes colour or hair length
+  (Do NOT reject for small details a viewer would not notice: jewellery, nose pins, exact hairstyle,
+  minor clothing details, a slightly different expression or background detail.)
 - deformed objects (merged wheels, melted furniture, broken weapons)
 - visible text, letters, watermarks or logos
 - the picture does not show the described moment, or contradicts what the narrator says: places,
@@ -96,7 +98,7 @@ def _ask(body):
     for rnd in range(5):                    # free tier: a few requests per minute - be patient
         for key in keys:
             for model in _models_for(key):
-                wait = 4.5 - (time.time() - _last_call[0])
+                wait = 8 - (time.time() - _last_call[0])
                 if wait > 0:
                     time.sleep(wait)
                 _last_call[0] = time.time()
@@ -138,10 +140,31 @@ def check_many(pngs, prompt, context=""):
     verdict = _ask({"contents": [{"parts": parts}],
                     "generationConfig": {"temperature": 0, "responseMimeType": "application/json",
                                          "maxOutputTokens": 4096}})
-    res = verdict.get("results") if isinstance(verdict, dict) else None
-    if not isinstance(res, list) or len(res) != len(pngs):
-        return [(False, "checker answer did not cover every picture")] * len(pngs)
-    return [(bool(x.get("ok", False)), x.get("problem", "")) for x in res]
+    return _parse(verdict, len(pngs))
+
+
+def _parse(verdict, n):
+    """Accept the answer shapes Gemini actually returns: {"results": [...]}, a bare list, {"ok": ...} for one
+    picture, or {"picture 1": {...}, ...}. A picture the answer does not mention counts as rejected."""
+    res = None
+    if isinstance(verdict, list):
+        res = verdict
+    elif isinstance(verdict, dict):
+        if isinstance(verdict.get("results"), list):
+            res = verdict["results"]
+        elif "ok" in verdict:
+            res = [verdict]
+        else:
+            keyed = sorted((int(re.sub(r"\D", "", k) or 0), v) for k, v in verdict.items()
+                           if isinstance(v, dict) and re.search(r"\d", k))
+            res = [v for _, v in keyed] or None
+    if not res:
+        return [(False, "checker gave no readable verdict")] * n
+    out = []
+    for k in range(n):
+        x = res[k] if k < len(res) and isinstance(res[k], dict) else {}
+        out.append((bool(x.get("ok", False)), x.get("problem", "") if x else "not judged"))
+    return out
 
 
 def check(png_bytes, prompt, context=""):
