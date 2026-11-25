@@ -229,6 +229,12 @@
  },
  "events": [
   {
+   "at": "2026-11-25T18:13:20+00:00",
+   "row": "",
+   "level": "info",
+   "msg": "Row 8: new thumbnail tried (17 views vs average 234)"
+  },
+  {
    "at": "2026-11-25T16:26:47+00:00",
    "row": "18",
    "level": "info",
