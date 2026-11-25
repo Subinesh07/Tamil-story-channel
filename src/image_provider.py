@@ -105,8 +105,9 @@ class CloudflareProvider(ImageProvider):
     def generate(self, prompt, seed=None):
         import base64
         url = f"https://api.cloudflare.com/client/v4/accounts/{self.account}/ai/run/{self.MODEL}"
-        # 8 steps = the model's best quality (hands, faces, detail); 4 was the fast minimum
-        body = {"prompt": prompt[:2000], "steps": 8}   # this model takes no seed (random each time)
+        # first try at 4 steps (cheap: about twice as many pictures per day); redraws after a rejection
+        # use 8 steps, the model's best quality for hands and faces (STEPS is set by generate_all)
+        body = {"prompt": prompt[:2000], "steps": STEPS[0]}   # this model takes no seed (random each time)
         r = self.session.post(url, json=body, headers={"Authorization": f"Bearer {self.token}"}, timeout=120)
         text = r.text[:300]
         if r.status_code == 429 or "4006" in text or "allocation" in text.lower() or "neurons" in text.lower():
@@ -230,7 +231,8 @@ def make_outro_card(png_path, out_path):
     return out_path
 
 
-STATS = {"drawn": 0, "rounds": 0, "scenes": []}   # picture tries in this run (reported per video)
+STATS = {"drawn": 0, "rounds": 0, "scenes": []}
+STEPS = [4]   # FLUX steps for the next picture: 4 on the first round, 8 on redraws   # picture tries in this run (reported per video)
 
 
 def with_style(p):
@@ -397,6 +399,7 @@ def generate_all(provider, prompts, out_dir, check=True, base_seed=1000, cache_d
         for rnd in range(3 if check else 1 + IMAGE_RETRIES):
             if check and draw_prompt == first and reasons:
                 draw_prompt = with_style(simpler_prompt(first, reasons, ctx))   # same moment, easier to draw
+            STEPS[0] = 4 if rnd == 0 else 8
             cands = []
             for k in range(batch):
                 try:
