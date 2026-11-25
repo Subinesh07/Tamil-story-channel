@@ -291,6 +291,8 @@ def drawable_prompts(prompts, contexts=None):
             "6) place and time of day in a few words, then the light\n"
             "- only positive words: never mention what should NOT appear; drop decoration (jewellery, sleeves, patterns)\n"
             "- for vehicles say where the camera is (e.g. 'seen through the windshield from outside the car')\n"
+            "- papers, letters, phones and signs are seen from the back or blurred, with no readable writing\n"
+            "- every person faces the camera or is seen in profile, never from the back unless the moment needs it\n"
             "- keep the same story moment as the narration; leave out the art style (it is added automatically)\n"
             f"Return JSON {{\"prompts\": [exactly {len(prompts)} strings in the same order]}}\n\n" + items,
             want_json=True, max_tokens=30000, rounds=1)
