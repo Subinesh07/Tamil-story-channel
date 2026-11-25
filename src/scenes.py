@@ -32,7 +32,12 @@ def plan_scenes(timings, n_prompts, n_scenes=None, intro=0, outro=0, marks=None,
             if idx >= hi or (cuts and idx <= cuts[-1]):
                 continue
             if cuts and sents[idx]["start"] - sents[cuts[-1]]["start"] < min_secs:
-                continue  # too short to show: keep the previous picture
+                # the previous picture would show for under min_secs: show THIS picture from the previous
+                # cut instead (it covers what is narrated next). Keeping the old one showed e.g. Madhavi
+                # crying while the narration had moved on to Iniya standing up (row 11, 7:09).
+                if len(cuts) > 1 or cuts[0] != lo:
+                    prompt_ids[-1] = k
+                continue
             cuts.append(idx)
             prompt_ids.append(k)
         if not cuts or cuts[0] != lo:
