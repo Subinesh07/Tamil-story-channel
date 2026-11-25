@@ -200,6 +200,9 @@ def produce(row, upload=True, check_duration=True):
     frame = out / f"story_{rid}_subtitle_frame.png"
     from config import DOOM_HARD, DOOM_SOFT
     bounds = {"hard": DOOM_HARD, "soft": DOOM_SOFT} if row.get("genre") == "doomsday" else {}
+    if row.get("genre") == "horror":
+        from config import HORROR_HARD, HORROR_SOFT
+        bounds = {"hard": HORROR_HARD, "soft": HORROR_SOFT}
     ok, failures, warnings = quality_gate(video, ass, timings, sentences, images, frame,
                                           check_duration=check_duration, **bounds)
     for w in warnings + img_warnings:
@@ -357,6 +360,12 @@ def drama_thumbnail(row, provider, work, out_path, n):
                      "line2": random.Random(n).choice(["கடைசியில் நடந்தது என்ன?", "அடுத்து நடந்தது என்ன?",
                                                        "அந்த ரகசியம் என்ன?", "யாரும் எதிர்பார்க்காத திருப்பம்..!"])}
             prompt = None
+    from config import EXPERIMENT_START
+    if prompt and (row.get("publish_at") or "")[:10] >= EXPERIMENT_START:   # face thumbnails (experiment)
+        face = ("terrified, eyes wide with fear" if row.get("genre") in ("horror", "doomsday")
+                else "shocked, eyes wet with tears")
+        prompt = (f"ONE main character's face in a huge close-up filling about half the frame, {face}, "
+                  f"looking towards the viewer, background dark and simple; " + prompt)
     bg = work / "images" / "thumb_bg.png"
     bg.parent.mkdir(parents=True, exist_ok=True)
     if os.environ.get("NO_NEW_ASSETS"):
@@ -475,11 +484,12 @@ def main():
     if not args.test and not args.no_upload and os.environ.get("YT_REFRESH_TOKEN"):
         try:
             from competitors import client
+            from youtube_upload import seo_title
             yt = client()
             ch = yt.channels().list(part="contentDetails", mine=True).execute()["items"][0]
             pl = ch["contentDetails"]["relatedPlaylists"]["uploads"]
             items = yt.playlistItems().list(part="snippet", playlistId=pl, maxResults=25).execute().get("items", [])
-            same = [i for i in items if i["snippet"]["title"].strip() == row["title_ta"].strip()[:100]]
+            same = [i for i in items if i["snippet"]["title"].strip() in (row["title_ta"].strip()[:100], seo_title(row).strip())]
             if same:
                 vid = same[0]["snippet"]["resourceId"]["videoId"]
                 log.warning("Row %s is already on YouTube as %s - marking done, not uploading again", row["id"], vid)

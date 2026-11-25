@@ -94,6 +94,14 @@ DOOM_MIN_WORDS, DOOM_MAX_WORDS = 1150, 1450
 DOOM_HARD = (8.0, 16.0)
 DOOM_SOFT = (9.5, 14.0)
 DOOM_HOUR = 11
+# Experiment from 26 Nov 2026 (competitor report): longer horror, Tamil+English titles, face thumbnails
+EXPERIMENT_START = "2026-11-26"
+HORROR_MIN_WORDS, HORROR_MAX_WORDS = 1850, 2250   # 15-18 min (top Tamil horror channels run 15-40 min)
+HORROR_HARD = (12.0, 22.0)
+HORROR_SOFT = (14.0, 20.0)
+EN_TAGS = {"horror": "Tamil Horror Story", "doomsday": "Tamil Story", "family serial": "Tamil Family Story",
+           "family moral": "Tamil Family Story", "family emotional": "Tamil Family Story",
+           "real lives": "Tamil Real Story", "adventure": "Tamil Adventure Story"}
 # 7 PM-slot story time by weekday (Mon=0 ... Sun=6), IST. Published ~1 hour before India's
 # evening viewing peak (7-10 PM) so YouTube has time to start recommending it.
 PUBLISH_HOURS = {0: 18, 1: 20, 2: 18, 3: 18, 4: 19, 5: 19, 6: 17}

@@ -160,6 +160,10 @@ def analytics_report(days=28):
     src = q(s=end - timedelta(days=days), dimensions="insightTrafficSourceType", metrics="views", sort="-views")
     lines.append("\n🚦 Where views come from (last %d days): " % days +
                  ", ".join(f"{a} {b}" for a, b in (src.get("rows") or [])[:6]))
+    try:
+        lines.append(experiment_check(q))
+    except Exception as e:
+        lines.append(f"\n🧪 Experiment check not available yet ({str(e)[:80]})")
     report = "\n".join(lines)
     print(report)
     try:
@@ -168,6 +172,54 @@ def analytics_report(days=28):
     except Exception:
         pass
     return report
+
+
+def experiment_check(q):
+    """Did the 26 Nov changes work? (longer horror, Tamil+English titles, face thumbnails)
+    Compares long videos published before vs after EXPERIMENT_START, each judged on its first days.
+    Saves status/experiment.md."""
+    import re as _re
+    from datetime import datetime as _dt
+    from config import EXPERIMENT_START
+    rows = q(s=date(2026, 1, 1), dimensions="video", sort="-views", maxResults=200,
+             metrics="views,averageViewDuration,averageViewPercentage,subscribersGained").get("rows", [])
+    stats = {r[0]: r[1:] for r in rows}
+    yt, info = _yt(), {}
+    ids = list(stats)
+    for k in range(0, len(ids), 50):
+        for it in yt.videos().list(part="snippet,contentDetails", id=",".join(ids[k:k + 50])).execute().get("items", []):
+            m = _re.match(r"PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?", it["contentDetails"]["duration"])
+            secs = sum(int(x or 0) * f for x, f in zip(m.groups(), (3600, 60, 1)))
+            info[it["id"]] = (it["snippet"]["publishedAt"][:10], secs)
+    today = str(date.today())
+    groups = {"before": [], "after": []}
+    for vid, (pub, secs) in info.items():
+        if secs < 180 or (date.fromisoformat(today) - date.fromisoformat(pub)).days < 2:
+            continue   # Shorts, and videos younger than 2 days, are not compared
+        groups["after" if pub >= EXPERIMENT_START else "before"].append(stats[vid])
+    def avg(g, i):
+        return sum(x[i] for x in g) / len(g) if g else 0
+    out = [f"\n🧪 Experiment since {EXPERIMENT_START} (longer horror, Tamil+English titles, face thumbnails)",
+           "   long videos | avg views | avg view time | % watched | subs gained per video"]
+    for name, g in groups.items():
+        out.append(f"   {name:6} {len(g):3} | {avg(g, 0):7.0f} | {int(avg(g, 1)) // 60}:{int(avg(g, 1)) % 60:02d} | "
+                   f"{avg(g, 2):4.0f}% | {avg(g, 3):.1f}")
+    b, a = groups["before"], groups["after"]
+    if len(a) < 4:
+        out.append(f"   Verdict: waiting ({len(a)}/4 new videos old enough to judge).")
+    else:
+        # recent 'before' videos only: older ones had months to collect views
+        b = b[-10:] if b else b
+        better = [n for n, i in (("views", 0), ("view time", 1), ("subs", 3)) if avg(a, i) > avg(b, i) * 1.15]
+        worse = [n for n, i in (("views", 0), ("view time", 1), ("subs", 3)) if avg(a, i) < avg(b, i) * 0.85]
+        out.append("   Verdict: " + ("✅ WORKING: better " + ", ".join(better) if better and not worse else
+                                     "❌ NOT WORKING: worse " + ", ".join(worse) if worse and not better else
+                                     "➖ mixed/no clear change: better " + (", ".join(better) or "nothing") +
+                                     "; worse " + (", ".join(worse) or "nothing")))
+    text = "\n".join(out)
+    (ROOT / "status").mkdir(exist_ok=True)
+    (ROOT / "status" / "experiment.md").write_text(f"Updated {today}\n{text}\n", encoding="utf-8")
+    return text
 
 
 def review_before_apply(subs_goal=800, hours_goal=3000):

@@ -24,8 +24,25 @@ def _client():
     return build("youtube", "v3", credentials=creds, cache_discovery=False)
 
 
+def seo_title(row):
+    """From EXPERIMENT_START: add English search words people type ("Tamil Horror Story"),
+    like the top Tamil story channels. Never claims the story is real."""
+    from config import EN_TAGS, EXPERIMENT_START
+    title = row["title_ta"].strip()
+    tag = EN_TAGS.get(row.get("genre", ""), "Tamil Story")
+    if (row.get("publish_at") or "")[:10] < EXPERIMENT_START or re.search(r"Tamil .*Story", title):
+        return title[:100]
+    room = 100 - len(tag) - 3
+    if len(title) > room:   # shorten the Tamil hook at a word boundary, keep the series/part suffix
+        head, sep, tail = title.partition(" | ")
+        keep = room - (len(sep) + len(tail))
+        head = head[:max(20, keep - 1)].rsplit(" ", 1)[0].rstrip(" ,:-") + "…"
+        title = (head + sep + tail)[:room]
+    return f"{title} | {tag}"
+
+
 def build_metadata(row):
-    title = row["title_ta"].strip()[:100]
+    title = seo_title(row)
     script = re.sub(r"\d+\.\s*", "", row["script_ta"]).replace("।", ".").strip()
     intro = (row.get("description_ta") or "").strip() or f"{script[:200].rstrip()}…"
     chapters = f"\n\n{row['chapters']}" if row.get("chapters") else ""

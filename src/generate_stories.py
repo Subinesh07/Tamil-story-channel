@@ -545,6 +545,9 @@ def write_story(rows, doomsday=False, redo=None):
         day = S.next_publish_date(rows)
         genre, why = S.genre_for(day, rows, data)
         lo, hi, n_parts, part_words, mins, approx = MIN_WORDS, MAX_WORDS, 2, "620-700", "10-12", "1,300"
+    if genre == "horror" and not doomsday:   # longer horror episodes (experiment from 26 Nov)
+        from config import HORROR_MAX_WORDS, HORROR_MIN_WORDS
+        lo, hi, n_parts, part_words, mins, approx = HORROR_MIN_WORDS, HORROR_MAX_WORDS, 3, "640-740", "15-18", "2,000"
     prefer = why.split(":", 1)[1] if why.startswith("weekend:") else None
     if not doomsday and not redo:
         ser = (S.golden_series(data) if genre == "family emotional" else
