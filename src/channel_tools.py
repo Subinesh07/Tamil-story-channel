@@ -315,6 +315,12 @@ def review_before_apply(subs_goal=800, hours_goal=3000):
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     retry_pending_comments()
+    if len(sys.argv) > 2 and sys.argv[1] == "stats":   # quick live numbers for given video ids
+        for it in _yt().videos().list(part="statistics,snippet,contentDetails", id=sys.argv[2]).execute()["items"]:
+            st = it["statistics"]
+            print(f"STATS {it['id']} | {it['contentDetails']['duration']} | views {st.get('viewCount')} | "
+                  f"likes {st.get('likeCount')} | comments {st.get('commentCount')} | {it['snippet']['title'][:60]}")
+        sys.exit(0)
     if len(sys.argv) > 2 and sys.argv[1] == "comment":
         import csv
         for row in csv.DictReader(open(ROOT / "stories.csv", encoding="utf-8")):
