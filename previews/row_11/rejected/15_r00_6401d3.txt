@@ -1,0 +1,4 @@
+REJECTED: Iniya is positioned on the right of the frame instead of the left, and is wearing a doctor's coat.
+
+PROMPT:
+photorealistic cinematic film still, South Indian people and setting, dramatic movie lighting: Medium shot, whole heads visible with space above, a doctor leans forward with a focused expression while Iniya sits still on the left of the frame. Doctor: 45-year-old man, short hair, smooth shaved chin, white coat over shirt. Iniya: 26-year-old woman, oval face, tied-back wavy hair, blue salwar kameez. Hands resting on lap. Living room, day, soft interior light.

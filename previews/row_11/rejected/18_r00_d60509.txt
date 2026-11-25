@@ -1,0 +1,4 @@
+REJECTED: deformed and fused fingers on the hand in the foreground
+
+PROMPT:
+photorealistic cinematic film still, South Indian people and setting, dramatic movie lighting: Medium shot, whole head visible with space above, Iniya lies on a bed looking sideways with watchful eyes. Iniya: 26-year-old woman, oval face, tied-back wavy hair, white cotton salwar kameez. Her hands rest flat on top of the blanket. Quiet bedroom, night, cool moonlight from side window.

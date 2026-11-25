@@ -1,0 +1,4 @@
+REJECTED: Iniya is wearing a yellow saree instead of the described red salwar kameez, and text is visible in the background.
+
+PROMPT:
+photorealistic cinematic film still, South Indian people and setting, dramatic movie lighting: Iniya in a study room, looking frustrated and speaking, seen from the front. Iniya: 26-year-old woman, oval face, tied-back wavy hair, red salwar kameez. Madhavi's shoulder is visible in the foreground: 48-year-old woman, round face, long braided hair, yellow silk saree, red pottu. Study room, night, dramatic lighting.

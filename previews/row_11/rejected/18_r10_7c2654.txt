@@ -1,0 +1,4 @@
+REJECTED: Hands are visible holding the blanket, but the description specifies that her hands should be tucked completely out of sight beneath the blanket.
+
+PROMPT:
+photorealistic cinematic film still, South Indian people and setting, dramatic movie lighting: Close-up shot, whole head visible with space above, Iniya lies awake on a bed looking sideways with watchful eyes. Iniya: 26-year-old woman, oval face, tied-back wavy hair, white cotton salwar kameez. Her hands are tucked completely out of sight beneath the blanket. Quiet bedroom, night, cool moonlight from side window, seen from the front
