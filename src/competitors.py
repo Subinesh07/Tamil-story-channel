@@ -17,7 +17,7 @@ from zoneinfo import ZoneInfo
 from config import ROOT, TIMEZONE
 
 log = logging.getLogger("competitors")
-SEARCHES = ["tamil story", "tamil family story", "தமிழ் கதைகள்", "tamil kathaigal audio story"]
+SEARCHES = ["tamil horror stories", "tamil pei kathai", "tamil family drama story", "tamil emotional story", "tamil audio story narration", "தமிழ் திகில் கதைகள்"]
 LIST_FILE = ROOT / "competitors.txt"
 REPORT_DIR = ROOT / "reports"
 IST = ZoneInfo(TIMEZONE)
