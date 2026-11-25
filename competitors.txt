@@ -1,11 +1,3 @@
-# Competitor channels to track every week: one per line.
-# Accepts a channel link, an @handle, or a channel ID (starts with UC...).
-# If fewer than 5 are listed, similar Tamil story channels are found automatically.
-# Top Tamil story channels by subscribers (picked Nov 2026)
-UCSvha2APDCRgZEtdimqYO4A   # Tamil Fairy Tales (~2.1M)
-# removed: Mr Tamilan Stories (movie voice-over recaps, not our niche)
-UCALHoRZfg5dX-faoLJAm7zA   # Tamil Moral Stories (~1.0M)
-UC_aN-4FNHt_JgJC2IYMgVmg   # Toon Tv Tamil Stories (~650K)
-UC3zNovoMWjStvNxGnt-Wzlw   # Studio Boo Tv Tamil Story (~598K, fast growing)
-# Closest in theme (family drama stories)
-UC0VkRknJTtP24J1lEm-WGzA   # Jaitra TV - Tamil Stories
+# Competitor channels to track (one per line: link, @handle or UC... id).
+# Left empty on purpose: fewer than 5 here = horror + family-drama Tamil story
+# channels are found automatically each run (our niche, not kids' cartoons).

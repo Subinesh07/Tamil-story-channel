@@ -151,7 +151,7 @@ def write_report(ours, others, applied=None):
         lines += ["", "## ✅ Changes applied automatically this week", ""] + [f"- {c}" for c in applied]
         lines += ["", "_To undo or freeze these, edit `channel_strategy.json` (set `\"auto\": false`)._"]
     lines += ["", "## Observations", ""] + [f"- {t}" for t in suggestions(ours, others)]
-    lines += ["", "_Generated automatically every Monday. Use competitors for themes and timing "
+    lines += ["", "_Generated automatically every 3 days. Use competitors for themes and timing "
               "ideas only: never copy their stories, titles or thumbnails (reused-content risk)._"]
     path = REPORT_DIR / f"competitors-{today}.md"
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
