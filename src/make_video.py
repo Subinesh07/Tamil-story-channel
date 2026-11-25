@@ -142,12 +142,22 @@ def produce(row, upload=True, check_duration=True):
     scene_prompts = [prompts[s["prompt_index"]] for s in story_scenes]
     import image_provider as IP
     from image_provider import PlaceholderProvider, drawable_prompts
+    cards = {}
+    try:   # fixed face + ONE dress colour per character for the whole series
+        from characters import fixed_cards
+        if row.get("series_id"):
+            import series as S
+            cards = fixed_cards(next((x for x in S.load().get("series", []) if x.get("id") == row["series_id"]), {}).get("characters"))
+    except Exception as e:
+        log.warning("Character cards unavailable: %s", str(e)[:100])
     draw = (None if os.environ.get("NO_NEW_ASSETS") or isinstance(provider, PlaceholderProvider)
-            else drawable_prompts(scene_prompts, contexts))
+            else drawable_prompts(scene_prompts, contexts, cards=cards, genre=row.get("genre", "")))
+    from config import PICTURE_CHECK
     story_imgs, img_warnings = generate_all(provider, scene_prompts,
                                             work / "images", base_seed=n * 1000 + 7, contexts=contexts,
                                             draw_prompts=draw,
-                                            cache_dir=ROOT / "cache" / "images" / f"row_{rid}")
+                                            cache_dir=ROOT / "cache" / "images" / f"row_{rid}",
+                                            check=PICTURE_CHECK)
     _st = IP.STATS
     if _st["scenes"]:
         first = sum(1 for x in _st["scenes"] if x["first_try"])

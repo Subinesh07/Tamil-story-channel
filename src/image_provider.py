@@ -285,7 +285,7 @@ def simpler_prompt(prompt, reasons, context=""):
     return prompt
 
 
-def drawable_prompts(prompts, contexts=None):
+def drawable_prompts(prompts, contexts=None, cards=None, genre=""):
     """ONE Gemini request for the whole video: rewrite every picture description so the free picture model
     can draw it right the first time (one main person acting, simple positions, simple camera), keeping the
     same story moment, character looks and art style. Falls back to the originals on any problem."""
@@ -302,9 +302,12 @@ def drawable_prompts(prompts, contexts=None):
             "2) ONE main person and the ONE action they do (only one person acts in a picture)\n"
             "3) any other person only present and still, placed with 'on the left of the frame' / 'on the right of the "
             "frame' (never 'beside him', never two people interacting or touching)\n"
+            + ("4) refer to each person by NAME only (exact names: " + ", ".join(cards) + "); NEVER describe their "
+               "clothes, colours, hair or face - their fixed look is added automatically. Other people (doctor, "
+               "villager) get age + gender + clothes in a few words\n" if cards else
             "4) each character as a short ID line: age + gender + 3-4 identity details (hair, glasses, facial hair, main "
             "clothes colour) copied from the original; facial hair only in positive words (e.g. 'thin moustache, smooth "
-            "shaved chin'), never the words 'no beard'\n"
+            "shaved chin'), never the words 'no beard'\n") +
             "5) hands given a simple job ('hands on the steering wheel', 'hands resting on her lap') or out of frame\n"
             "6) place and time of day in a few words, then the light\n"
             "- only positive words: never mention what should NOT appear; drop decoration (jewellery, sleeves, patterns)\n"
@@ -315,13 +318,21 @@ def drawable_prompts(prompts, contexts=None):
             f"Return JSON {{\"prompts\": [exactly {len(prompts)} strings in the same order]}}\n\n" + items,
             want_json=True, max_tokens=30000, rounds=1)
         out = [x.strip() for x in d["prompts"]]
-        if len(out) == len(prompts) and all(len(x) > 80 for x in out):
+        if len(out) == len(prompts) and all(len(x) > 40 for x in out):
             log.info("Picture descriptions made easier to draw (%d)", len(out))
-            return out
+            return with_cards(out, cards, genre)
         log.info("Drawable rewrite returned %d of %d descriptions - using originals", len(out), len(prompts))
     except Exception as e:
         log.info("Drawable rewrite skipped: %s", str(e)[:120])
-    return prompts
+    return with_cards(prompts, cards, genre)
+
+
+def with_cards(prompts, cards, genre=""):
+    """Characters (fixed face + fixed clothes colour) and the rules go FIRST, then the scene."""
+    if not cards:
+        return prompts
+    from characters import story_prompt
+    return [story_prompt(p, cards, genre) for p in prompts]
 
 
 def generate_all(provider, prompts, out_dir, check=True, base_seed=1000, cache_dir=None, contexts=None,
@@ -427,7 +438,7 @@ def generate_all(provider, prompts, out_dir, check=True, base_seed=1000, cache_d
         for rnd in range(2 if check else 1 + IMAGE_RETRIES):
             if check and draw_prompt == first and reasons:
                 draw_prompt = with_style(simpler_prompt(first, reasons, ctx))   # same moment, easier to draw
-            STEPS[0] = 4 if rnd == 0 else 8
+            STEPS[0] = 8 if not check else (4 if rnd == 0 else 8)   # no checker: one careful 8-step draw
             cands = []
             for k in range(batch):
                 try:

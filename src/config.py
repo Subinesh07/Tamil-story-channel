@@ -151,3 +151,8 @@ GEMINI_STYLE = ("Read this Tamil story aloud like a warm, emotional storyteller 
 GEMINI_TEMPO = 1.08            # gentle speed-up after synthesis (pitch unchanged); close to the reference voice
 GEMINI_CHUNK_CHARS = 4000      # long passages = few requests (free daily limit is small)
 TTS_CACHE = ROOT / "cache" / "tts"   # voiced chunks survive between runs (quota pauses)
+
+# 25 Nov 2026 (owner): no picture checker for videos - the "failed" pictures were fine; what viewers notice is a
+# character's dress colour or face changing, which fixed character cards now handle. Set PICTURE_CHECK=1 to re-enable.
+import os as _os
+PICTURE_CHECK = bool(_os.environ.get("PICTURE_CHECK"))
