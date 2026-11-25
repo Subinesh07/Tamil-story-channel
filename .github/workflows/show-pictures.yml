@@ -31,6 +31,11 @@ jobs:
             p="${ok%.ok}.png"; [ -f "$p" ] && cp "$p" $d/
             t="${ok%.ok}.prompt.txt"; [ -f "$t" ] && cp "$t" $d/
           done
+          for p in cache/images/row_${{ inputs.row_id }}/*.png; do   # used without the checker (owner's choice)
+            [ -f "${p%.png}.ok" ] && continue
+            mkdir -p $d/unchecked; cp "$p" $d/unchecked/
+            t="${p%.png}.prompt.txt"; [ -f "$t" ] && cp "$t" $d/unchecked/
+          done
           if [ -d cache/images/row_${{ inputs.row_id }}/rejected ]; then mkdir -p $d/rejected; cp cache/images/row_${{ inputs.row_id }}/rejected/* $d/rejected/; fi
           ls -la $d
           git config user.name "nila-bot"; git config user.email "bot@users.noreply.github.com"
