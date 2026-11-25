@@ -12,7 +12,7 @@ One story a day (time varies by weekday) + Doomsday Sat/Sun 11 AM, IST. Updated 
 | 2026-11-22 | 6 | The Palm-Leaf Trail: Part 1 - The Monsoon Forest Secret | Sea, Forest, Temple: The Palm-Leaf Trail Part 1 | done | [cQ3rhliRRpU](https://youtu.be/cQ3rhliRRpU) |
 | 2026-11-23 | 8 | Sea, Forest, Temple: Part 2 - Trapped in the Flooded Cavern | Sea, Forest, Temple: The Palm-Leaf Trail Part 2 | done | [VI0JCda2iDI](https://youtu.be/VI0JCda2iDI) |
 | 2026-11-24 | 9 | Echoes of the Silent Bell - Part 1 | Echoes of the Silent Bell Part 1 | done | [aT5rP36PJNc](https://youtu.be/aT5rP36PJNc) |
-| 2026-11-25 | 11 | The Master of Deception: If The Shadow Becomes Real Part 2 | If The Shadow Becomes Real Part 2 | pending |  |
+| 2026-11-25 | 11 | The Master of Deception: If The Shadow Becomes Real Part 2 | If The Shadow Becomes Real Part 2 | processing |  |
 | 2026-11-26 | 12 | Alexander: The Last Horizon - Part 1 | Alexander: The Last Horizon Part 1 | pending |  |
 | 2026-11-27 | 13 | The Broken Bird and the Lost Mould | Malaichaaral Grandfather Stories Part 1 | pending |  |
 | 2026-11-28 | 15 | Doomsday Part 3: The Secret They Hide | Doomsday: The Last 7 Days Part 3 | pending |  |
@@ -20,4 +20,4 @@ One story a day (time varies by weekday) + Doomsday Sat/Sun 11 AM, IST. Updated 
 | 2026-11-29 | 16 | Doomsday: Day 4 - The Classified Bunker List | Doomsday: The Last 7 Days Part 4 | pending |  |
 | 2026-11-29 | 17 | The Sunken Lamp's Secret | Sea, Forest, Temple: The Palm-Leaf Trail Part 3 | pending |  |
 
-Pending stories: **7** ⚠️ below 10, the Generate stories workflow will top this up.
+Pending stories: **6** ⚠️ below 10, the Generate stories workflow will top this up.
