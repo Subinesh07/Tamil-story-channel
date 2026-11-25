@@ -409,6 +409,8 @@ def generate_all(provider, prompts, out_dir, check=True, base_seed=1000, cache_d
         if os.environ.get("NO_NEW_ASSETS"):
             raise ImageQuota(f"Short-only run: saved picture {i} is missing - not making new pictures")
         gave_up = cache_dir / f"gave_up_{i:02d}.txt" if cache_dir else None
+        if gave_up and gave_up.exists() and os.environ.get("RETRY_FAILED"):   # owner agreed to one more round
+            gave_up.unlink()
         if check and gave_up and gave_up.exists():   # already failed twice in an earlier run: no more tries
             failed_scenes.append((i, gave_up.read_text(encoding="utf-8")[:200], prompt))
             paths.append(path)
