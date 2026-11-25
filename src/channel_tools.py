@@ -104,6 +104,50 @@ def post_comment(row, video_id, poll_q=None):
         return c["id"]
     except Exception as e:
         log.warning("Comment post failed: %s", str(e)[:200])
+        if "403" in str(e) or "insufficient" in str(e).lower():   # video still private: retry after it goes public
+            pend = _pending()
+            pend[video_id] = {"row": row.get("id"), "poll": poll_q}
+            _save_pending(pend)
+            log.info("Comment queued until %s is public", video_id)
+
+
+PENDING = ROOT / "status" / "pending_comments.json"
+
+
+def _pending():
+    try:
+        return json.loads(PENDING.read_text())
+    except Exception:
+        return {}
+
+
+def _save_pending(d):
+    PENDING.parent.mkdir(exist_ok=True)
+    PENDING.write_text(json.dumps(d, ensure_ascii=False, indent=1))
+
+
+def retry_pending_comments(rows=None):
+    """Post comments that failed while the video was private (runs hourly with produce + daily analytics)."""
+    pend = _pending()
+    if not pend:
+        return
+    try:
+        import csv
+        rows = rows or list(csv.DictReader(open(ROOT / "stories.csv", encoding="utf-8")))
+        st = {i["id"]: i["status"]["privacyStatus"] for i in
+              _yt().videos().list(part="status", id=",".join(pend)).execute().get("items", [])}
+    except Exception as e:
+        log.warning("Pending comments check failed: %s", str(e)[:120])
+        return
+    for vid in list(pend):
+        if vid not in st:          # video deleted: drop it
+            pend.pop(vid)
+        elif st[vid] == "public":
+            item = pend.pop(vid)
+            _save_pending(pend)   # saved first, so a second failure can't loop forever
+            row = next((r for r in rows if r["id"] == str(item["row"])), {"id": item["row"]})
+            post_comment(row, vid, item.get("poll"))
+    _save_pending(pend)
 
 
 def analytics_report(days=28):
@@ -270,6 +314,7 @@ def review_before_apply(subs_goal=800, hours_goal=3000):
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
+    retry_pending_comments()
     if len(sys.argv) > 2 and sys.argv[1] == "comment":
         import csv
         for row in csv.DictReader(open(ROOT / "stories.csv", encoding="utf-8")):

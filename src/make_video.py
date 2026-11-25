@@ -418,6 +418,11 @@ def chapters(scenes):
 
 
 def main():
+    try:   # comments that failed while a video was still private
+        from channel_tools import retry_pending_comments
+        retry_pending_comments()
+    except Exception as e:
+        log.warning("Pending comments: %s", str(e)[:120])
     ap = argparse.ArgumentParser()
     ap.add_argument("--row-id", default="")
     ap.add_argument("--no-upload", action="store_true")
