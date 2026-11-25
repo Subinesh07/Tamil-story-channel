@@ -22,11 +22,13 @@ log = logging.getLogger(__name__)
 
 
 def to_png_1280x720(raw: bytes) -> bytes:
-    """Cover-fit any image to exactly WIDTHxHEIGHT and return PNG bytes."""
+    """Cover-fit any image to exactly WIDTHxHEIGHT (crop kept near the top) and return PNG bytes."""
     img = Image.open(io.BytesIO(raw)).convert("RGB")
     scale = max(WIDTH / img.width, HEIGHT / img.height)
     img = img.resize((round(img.width * scale), round(img.height * scale)), Image.LANCZOS)
-    left, top = (img.width - WIDTH) // 2, (img.height - HEIGHT) // 2
+    # square pictures (Cloudflare FLUX) cropped to 16:9: keep the TOP part, where heads are.
+    # Centre-cropping cut off ~22% of the top and gave 'head cut off' rejections (25 Nov).
+    left, top = (img.width - WIDTH) // 2, round((img.height - HEIGHT) * 0.15)
     img = img.crop((left, top, left + WIDTH, top + HEIGHT))
     buf = io.BytesIO()
     img.save(buf, "PNG", optimize=True)
