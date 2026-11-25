@@ -158,12 +158,12 @@
    "voice": {
     "state": "done",
     "note": "Leda voice ready, listening check and click check passed",
-    "at": "2026-11-24T16:17:02+00:00"
+    "at": "2026-11-25T00:18:00+00:00"
    },
    "pictures": {
     "state": "waiting",
-    "note": "scene 0: every candidate was rejected by the checker (Kathiravan is holding the documents instead of Iniya, has a beard instead of a smooth shaved chi",
-    "at": "2026-11-24T16:26:32+00:00"
+    "note": "scene 0: every candidate was rejected by the checker (The woman is shown from the back instead of facing front over the man's shoulder.); pausing - th",
+    "at": "2026-11-25T00:33:04+00:00"
    }
   },
   "12": {
@@ -196,6 +196,12 @@
   }
  },
  "events": [
+  {
+   "at": "2026-11-25T00:33:04+00:00",
+   "row": "11",
+   "level": "warn",
+   "msg": "Paused: scene 0: every candidate was rejected by the checker (The woman is shown from the back instead of facing front over the man's shoulder.); pausing - th"
+  },
   {
    "at": "2026-11-24T16:42:43+00:00",
    "row": "17",
@@ -415,8 +421,8 @@
  ],
  "limits": {
   "cloudflare": {
-   "blocked_at": "2026-11-24T07:04:27+00:00",
-   "worked_at": "2026-11-24T16:20:52+00:00",
+   "blocked_at": "2026-11-25T00:30:51+00:00",
+   "worked_at": "2026-11-25T00:25:32+00:00",
    "note": "Cloudflare daily free allowance used up (HTTP 429: {\"errors\":[{\"message\":\"AiError: AiError: you have used up your daily free allocation of 10,000 neur",
    "last_reset_seen": "2026-11-24T16:20:52+00:00"
   },
@@ -428,9 +434,10 @@
    "worked_at": "2026-11-24T16:16:42+00:00"
   },
   "cloudflare_2": {
-   "worked_at": "2026-11-24T03:30:10+00:00",
+   "worked_at": "2026-11-25T00:30:55+00:00",
    "blocked_at": "2026-11-24T07:04:27+00:00",
-   "note": "Cloudflare daily free allowance used up (HTTP 429: {\"errors\":[{\"message\":\"AiError: AiError: you have used up your daily free allocation of 10,000 neur"
+   "note": "Cloudflare daily free allowance used up (HTTP 429: {\"errors\":[{\"message\":\"AiError: AiError: you have used up your daily free allocation of 10,000 neur",
+   "last_reset_seen": "2026-11-25T00:30:55+00:00"
   }
  },
  "community": {
