@@ -238,10 +238,24 @@ STEPS = [4]   # FLUX steps for the next picture: 4 on the first round, 8 on redr
 def with_style(p):
     """Every drawn picture starts with the short house style (the model may ignore the end of a long prompt);
     the full style text stays at the end."""
+    import re
     from config import IMAGE_STYLE, STYLE_PREFIX
+    p = drawable_words(p)
     if not p.startswith(STYLE_PREFIX):
         p = STYLE_PREFIX + p
     return p if IMAGE_STYLE[:60] in p else f"{p.rstrip('. ')}. {IMAGE_STYLE}"
+
+
+def drawable_words(p):
+    """Words FLUX keeps drawing wrong (row 11, 25 Nov: 11 of 15 scenes rejected for these):
+    - 'salwar kameez' -> FLUX draws a saree; describe the garment instead
+    - 'close-up' -> FLUX crops the top of the head; use a chest-up shot with the camera further back"""
+    import re
+    p = re.sub(r"\b(?:cotton |silk )?salwar kameez\b",
+               "knee-length kurta top with matching loose trousers and a dupatta scarf", p, flags=re.I)
+    p = re.sub(r"\b(?:extreme )?close-up(?: shot)?(?: of)?\b,?",
+               "medium shot from the chest up, camera a step back,", p, flags=re.I)
+    return p
 
 
 def simpler_prompt(prompt, reasons, context=""):
@@ -254,8 +268,8 @@ def simpler_prompt(prompt, reasons, context=""):
             "SAME story moment is much easier to draw correctly. The picture model cannot reliably decide WHICH "
             "of two people does an action, so: show ONLY the one person doing the main action or speaking, "
             "framed close (the other person may appear only from behind or just a shoulder, never doing "
-            "anything), one clear action, a simple camera angle (e.g. 'Oviya in a car passenger seat, pointing "
-            "ahead, seen from the front'). Keep every character's age, look, clothes and facial-hair wording exactly as given, "
+            "anything), one clear action, a simple camera angle (e.g. 'the woman in a car passenger seat, pointing "
+            "ahead, seen from the front' - use the story's own character names). Keep every character's age, look, clothes and facial-hair wording exactly as given, "
             "and keep the art style sentence unchanged. Never mention things that should NOT appear.\n\n"
             f"Description:\n{prompt}\n\nWhat went wrong:\n- " + "\n- ".join(reasons[-3:]) +
             f"\n\nNarration at this moment (Tamil): {context[:500]}\n\n"
@@ -282,7 +296,7 @@ def drawable_prompts(prompts, contexts=None):
         d = complete(
             "These are picture descriptions for one Tamil story video. A free picture model (FLUX) will draw them. "
             "Rewrite EACH one with this exact template, in this order, under 70 words:\n"
-            "1) camera shot first: 'Medium shot, whole heads visible with space above,' (or close-up / wide shot)\n"
+            "1) camera shot first: 'Medium shot, whole heads visible with space above,' (or 'Medium shot from the chest up' / wide shot; never 'close-up')\n"
             "2) ONE main person and the ONE action they do (only one person acts in a picture)\n"
             "3) any other person only present and still, placed with 'on the left of the frame' / 'on the right of the "
             "frame' (never 'beside him', never two people interacting or touching)\n"
