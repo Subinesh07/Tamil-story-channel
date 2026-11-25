@@ -15,6 +15,10 @@ on:
         description: "true = give scenes that failed both tries ONE more round (only when the owner agrees)"
         required: false
         default: "false"
+      no_check:
+        description: "true = use new pictures WITHOUT the picture checker (owner's choice, one run)"
+        required: false
+        default: "false"
       hold:
         description: "true = upload privately WITHOUT a schedule; it waits for approval (Approve video workflow)"
         required: false
@@ -99,6 +103,7 @@ jobs:
           if [ "${{ inputs.fresh_pictures }}" = "true" ]; then export FRESH_PICTURES=1; fi
           if [ "${{ inputs.hold }}" = "true" ]; then export HOLD_FOR_APPROVAL=1; fi
           if [ "${{ inputs.retry_failed }}" = "true" ]; then export RETRY_FAILED=1; fi
+          if [ "${{ inputs.no_check }}" = "true" ]; then export NO_PICTURE_CHECK=1; fi
           python src/make_video.py $ARGS
 
       - name: Keep the finished video for full-series compilations
