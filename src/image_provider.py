@@ -327,6 +327,7 @@ def generate_all(provider, prompts, out_dir, check=True, base_seed=1000, cache_d
     out_dir.mkdir(parents=True, exist_ok=True)
     paths, warnings = [], []
     used, loaded = set(), set()
+    failed_scenes = []
     if cache_dir:
         cache_dir.mkdir(parents=True, exist_ok=True)
         if fresh:   # redo every picture: forget all saved pictures of this video (a paused run continues from new ones)
@@ -391,12 +392,18 @@ def generate_all(provider, prompts, out_dir, check=True, base_seed=1000, cache_d
             continue
         if os.environ.get("NO_NEW_ASSETS"):
             raise ImageQuota(f"Short-only run: saved picture {i} is missing - not making new pictures")
+        gave_up = cache_dir / f"gave_up_{i:02d}.txt" if cache_dir else None
+        if check and gave_up and gave_up.exists():   # already failed twice in an earlier run: no more tries
+            failed_scenes.append((i, gave_up.read_text(encoding="utf-8")[:200], prompt))
+            paths.append(path)
+            continue
         data, reason = None, ""
         first = with_style(draw_prompts[i] if draw_prompts and i < len(draw_prompts) else prompt)
         draw_prompt, reasons = first, []
         # rounds of BATCH candidates; the checker judges a whole batch in ONE request (saves its daily limit)
-        batch = 1 if not check else 2
-        for rnd in range(3 if check else 1 + IMAGE_RETRIES):
+        # at most 2 tries per picture: 4 steps, then (after a rejection) one simplified redraw at 8 steps
+        batch = 1
+        for rnd in range(2 if check else 1 + IMAGE_RETRIES):
             if check and draw_prompt == first and reasons:
                 draw_prompt = with_style(simpler_prompt(first, reasons, ctx))   # same moment, easier to draw
             STEPS[0] = 4 if rnd == 0 else 8
@@ -443,8 +450,14 @@ def generate_all(provider, prompts, out_dir, check=True, base_seed=1000, cache_d
             log.warning("Scene %d: all %d candidates rejected (%s)", i, len(cands), "; ".join(r for _, r in verdicts)[:300])
         else:
             if data is not None and check:
-                raise PictureFailed(f"scene {i}: every candidate was rejected by the checker ({reason}); "
-                                    "pausing - the next run tries again")
+                # both tries failed: skip this scene (no more credits on it) and carry on with the others;
+                # it is listed at the end so a hand-made picture can be added (assets/overrides/row_<id>/NN.png)
+                failed_scenes.append((i, reason, first))
+                if gave_up:
+                    gave_up.write_text(reason or "rejected twice", encoding="utf-8")
+                log.warning("Scene %d: both tries rejected - needs a hand-made picture (%s)", i, reason)
+                paths.append(path)
+                continue
         if data is None:
             if isinstance(provider, PlaceholderProvider):
                 data = provider.generate(prompt)
@@ -458,6 +471,12 @@ def generate_all(provider, prompts, out_dir, check=True, base_seed=1000, cache_d
             if check:
                 cached.with_suffix(".ok").write_text(CHECK_VERSION)
         paths.append(path)
+    if failed_scenes:
+        listing = "\n".join(f"  scene {i:02d}: {why[:120]}\n    prompt: {p[:400]}" for i, why, p in failed_scenes)
+        if cache_dir:
+            (cache_dir / "needs_handmade.txt").write_text(listing, encoding="utf-8")
+        raise PictureFailed(f"{len(failed_scenes)} scene(s) need a hand-made picture after 2 tries: "
+                            + ", ".join(f"{i:02d}" for i, _, _ in failed_scenes) + "\n" + listing)
     return paths, warnings
 
 
