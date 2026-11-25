@@ -8,14 +8,14 @@
     "friendship or romance": 3
   },
   "trending_themes": [
-    "சோம்பேறி",
-    "நாத்தனார்",
-    "கழுதை",
-    "சபிக்கப்பட்ட",
-    "தையல்காரர்",
-    "ஆடை",
-    "தயாரிப்பவர்",
-    "இளவரசன்"
+    "பயங்கரம்",
+    "இரவு",
+    "தனுஷ்கோடியில்",
+    "கடல்",
+    "காட்டேரிகள்",
+    "லாரி",
+    "டிரைவர்களை",
+    "வேட்டையாடும்"
   ],
   "engagement_push": false,
   "history": [
@@ -45,6 +45,12 @@
       "date": "2026-11-25",
       "changes": [
         "Everything is on track: no changes needed this week."
+      ]
+    },
+    {
+      "date": "2026-11-25",
+      "changes": [
+        "Story writer will lean towards these popular themes (ideas only): பயங்கரம், இரவு, தனுஷ்கோடியில், கடல், காட்டேரிகள், லாரி, டிரைவர்களை, வேட்டையாடும்"
       ]
     }
   ]
