@@ -218,9 +218,22 @@
     "note": "written; style [10, 9, 10], 4 logic problems fixed, foreign letters checked",
     "at": "2026-11-24T16:42:43+00:00"
    }
+  },
+  "18": {
+   "script": {
+    "state": "done",
+    "note": "written; style [8, 10, 9], 4 logic problems fixed, foreign letters checked",
+    "at": "2026-11-25T16:26:47+00:00"
+   }
   }
  },
  "events": [
+  {
+   "at": "2026-11-25T16:26:47+00:00",
+   "row": "18",
+   "level": "info",
+   "msg": "Story written: மலைக் கோயிலில் மறைந்த 400 வருட ரகசியம்! தங்கப் புதையல் இல்லையா…… | கடலும் காடும்"
+  },
   {
    "at": "2026-11-25T10:05:03+00:00",
    "row": "12",
