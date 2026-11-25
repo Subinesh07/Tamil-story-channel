@@ -431,6 +431,13 @@ def generate_all(provider, prompts, out_dir, check=True, base_seed=1000, cache_d
                                         "first_try": rnd == 0 and verdicts[0][0]})
                 break
             data = cands[0]
+            if cache_dir:   # keep rejected pictures with the reason, for review (show-pictures workflow)
+                rej = cache_dir / "rejected"
+                rej.mkdir(exist_ok=True)
+                for k, (c, (_, why)) in enumerate(zip(cands, verdicts)):
+                    stem = f"{i:02d}_r{rnd}{k}_{hashlib.md5(c).hexdigest()[:6]}"
+                    (rej / f"{stem}.png").write_bytes(c)
+                    (rej / f"{stem}.txt").write_text(f"REJECTED: {why}\n\nPROMPT:\n{draw_prompt}", encoding="utf-8")
             reasons += [r for _, r in verdicts if r]
             reason = reasons[-1] if reasons else "rejected"
             log.warning("Scene %d: all %d candidates rejected (%s)", i, len(cands), "; ".join(r for _, r in verdicts)[:300])
