@@ -31,11 +31,13 @@ jobs:
           YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
           YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
           YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
+          FB_PAGE_TOKEN: ${{ secrets.FB_PAGE_TOKEN }}
         run: |
           MODE="${{ github.event.inputs.mode }}"
           if [ "$MODE" = "backfill" ]; then python src/channel_tools.py backfill; fi
           case "$MODE" in add:*) python src/channel_tools.py add "${MODE#add:}";; comment:*) python src/channel_tools.py comment "${MODE#comment:}";; stats:*) python src/channel_tools.py stats "${MODE#stats:}"; exit 0;; fixnext:*) python src/channel_tools.py fixnext "${MODE#fixnext:}"; exit 0;; esac
           python src/channel_tools.py
+          python src/tracker.py || echo "tracker skipped"
       - name: Reminder before applying for monetization
         env:
           GH_TOKEN: ${{ github.token }}
