@@ -120,7 +120,15 @@ def shoutout_lines(rows, row):
         return []
     coms = sorted(coms, key=lambda c: -c["likes"])[:25]
     listing = "\n".join(f"{i}. ({c['author']}) {c['text']}" for i, c in enumerate(coms))
-    d = _llm("You are the warm storyteller of a Tamil story channel. From these viewer comments pick ONE that "
+    part = row.get("part") or ""
+    # 26 Nov: a viewer asked "part 2 eppo?" and the shout-out INSIDE part 2 answered "part 2 coming soon"
+    where = (f"This line is spoken near the END of PART {part} of the series, i.e. the viewer is ALREADY watching "
+             f"part {part}. The comments were written under EARLIER videos. If a comment asks when the next part "
+             f"comes, thank them for waiting and say this is that part, already here (e.g. 'நீங்க கேட்ட அடுத்த பகுதி "
+             f"இதோ வந்துடுச்சு'); never say a part that is already out is 'coming soon'. "
+             if part else "")
+    d = _llm("You are the warm storyteller of a Tamil story channel. " + where +
+             "From these viewer comments pick ONE that "
              "is kind, funny, emotional or a good guess about the story (skip rude, negative, spam, links, "
              "self-promotion, quiz answers). Write 1-2 short spoken lines in casual Tamil reacting to it, naming "
              "the viewer by first name written in Tamil letters. Tamil letters only, no English letters, no emoji. "
