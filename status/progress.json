@@ -325,9 +325,35 @@
     "note": "written; style [8, 7, 9], 3 logic problems fixed, foreign letters checked",
     "at": "2026-11-26T05:32:29+00:00"
    }
+  },
+  "24": {
+   "script": {
+    "state": "done",
+    "note": "written; style [9, 9, 10], 6 logic problems fixed, foreign letters checked",
+    "at": "2026-11-26T16:02:16+00:00"
+   }
+  },
+  "25": {
+   "script": {
+    "state": "done",
+    "note": "written; style [9, 8, 9], 5 logic problems fixed, foreign letters checked",
+    "at": "2026-11-26T16:07:25+00:00"
+   }
   }
  },
  "events": [
+  {
+   "at": "2026-11-26T16:07:26+00:00",
+   "row": "25",
+   "level": "info",
+   "msg": "Story written: போன பகுதியில என்ன ஆச்சு? இன்யாவை மிரட்டிய கதிர்வேல்… அடுத்த அதிர்ச்சி… | நிழல் ந"
+  },
+  {
+   "at": "2026-11-26T16:02:16+00:00",
+   "row": "24",
+   "level": "info",
+   "msg": "Story written: சித்தப்பாவின் சதி... நடுத்தெருவில் நின்ற இனிவா! 26 வயதில் இப்படியொரு… | நிழல் நி"
+  },
   {
    "at": "2026-11-26T13:13:42+00:00",
    "row": "13",
