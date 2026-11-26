@@ -218,6 +218,31 @@
     "state": "done",
     "note": "written; style [9, 8, 9], 3 logic problems fixed, foreign letters checked",
     "at": "2026-11-22T18:15:13+00:00"
+   },
+   "voice": {
+    "state": "done",
+    "note": "Leda voice ready, listening check and click check passed",
+    "at": "2026-11-26T13:03:51+00:00"
+   },
+   "pictures": {
+    "state": "done",
+    "note": "29 pictures, all real and different",
+    "at": "2026-11-26T13:07:01+00:00"
+   },
+   "video": {
+    "state": "done",
+    "note": "11.2 min, quality check passed",
+    "at": "2026-11-26T13:11:51+00:00"
+   },
+   "short": {
+    "state": "done",
+    "note": "Short C_0TRzjeae0 scheduled 30 min after the video",
+    "at": "2026-11-26T13:12:33+00:00"
+   },
+   "upload": {
+    "state": "done",
+    "note": "https://youtu.be/EzSDxfQ5nQ4 scheduled 2026-11-27T19:00",
+    "at": "2026-11-26T13:13:42+00:00"
    }
   },
   "14": {
@@ -303,6 +328,18 @@
   }
  },
  "events": [
+  {
+   "at": "2026-11-26T13:13:42+00:00",
+   "row": "13",
+   "level": "info",
+   "msg": "Video scheduled on YouTube (EzSDxfQ5nQ4)"
+  },
+  {
+   "at": "2026-11-26T13:13:21+00:00",
+   "row": "",
+   "level": "info",
+   "msg": "Row 13: 1 extra Shorts scheduled (next afternoons, 1 PM)"
+  },
   {
    "at": "2026-11-26T11:43:40+00:00",
    "row": "19",
@@ -660,7 +697,7 @@
  ],
  "limits": {
   "cloudflare": {
-   "blocked_at": "2026-11-26T11:41:02+00:00",
+   "blocked_at": "2026-11-26T13:04:56+00:00",
    "worked_at": "2026-11-26T11:34:15+00:00",
    "note": "Cloudflare daily free allowance used up (HTTP 429: {\"errors\":[{\"message\":\"AiError: AiError: you have used up your daily free allocation of 10,000 neur",
    "last_reset_seen": "2026-11-26T11:34:15+00:00"
@@ -670,10 +707,10 @@
    "note": "Pollinations free allowance used up"
   },
   "leda": {
-   "worked_at": "2026-11-25T10:04:10+00:00"
+   "worked_at": "2026-11-26T13:03:33+00:00"
   },
   "cloudflare_2": {
-   "worked_at": "2026-11-26T11:41:06+00:00",
+   "worked_at": "2026-11-26T13:05:00+00:00",
    "blocked_at": "2026-11-25T10:05:02+00:00",
    "note": "Cloudflare daily free allowance used up (HTTP 429: {\"errors\":[{\"message\":\"AiError: AiError: you have used up your daily free allocation of 10,000 neur",
    "last_reset_seen": "2026-11-26T03:10:49+00:00"
@@ -764,6 +801,17 @@
     "அடுத்த பார்ட் சீக்கிரம் வேணும்"
    ],
    "at": "2026-11-26T11:43:23+00:00"
+  },
+  "13": {
+   "post": "🌳 மழைச்சாரல் தாத்தா கதைகள் - பகுதி 1\n\nஒரு சின்ன தப்பு ஊரோட பெரிய ரகசியத்தையே வெளிப்படுத்த போகுதா?\nமழைச்சாரல் கிராமத்துல தாத்தா சொல்லப்போற அந்த மர்மமான கதை இதுதான்! அந்த பழைய அச்சு எங்கே இருக்குன்னு தெரிஞ்சா நீங்களே ஷாக் ஆயிடுவீங்க.\n\n▶️ https://youtu.be/EzSDxfQ5nQ4\n⏰ சாயங்காலம் 7 மணிக்கு – நிலா கதைகள்\n#நிலாகதைகள் #TamilStory",
+   "poll": "🗳️ அந்த பழைய அச்சு இப்போ யார்கிட்ட இருக்கும்னு நினைக்கிறீங்க?",
+   "options": [
+    "அந்த குட்டி பையன்",
+    "கதை சொல்லும் தாத்தா",
+    "மண்ணுக்குள்ள புதைஞ்சு இருக்கும்",
+    "ஊர் பெரியவர்"
+   ],
+   "at": "2026-11-26T13:13:25+00:00"
   }
  }
 }
