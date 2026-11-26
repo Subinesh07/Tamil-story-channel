@@ -20,9 +20,10 @@ PATH = ROOT / "series.json"
 TZ = ZoneInfo(TIMEZONE)
 
 # Niche plan: horror (4-part stories Mon/Wed/Fri/Sat) + family emotional (3-part Tue/Thu/Sun).
-WEEKLY = {0: "horror", 1: "family serial", 2: "horror", 3: "family serial", 4: "horror", 5: "horror",
-          6: "family serial"}
-WEEKEND_DEFAULT = {5: "horror", 6: "family serial"}
+# 26 Nov 2026: FAMILY-ONLY channel (Studio: 68% of viewers are 55+, 60% women; family videos get the
+# highest click rates, horror/doomsday the lowest). Horror can become a second channel after monetisation.
+WEEKLY = {d: "family serial" for d in range(7)}
+WEEKEND_DEFAULT = {5: "family serial", 6: "family serial"}
 # The series that were already running finish in full first, on their old days; as each one ends,
 # its day switches to the niche plan above.
 OLD_WEEKLY = {0: "adventure", 1: "horror", 2: "family serial", 3: "real lives", 4: "family moral",
@@ -39,7 +40,7 @@ GENRES = {
                         "with a satisfying explanation. Scary atmosphere but NO gore, blood or graphic "
                         "violence (advertiser-friendly)"},
     "family serial": {"ta": "குடும்பத் தொடர்", "parts": 3,
-                      "brief": "a deeply emotional Tamil family story in 3 parts: amma, appa, patti, thatha, "
+                      "brief": "a deeply emotional Tamil family serial: amma, appa, patti, thatha, "
                                "siblings, in-laws; a hidden sacrifice or secret, misunderstandings, a big emotional "
                                "twist and a warm ending that brings tears - the kind of story families share on WhatsApp"},
     "real lives": {"ta": "நிஜ வாழ்க்கைக் கதை", "parts": 4,
@@ -258,7 +259,7 @@ def genre_for(day, rows, data):
     g_old = OLD_WEEKLY[wd]
     sid = LEGACY_SERIES.get(g_old)
     leg = next((x for x in data["series"] if x["id"] == sid), None) if sid else None
-    if leg and leg["status"] == "active" and leg["parts_done"] < leg["parts_total"]:
+    if leg and leg["status"] == "active" and leg["parts_done"] < leg["parts_total"] and g_old.startswith("family"):
         return g_old, "finishing a started series"
     if wd in WEEKLY:
         return WEEKLY[wd], "weekday"

@@ -1,352 +1,426 @@
 {
-  "series": [
+ "series": [
+  {
+   "id": "family-1",
+   "genre": "family serial",
+   "status": "active",
+   "parts_total": 8,
+   "parts_done": 3,
+   "so_far": [
+    "Iniya begins renovating her ancestral home to distract herself from her father's death. While clearing out his study, she finds a hidden compartment containing documents that suggest her uncle Kathiravan has forged a will. The episode ends with Kathiravan confronting her in the study, creating a tense standoff.",
+    "Kathiravan catches Iniya in her father's study and immediately twists the situation, convincing Madhavi that Iniya has lost her mental balance from grief. Despite Vetri's gloating and a staged doctor visit to declare her unfit, Iniya stays exceptionally calm and refuses to play into their psychological trap. The episode ends on a knife-edge when Iniya discovers an unexpected clue hidden in the courtyard at midnight, just as someone steps out of the dark.",
+    "Iniya escapes the midnight confrontation and begins systematically collecting evidence of Kathiravan's financial fraud. She manages to access the company's digital ledger while working under the guise of home renovation. The episode ends when she finds a bank document linking her father's signatures to a date after his death, just as Kathiravan enters the room."
+   ],
+   "title_ta": "நிழல் நிஜமானால்",
+   "title_en": "If The Shadow Becomes Real",
+   "premise_en": "After her father's sudden death, a quiet interior designer discovers her greedy uncle has forged documents to seize their ancestral home. She navigates the complex web of family betrayal to reclaim her legacy through calm strategy rather than confrontation.",
+   "characters": [
     {
-      "id": "family-1",
-      "genre": "family serial",
-      "status": "active",
-      "parts_total": 8,
-      "parts_done": 3,
-      "so_far": [
-        "Iniya begins renovating her ancestral home to distract herself from her father's death. While clearing out his study, she finds a hidden compartment containing documents that suggest her uncle Kathiravan has forged a will. The episode ends with Kathiravan confronting her in the study, creating a tense standoff.",
-        "Kathiravan catches Iniya in her father's study and immediately twists the situation, convincing Madhavi that Iniya has lost her mental balance from grief. Despite Vetri's gloating and a staged doctor visit to declare her unfit, Iniya stays exceptionally calm and refuses to play into their psychological trap. The episode ends on a knife-edge when Iniya discovers an unexpected clue hidden in the courtyard at midnight, just as someone steps out of the dark.",
-        "Iniya escapes the midnight confrontation and begins systematically collecting evidence of Kathiravan's financial fraud. She manages to access the company's digital ledger while working under the guise of home renovation. The episode ends when she finds a bank document linking her father's signatures to a date after his death, just as Kathiravan enters the room."
-      ],
-      "title_ta": "நிழல் நிஜமானால்",
-      "title_en": "If The Shadow Becomes Real",
-      "premise_en": "After her father's sudden death, a quiet interior designer discovers her greedy uncle has forged documents to seize their ancestral home. She navigates the complex web of family betrayal to reclaim her legacy through calm strategy rather than confrontation.",
-      "characters": [
-        {
-          "name": "Iniya",
-          "role": "Protagonist, Interior Designer",
-          "age": 26,
-          "appearance_en": "Oval face with sharp eyes, tied-back wavy hair, wears cotton salwar kameez with minimal silver jewelry.",
-          "gender": "female"
-        },
-        {
-          "name": "Kathiravan",
-          "role": "Antagonist, Uncle",
-          "age": 52,
-          "appearance_en": "Square jawline, grey-streaked short hair, always wears formal half-sleeve shirts and a gold watch."
-        },
-        {
-          "name": "Madhavi",
-          "role": "Mother",
-          "age": 48,
-          "appearance_en": "Round face, soft features, long braided hair, wears simple silk sarees with a prominent pottu."
-        },
-        {
-          "name": "Vetri",
-          "role": "Opponent/Cousin",
-          "age": 28,
-          "appearance_en": "Angular face, short-cropped modern haircut, wears branded polo shirts and watches.",
-          "gender": "male"
-        }
-      ],
-      "arc": [
-        "Iniya discovers the forged will during a routine renovation of the family house.",
-        "Kathiravan successfully gaslights the family into believing Iniya is mentally unstable.",
-        "Iniya begins documenting the financial irregularities in the family business secretly.",
-        "Vetri attempts to sabotage Iniya's career, leading to a public confrontation at a family function.",
-        "Iniya finds an unlikely ally in a former employee who witnessed the forgery years ago.",
-        "The family secret involving a hidden debt is revealed, turning the siblings against Kathiravan.",
-        "A tense legal standoff occurs where Iniya presents evidence that shifts the power balance.",
-        "Justice is served as the property is legally restored, and Iniya reconciles the broken family unit."
-      ],
-      "person": null,
-      "key_facts_en": null
+     "name": "Iniya",
+     "role": "Protagonist, Interior Designer",
+     "age": 26,
+     "appearance_en": "Oval face with sharp eyes, tied-back wavy hair, wears cotton salwar kameez with minimal silver jewelry.",
+     "gender": "female"
     },
     {
-      "id": "adventure-2",
-      "genre": "adventure",
-      "status": "active",
-      "parts_total": 5,
-      "parts_done": 4,
-      "so_far": [
-        "On her deathbed, Sevvali Paati gives Vaanathi a bundle of palm leaves. The siblings and fisher boy Paal decode the first clue pointing to a hollow tamarind tree in a monsoon forest. With forest guide Ilavarasu, they trek through rain and leeches, find the tree, and extract a carved stone marker. As they examine it, Kalai spots fresh footprints and cut marks — Marudhan's men have been there. The episode ends with the group realizing they are being watched from the tree line, and Marudhan himself steps into view, stick raised.",
-        "In Part 2, Ilavarasu guides the children across a roaring flooded river gorge to escape Marudhan. Inside a hidden cliffside rock shelter, Vaanathi copies an ancient coastal survey map carved into the stone wall. However, Marudhan ambushes them from an upper ledge and snatches the original carved marker. A sudden severe landslide seals the cavern mouth, trapping everyone inside while rainwater rapidly floods the cave floor. Fisher boy Paal prepares to dive into a dark submerged sinkhole to locate an underwater sea tunnel out.",
-        "After escaping the flooded cave, the group reaches a fishing village where they meet marine researcher Surangi. Paal and Surangi dive into a reef wreck and retrieve an ancient bronze lamp while Marudhan chases them in a motorboat. Vaanathi decodes an inscription on the lamp that points to a 'ninth lamp' in a hill temple. The part ends when Kalai discovers a hidden message tucked inside the lamp's oil reservoir.",
-        "After reading the hidden letter from the bronze lamp, Vaanathi and her group climb to the hilltop temple during the Karthigai festival. Guided by the old priest Deivashigamani, Vaanathi decodes a shadow-and-lamp riddle to open a subterranean stone vault beneath the sanctum. Instead of gold, they discover ancient copper plates containing the lost mountain water sluice plans. Just as they make the discovery, Marudhan traps them inside the vault, forcing them to trigger an ancient underground water gate to survive."
-      ],
-      "title_ta": "கடலும் காடும் கோயிலும்",
-      "title_en": "Sea, Forest, Temple: The Palm-Leaf Trail",
-      "premise_en": "On her deathbed, grandmother Sevvali Paati hands her grandchildren a crumbling bundle of palm leaves that reveals their ancestors were guild surveyors who hid a coastal kingdom's water secret before a sea raid four centuries ago. Three siblings and a fisher boy follow the trail from a monsoon forest in the hills to a reef wreck and up to a hilltop temple, with a ruthless antique dealer always one step behind. What waits at the end is not gold but the power to end a village's drought, if the children reach it first.",
-      "characters": [
-        {
-          "name": "வானதி (Vaanathi)",
-          "role": "16-year-old protagonist; reads old palm-leaf Tamil script; leads the decoding of every clue",
-          "age": 16,
-          "appearance_en": "Lean girl with wheat-brown skin, oval face, a small mole below her left eye, thick black hair in one long braid tied with red thread; faded teal cotton kurta over blue jeans, brown canvas satchel across her chest, black rubber sandals."
-        },
-        {
-          "name": "தென்னவன் (Thennavan)",
-          "role": "22-year-old elder brother; blacksmith's apprentice; strength and stubborn protectiveness",
-          "age": 22,
-          "appearance_en": "Broad-shouldered young man with dark brown skin, short cropped hair, heavy eyebrows and a thin scar on his right forearm; grey sleeveless vest, dark green rolled trousers, thin steel chain, small iron hammer hooked at his waist."
-        },
-        {
-          "name": "கலை (Kalai)",
-          "role": "13-year-old little brother; comic relief, sharp memory, records everything on an old camera",
-          "age": 13,
-          "appearance_en": "Small wiry boy with a gap-toothed grin, dense curly black hair, round cheeks; bright yellow t-shirt with a tiger print, khaki shorts, one sock pulled up and one down, scuffed white shoes, black camera on a strap around his neck."
-        },
-        {
-          "name": "பால்கடல் 'பால்' (Paalkadal 'Paal')",
-          "role": "18-year-old fisher boy next door; free-diver who guides the sea leg of the journey",
-          "age": 18,
-          "appearance_en": "Tall lanky boy with deep sun-tanned skin, sun-bleached brown curls, wide friendly eyes; faded red bandana knotted on his head, sleeveless blue-and-white checked shirt, rolled shorts, sea-glass bead necklace, bare feet."
-        },
-        {
-          "name": "செவ்வலிப் பாட்டி (Sevvali Paati)",
-          "role": "78-year-old grandmother; keeper of the family's oral history and the palm-leaf bundle",
-          "age": 78,
-          "appearance_en": "Tiny bent old woman with silver hair in a low bun studded with white jasmine, deep wrinkles, thick black-rimmed glasses; mustard-yellow sari with brown border, grey shawl over one shoulder, brass key ring tied at her waist."
-        },
-        {
-          "name": "இளவரசு (Ilavarasu)",
-          "role": "34-year-old forest guide from a hill hamlet; knows the tiger corridors and the old survey paths",
-          "age": 34,
-          "appearance_en": "Tall lean man with very dark skin, sharp cheekbones, long black hair tied low at the nape; maroon shirt with rolled sleeves, khaki trousers, cloth bundle slung across his back, machete at his hip, white bone bead bracelet on his right wrist."
-        },
-        {
-          "name": "சுரங்கி (Surangi)",
-          "role": "26-year-old marine researcher who joins the reef dive and reads the shipwreck's markings",
-          "age": 26,
-          "appearance_en": "Round cheerful face with sun spots across the nose, black hair in two short plaits; navy blue rash guard with an orange stripe, orange knee-length shorts, dive mask pushed up on her forehead, grey fins carried in one hand."
-        },
-        {
-          "name": "மருதன் (Marudhan)",
-          "role": "46-year-old antique dealer and main antagonist; hunts the same treasure to sell abroad",
-          "age": 46,
-          "appearance_en": "Heavy-set man with salt-and-pepper hair combed straight back, thick gold-rimmed glasses, a trimmed moustache; crisp cream silk shirt, beige trousers, heavy gold ring on his left hand, dark wooden walking stick with a brass handle."
-        },
-        {
-          "name": "தெய்வசிகாமணி (Deivashigamani)",
-          "role": "63-year-old guardian priest of the hill temple; holds the final piece of the puzzle",
-          "age": 63,
-          "appearance_en": "Thin tall old man, bald crown with white hair at the sides, three white vibhuti lines across his forehead; plain white dhoti and white shawl, wooden staff with a small brass bell, copper water pot at his side."
-        }
-      ],
-      "arc": [
-        "Sevvali Paati's palm-leaf bundle sends Vaanathi, Thennavan, Kalai and Paal into a monsoon forest, where a hollow tamarind tree yields a carved stone marker and they realise Marudhan's men are tracking them.",
-        "Guided by Ilavarasu across a flooded river gorge, the children reach a hidden rock shelter and copy a coastal survey map, but Marudhan snatches the original and a landslide traps the group overnight.",
-        "In a fishing village, Surangi and Paal take the children to a reef wreck where they raise a bronze lamp whose inscription names a hill temple and the ninth lamp of its festival corridor.",
-        "Climbing to the hill temple during the lamp festival, the children solve Deivashigamani's shadow-and-lamp riddle and open a sealed vault beneath the sanctum, finding granary records, manuscripts and a sluice plan instead of gold.",
-        "When Marudhan breaks the vault's water channel, the children rescue him from the flood and restore the ancient spring line to the drought-hit village, revealing their ancestors built the secret to give water, not to hoard it."
-      ],
-      "person": null,
-      "key_facts_en": null
+     "name": "Kathiravan",
+     "role": "Antagonist, Uncle",
+     "age": 52,
+     "appearance_en": "Square jawline, grey-streaked short hair, always wears formal half-sleeve shirts and a gold watch."
     },
     {
-      "id": "doomsday-1",
-      "genre": "doomsday",
-      "status": "active",
-      "parts_total": 7,
-      "parts_done": 4,
-      "so_far": [
-        "At the Kodaikanal observatory, astronomer Meera analyzes satellite data and calculates a massive solar storm will strike Earth in 7 days, collapsing all power grids. She calls her auto-driver father Selvam in Chennai to prepare. Suddenly, senior official Raghavan and an assistant enter the lab, demanding she halt and surrender the data. Meera secretly copies the files onto a hidden drive, evades their grasp, and sprints into the foggy night, reaching the perimeter fence as a black SUV blocks the mountain road ahead.",
-        "Meera manages to evade Raghavan's men in the misty Kodaikanal hills and boards a bus to Chennai. During the journey, she notices electronic glitches and a strange red hue in the sky, confirming the solar storm's approach. She meets her journalist friend Karthik who begins to believe her when his equipment fails. When Meera finally reaches her home in Chennai to warn her father, she finds Raghavan already there, acting like a family friend.",
-        "Meera tries to expose the solar storm threat, but Raghavan spins a narrative that panic is worse than the disaster itself. She and Karthik attempt to upload a warning video, but it is deleted by mysterious forces. Arjun overhears Raghavan discussing the 'blackout' plans on his phone, realizing his father is in danger. The episode ends with the realization that the power grid is already being compromised.",
-        "On Day 4, Meera and her father Selvam stockpile dry rations and water while their neighbours mock their paranoia. Karthik warns that local power grids are already showing micro-surges as Raghavan watches the neighborhood. Arjun sneaks into Raghavan's temporary local outpost and steals a confidential folder, revealing an underground bunker reserved solely for high-ranking officials."
-      ],
-      "title_ta": "டூம்ஸ்டே: கடைசி 7 நாட்கள்",
-      "title_en": "Doomsday: The Last 7 Days",
-      "premise_en": "Meera, a young astronomer at a Kodaikanal observatory, discovers that a giant solar storm will black out the whole world in 7 days. Nobody believes her, secretive officials try to silence her, and she races to Chennai to protect her father and little brother, and finally to save the city's power grid.",
-      "characters": [
-        {
-          "name": "மீரா",
-          "role": "young astronomer, brave and clever heroine",
-          "age": 28,
-          "appearance_en": "slim Tamil woman, black hair in a loose braid, round black glasses, maroon kurta with a grey hoodie, ID card lanyard"
-        },
-        {
-          "name": "செல்வம்",
-          "role": "Meera's father, a kind Chennai auto-rickshaw driver",
-          "age": 58,
-          "appearance_en": "thin Tamil man, grey moustache, short grey hair, khaki shirt, white veshti"
-        },
-        {
-          "name": "அர்ஜுன்",
-          "role": "Meera's 10-year-old brother, curious and funny",
-          "age": 10,
-          "appearance_en": "small Tamil boy, messy hair, blue school t-shirt, red backpack"
-        },
-        {
-          "name": "ராகவன்",
-          "role": "cold, secretive senior official who wants the news hidden",
-          "age": 50,
-          "appearance_en": "tall Tamil man, neat grey beard, black coat, rimless glasses"
-        },
-        {
-          "name": "கார்த்திக்",
-          "role": "Meera's journalist friend who slowly believes her",
-          "age": 30,
-          "appearance_en": "Tamil man, short beard, checked shirt, camera bag"
-        }
-      ],
-      "arc": [
-        "Day 7: at night in the Kodaikanal lab Meera finds a giant sunspot; her maths says a solar storm hits in 7 days and every light, phone and hospital machine will die. She calls her father. Two men in black coats walk in and order her to stop. Cliffhanger: she escapes with a copy of the data.",
-        "Day 6: a tense escape down the misty ghat road to Chennai; the men follow; small strange signs begin (phones glitching, a faint red glow in the sky). Cliffhanger: Raghavan is waiting at her home.",
-        "Day 5: Raghavan says the panic would be worse than the storm. Meera and journalist Karthik try to warn the public; their video vanishes. Cliffhanger: Arjun overhears something terrible.",
-        "Day 4: the family prepares while neighbours laugh at them; Arjun finds a secret list of the few people who will be protected. Cliffhanger: their names are not on it, and Raghavan's is.",
-        "Day 3: the sky turns red at night and people start to believe; panic in the city. Meera learns why Raghavan hid the truth. Cliffhanger: Selvam goes missing in the crowd.",
-        "Day 2: Meera finds the real hope: if the city switches off its grid just before the storm, the transformers survive. She must reach the control centre. Cliffhanger: Raghavan blocks the door.",
-        "Day 1 to zero hour: Raghavan finally helps; the switch-off happens seconds before the storm; the whole world goes dark, but Chennai's lights come back first. The family is together, Selvam is a hero, and a final quiet twist about the next storm sets up a possible season 2."
-      ],
-      "title_tag": "டூம்ஸ்டே",
-      "search_tags": [
-        "doomsday",
-        "doomsday tamil",
-        "doomsday tamil story",
-        "end of the world tamil"
-      ]
+     "name": "Madhavi",
+     "role": "Mother",
+     "age": 48,
+     "appearance_en": "Round face, soft features, long braided hair, wears simple silk sarees with a prominent pottu."
     },
     {
-      "id": "horror-4",
-      "genre": "horror",
-      "status": "active",
-      "parts_total": 4,
-      "parts_done": 1,
-      "so_far": [
-        "Kavin and Oviya arrive in the foggy Sennimalai village to investigate a legendary clapperless bell. Guided by the mysterious Sundaram, they wait until midnight at the ancient clock tower. At the stroke of twelve, the bell vibrates on its own, projecting a giant, moving shadow of a 19th-century soldier onto the mist, which then begins to walk toward them as the tower door slowly creaks open."
-      ],
-      "title_ta": "நிழல் மணியின் ஓசை",
-      "title_en": "Echoes of the Silent Bell",
-      "premise_en": "An acoustic engineer and a historical researcher investigate a foggy mountain village where a clapperless iron bell chimes eerie notes every midnight, projecting phantom shadows. Their quest through mist-shrouded forests uncovers a 19th-century acoustic design built to guard a hidden underground valley.",
-      "characters": [
-        {
-          "name": "Kavin",
-          "role": "Acoustic Engineer",
-          "age": 29,
-          "appearance_en": "Short curly black hair, dark tan skin, round wire-rim glasses, navy blue zipped jacket over a beige linen shirt, dark denim pants.",
-          "gender": "male"
-        },
-        {
-          "name": "Oviya",
-          "role": "Archivist & Historian",
-          "age": 27,
-          "appearance_en": "Shoulder-length straight black hair tied in a half-up ponytail, olive complexion, forest green cotton kurti with rolled-up sleeves, small silver nose pin.",
-          "gender": "female"
-        },
-        {
-          "name": "Sundaram",
-          "role": "Village Caretaker",
-          "age": 58,
-          "appearance_en": "Receding gray hair, thick handlebar mustache, weathered dark brown skin, light tan khadi shirt, cream dhoti, holding a antique brass pocket watch.",
-          "gender": "male"
-        }
-      ],
-      "arc": [
-        "Part 1: Kavin and Oviya arrive in mist-laden Sennimalai village and witness the terrifying midnight phantom chime originating from a clapperless clock tower.",
-        "Part 2: A midnight search inside the abandoned colonial observatory reveals strange acoustic resonance frequency maps that distort human shadows.",
-        "Part 3: Following historical clues, the duo navigates a fog-bound night journey through dense pine forests to locate hidden subterranean basalt caverns.",
-        "Part 4: Kavin proves subterranean wind currents and natural basalt resonance created the infrasound visions, peacefully unlocking the village's lost heritage valley."
-      ],
-      "person": null,
-      "key_facts_en": null
-    },
-    {
-      "id": "real-5",
-      "genre": "real lives",
-      "status": "active",
-      "parts_total": 4,
-      "parts_done": 1,
-      "so_far": [
-        "This first part traces Alexander's birth in Pella, taming Bucephalus at age 12, studying under Aristotle, fighting at Chaeronea, and claiming the throne at age 20 after Philip II's assassination, ending with his historic crossing into Asia Minor."
-      ],
-      "title_ta": "அலெட்சாண்டர்: ஒரு மாமனிதன்",
-      "title_en": "Alexander: The Last Horizon",
-      "premise_en": "A dramatic four-part chronological journey of Alexander the Great, tracing his rise from Macedonian prince to conqueror of the known world, and his untimely death at Babylon based strictly on historical records.",
-      "characters": [
-        {
-          "name": "Alexander III",
-          "role": "King of Macedonia and Conqueror",
-          "age": 32,
-          "appearance_en": "Athletic build, piercing grey-blue eyes, medium-length wavy light-brown hair parted in the center, clean-shaven face, sharp jawline, wearing gleaming bronze Greek muscle cuirass armor and a crimson royal cloak."
-        },
-        {
-          "name": "Aristotle",
-          "role": "Philosopher and Tutor",
-          "age": 50,
-          "appearance_en": "Tall stature, deep-set thoughtful brown eyes, receding grey-brown hair with a short beard, wearing a traditional olive-green Greek chiton and a dark draped cloak.",
-          "gender": "male"
-        },
-        {
-          "name": "King Porus",
-          "role": "Paurava King of ancient India",
-          "age": 45,
-          "appearance_en": "Tall, muscular build, rich dark complexion, dark piercing eyes, neatly trimmed black beard, wearing elaborate gold and crimson Indian royal armor with traditional jewelry and a royal turban."
-        },
-        {
-          "name": "Olympias",
-          "role": "Queen Mother of Macedonia",
-          "age": 50,
-          "appearance_en": "Regal posture, sharp intense dark eyes, long dark braided hair interwoven with gold threads, wearing rich purple and gold royal Macedonian robes."
-        }
-      ],
-      "arc": [
-        "Part 1: The early years in Pella, tutoring under Aristotle, the assassination of Philip II, and Alexander claiming the Macedonian throne at age 20.",
-        "Part 2: The crossing into Asia Minor, the dramatic cutting of the Gordian Knot, and the massive victories against Darius III at Issus and Gaugamela.",
-        "Part 3: The campaigns through Egypt and Central Asia, founding Alexandria, and the marriage to Roxana.",
-        "Part 4: The grueling Indian campaign, the epic Battle of the Hydaspes against King Porus, the mutiny at the river, and his sudden death in Babylon."
-      ],
-      "person": "Alexander III of Macedon",
-      "key_facts_en": [
-        "Born in Pella, Macedonia in 356 BC to King Philip II and Queen Olympias.",
-        "Tamed the wild horse Bucephalus at around age 12, impressing his father.",
-        "Tutored by the Greek philosopher Aristotle from age 13 to 16 in philosophy, science, and literature.",
-        "Commanded the left wing of the Macedonian cavalry at the decisive Battle of Chaeronea at age 18 in 338 BC.",
-        "Assumed the throne of Macedonia at age 20 in 336 BC following the assassination of his father Philip II.",
-        "Crossed the Hellespont into Asia Minor in 334 BC with an army of approximately 48,000 soldiers.",
-        "Defeated the Persian king Darius III at the Battle of Issus in 333 BC and later at the Battle of Gaugamela in 331 BC.",
-        "Founded the city of Alexandria in Egypt in 331 BC, which became a major cultural and economic hub.",
-        "Married Roxana of Bactria in 327 BC to forge political alliances in Central Asia.",
-        "Invaded the Indian subcontinent and won the fiercely contested Battle of the Hydaspes against King Porus in 326 BC.",
-        "Faced a troop mutiny at the Hyphasis River in 326 BC, forcing his exhausted army to turn back toward Babylon.",
-        "Died in Babylon in June 323 BC at the age of 32 from an unspecified severe illness."
-      ]
-    },
-    {
-      "id": "family-6",
-      "genre": "family moral",
-      "status": "active",
-      "parts_total": 6,
-      "parts_done": 1,
-      "so_far": [
-        "Kadhar rushes his pottery work and breaks his clay bird, leading Periannan to teach him a lesson about patience. Through a guided storytelling session under the banyan tree, Kadhar learns that good things take time. The part ends with a cliffhanger about a missing ancient pottery mould in the village."
-      ],
-      "title_ta": "மழைச்சாரல் தாத்தா கதைகள்",
-      "title_en": "Malaichaaral Grandfather Stories",
-      "premise_en": "Every Saturday evening in a misty hill village, a wise retired pottery maker gathers his two grandchildren under a giant banyan tree. Through gentle storytelling, he helps them navigate childhood dilemmas, village harmony, and timeless moral truths.",
-      "characters": [
-        {
-          "name": "Periannan",
-          "role": "Grandfather and storyteller",
-          "age": 68,
-          "appearance_en": "Wise elderly man with a trimmed white beard, kind smiling eyes with crinkles at the corners, wearing a clean white cotton veshti and a grey woolen shawl draped over his shoulder."
-        },
-        {
-          "name": "Kadhar",
-          "role": "Elder grandson",
-          "age": 11,
-          "appearance_en": "Energetic boy with short curly black hair, expressive brown eyes, wearing a dark blue striped cotton shirt and brown shorts."
-        },
-        {
-          "name": "Poongodi",
-          "role": "Younger granddaughter",
-          "age": 8,
-          "appearance_en": "Curious bright-eyed girl with hair tied in two neat pigtails with yellow ribbons, wearing a simple green and yellow cotton salwar kameez."
-        }
-      ],
-      "arc": [
-        "Part 1: The lost clay bird teaches Kadhar the true value of patience and honest craftsmanship.",
-        "Part 2: A small dispute over a shared mango tree helps Poongodi understand the joy of selfless sharing.",
-        "Part 3: The mystery of the missing village lantern reveals the quiet power of forgiveness and trust.",
-        "Part 4: An accidental tumble into a neighbor's vegetable garden shows the children why teamwork heals old feuds.",
-        "Part 5: A rainy afternoon helping an elderly weaver teaches them to value quiet listening over speaking first.",
-        "Part 6: The annual village pottery fair brings a heartwarming realization that family is life's greatest treasure."
-      ],
-      "person": null,
-      "key_facts_en": null
+     "name": "Vetri",
+     "role": "Opponent/Cousin",
+     "age": 28,
+     "appearance_en": "Angular face, short-cropped modern haircut, wears branded polo shirts and watches.",
+     "gender": "male"
     }
-  ]
+   ],
+   "arc": [
+    "Iniya discovers the forged will during a routine renovation of the family house.",
+    "Kathiravan successfully gaslights the family into believing Iniya is mentally unstable.",
+    "Iniya begins documenting the financial irregularities in the family business secretly.",
+    "Vetri attempts to sabotage Iniya's career, leading to a public confrontation at a family function.",
+    "Iniya finds an unlikely ally in a former employee who witnessed the forgery years ago.",
+    "The family secret involving a hidden debt is revealed, turning the siblings against Kathiravan.",
+    "A tense legal standoff occurs where Iniya presents evidence that shifts the power balance.",
+    "Justice is served as the property is legally restored, and Iniya reconciles the broken family unit."
+   ],
+   "person": null,
+   "key_facts_en": null
+  },
+  {
+   "id": "adventure-2",
+   "genre": "adventure",
+   "status": "paused",
+   "parts_total": 5,
+   "parts_done": 4,
+   "so_far": [
+    "On her deathbed, Sevvali Paati gives Vaanathi a bundle of palm leaves. The siblings and fisher boy Paal decode the first clue pointing to a hollow tamarind tree in a monsoon forest. With forest guide Ilavarasu, they trek through rain and leeches, find the tree, and extract a carved stone marker. As they examine it, Kalai spots fresh footprints and cut marks — Marudhan's men have been there. The episode ends with the group realizing they are being watched from the tree line, and Marudhan himself steps into view, stick raised.",
+    "In Part 2, Ilavarasu guides the children across a roaring flooded river gorge to escape Marudhan. Inside a hidden cliffside rock shelter, Vaanathi copies an ancient coastal survey map carved into the stone wall. However, Marudhan ambushes them from an upper ledge and snatches the original carved marker. A sudden severe landslide seals the cavern mouth, trapping everyone inside while rainwater rapidly floods the cave floor. Fisher boy Paal prepares to dive into a dark submerged sinkhole to locate an underwater sea tunnel out.",
+    "After escaping the flooded cave, the group reaches a fishing village where they meet marine researcher Surangi. Paal and Surangi dive into a reef wreck and retrieve an ancient bronze lamp while Marudhan chases them in a motorboat. Vaanathi decodes an inscription on the lamp that points to a 'ninth lamp' in a hill temple. The part ends when Kalai discovers a hidden message tucked inside the lamp's oil reservoir.",
+    "After reading the hidden letter from the bronze lamp, Vaanathi and her group climb to the hilltop temple during the Karthigai festival. Guided by the old priest Deivashigamani, Vaanathi decodes a shadow-and-lamp riddle to open a subterranean stone vault beneath the sanctum. Instead of gold, they discover ancient copper plates containing the lost mountain water sluice plans. Just as they make the discovery, Marudhan traps them inside the vault, forcing them to trigger an ancient underground water gate to survive."
+   ],
+   "title_ta": "கடலும் காடும் கோயிலும்",
+   "title_en": "Sea, Forest, Temple: The Palm-Leaf Trail",
+   "premise_en": "On her deathbed, grandmother Sevvali Paati hands her grandchildren a crumbling bundle of palm leaves that reveals their ancestors were guild surveyors who hid a coastal kingdom's water secret before a sea raid four centuries ago. Three siblings and a fisher boy follow the trail from a monsoon forest in the hills to a reef wreck and up to a hilltop temple, with a ruthless antique dealer always one step behind. What waits at the end is not gold but the power to end a village's drought, if the children reach it first.",
+   "characters": [
+    {
+     "name": "வானதி (Vaanathi)",
+     "role": "16-year-old protagonist; reads old palm-leaf Tamil script; leads the decoding of every clue",
+     "age": 16,
+     "appearance_en": "Lean girl with wheat-brown skin, oval face, a small mole below her left eye, thick black hair in one long braid tied with red thread; faded teal cotton kurta over blue jeans, brown canvas satchel across her chest, black rubber sandals."
+    },
+    {
+     "name": "தென்னவன் (Thennavan)",
+     "role": "22-year-old elder brother; blacksmith's apprentice; strength and stubborn protectiveness",
+     "age": 22,
+     "appearance_en": "Broad-shouldered young man with dark brown skin, short cropped hair, heavy eyebrows and a thin scar on his right forearm; grey sleeveless vest, dark green rolled trousers, thin steel chain, small iron hammer hooked at his waist."
+    },
+    {
+     "name": "கலை (Kalai)",
+     "role": "13-year-old little brother; comic relief, sharp memory, records everything on an old camera",
+     "age": 13,
+     "appearance_en": "Small wiry boy with a gap-toothed grin, dense curly black hair, round cheeks; bright yellow t-shirt with a tiger print, khaki shorts, one sock pulled up and one down, scuffed white shoes, black camera on a strap around his neck."
+    },
+    {
+     "name": "பால்கடல் 'பால்' (Paalkadal 'Paal')",
+     "role": "18-year-old fisher boy next door; free-diver who guides the sea leg of the journey",
+     "age": 18,
+     "appearance_en": "Tall lanky boy with deep sun-tanned skin, sun-bleached brown curls, wide friendly eyes; faded red bandana knotted on his head, sleeveless blue-and-white checked shirt, rolled shorts, sea-glass bead necklace, bare feet."
+    },
+    {
+     "name": "செவ்வலிப் பாட்டி (Sevvali Paati)",
+     "role": "78-year-old grandmother; keeper of the family's oral history and the palm-leaf bundle",
+     "age": 78,
+     "appearance_en": "Tiny bent old woman with silver hair in a low bun studded with white jasmine, deep wrinkles, thick black-rimmed glasses; mustard-yellow sari with brown border, grey shawl over one shoulder, brass key ring tied at her waist."
+    },
+    {
+     "name": "இளவரசு (Ilavarasu)",
+     "role": "34-year-old forest guide from a hill hamlet; knows the tiger corridors and the old survey paths",
+     "age": 34,
+     "appearance_en": "Tall lean man with very dark skin, sharp cheekbones, long black hair tied low at the nape; maroon shirt with rolled sleeves, khaki trousers, cloth bundle slung across his back, machete at his hip, white bone bead bracelet on his right wrist."
+    },
+    {
+     "name": "சுரங்கி (Surangi)",
+     "role": "26-year-old marine researcher who joins the reef dive and reads the shipwreck's markings",
+     "age": 26,
+     "appearance_en": "Round cheerful face with sun spots across the nose, black hair in two short plaits; navy blue rash guard with an orange stripe, orange knee-length shorts, dive mask pushed up on her forehead, grey fins carried in one hand."
+    },
+    {
+     "name": "மருதன் (Marudhan)",
+     "role": "46-year-old antique dealer and main antagonist; hunts the same treasure to sell abroad",
+     "age": 46,
+     "appearance_en": "Heavy-set man with salt-and-pepper hair combed straight back, thick gold-rimmed glasses, a trimmed moustache; crisp cream silk shirt, beige trousers, heavy gold ring on his left hand, dark wooden walking stick with a brass handle."
+    },
+    {
+     "name": "தெய்வசிகாமணி (Deivashigamani)",
+     "role": "63-year-old guardian priest of the hill temple; holds the final piece of the puzzle",
+     "age": 63,
+     "appearance_en": "Thin tall old man, bald crown with white hair at the sides, three white vibhuti lines across his forehead; plain white dhoti and white shawl, wooden staff with a small brass bell, copper water pot at his side."
+    }
+   ],
+   "arc": [
+    "Sevvali Paati's palm-leaf bundle sends Vaanathi, Thennavan, Kalai and Paal into a monsoon forest, where a hollow tamarind tree yields a carved stone marker and they realise Marudhan's men are tracking them.",
+    "Guided by Ilavarasu across a flooded river gorge, the children reach a hidden rock shelter and copy a coastal survey map, but Marudhan snatches the original and a landslide traps the group overnight.",
+    "In a fishing village, Surangi and Paal take the children to a reef wreck where they raise a bronze lamp whose inscription names a hill temple and the ninth lamp of its festival corridor.",
+    "Climbing to the hill temple during the lamp festival, the children solve Deivashigamani's shadow-and-lamp riddle and open a sealed vault beneath the sanctum, finding granary records, manuscripts and a sluice plan instead of gold.",
+    "When Marudhan breaks the vault's water channel, the children rescue him from the flood and restore the ancient spring line to the drought-hit village, revealing their ancestors built the secret to give water, not to hoard it."
+   ],
+   "person": null,
+   "key_facts_en": null,
+   "paused_reason": "26 Nov 2026: channel is family-only (audience 68% aged 55+, 60% women)"
+  },
+  {
+   "id": "doomsday-1",
+   "genre": "doomsday",
+   "status": "paused",
+   "parts_total": 7,
+   "parts_done": 4,
+   "so_far": [
+    "At the Kodaikanal observatory, astronomer Meera analyzes satellite data and calculates a massive solar storm will strike Earth in 7 days, collapsing all power grids. She calls her auto-driver father Selvam in Chennai to prepare. Suddenly, senior official Raghavan and an assistant enter the lab, demanding she halt and surrender the data. Meera secretly copies the files onto a hidden drive, evades their grasp, and sprints into the foggy night, reaching the perimeter fence as a black SUV blocks the mountain road ahead.",
+    "Meera manages to evade Raghavan's men in the misty Kodaikanal hills and boards a bus to Chennai. During the journey, she notices electronic glitches and a strange red hue in the sky, confirming the solar storm's approach. She meets her journalist friend Karthik who begins to believe her when his equipment fails. When Meera finally reaches her home in Chennai to warn her father, she finds Raghavan already there, acting like a family friend.",
+    "Meera tries to expose the solar storm threat, but Raghavan spins a narrative that panic is worse than the disaster itself. She and Karthik attempt to upload a warning video, but it is deleted by mysterious forces. Arjun overhears Raghavan discussing the 'blackout' plans on his phone, realizing his father is in danger. The episode ends with the realization that the power grid is already being compromised.",
+    "On Day 4, Meera and her father Selvam stockpile dry rations and water while their neighbours mock their paranoia. Karthik warns that local power grids are already showing micro-surges as Raghavan watches the neighborhood. Arjun sneaks into Raghavan's temporary local outpost and steals a confidential folder, revealing an underground bunker reserved solely for high-ranking officials."
+   ],
+   "title_ta": "டூம்ஸ்டே: கடைசி 7 நாட்கள்",
+   "title_en": "Doomsday: The Last 7 Days",
+   "premise_en": "Meera, a young astronomer at a Kodaikanal observatory, discovers that a giant solar storm will black out the whole world in 7 days. Nobody believes her, secretive officials try to silence her, and she races to Chennai to protect her father and little brother, and finally to save the city's power grid.",
+   "characters": [
+    {
+     "name": "மீரா",
+     "role": "young astronomer, brave and clever heroine",
+     "age": 28,
+     "appearance_en": "slim Tamil woman, black hair in a loose braid, round black glasses, maroon kurta with a grey hoodie, ID card lanyard"
+    },
+    {
+     "name": "செல்வம்",
+     "role": "Meera's father, a kind Chennai auto-rickshaw driver",
+     "age": 58,
+     "appearance_en": "thin Tamil man, grey moustache, short grey hair, khaki shirt, white veshti"
+    },
+    {
+     "name": "அர்ஜுன்",
+     "role": "Meera's 10-year-old brother, curious and funny",
+     "age": 10,
+     "appearance_en": "small Tamil boy, messy hair, blue school t-shirt, red backpack"
+    },
+    {
+     "name": "ராகவன்",
+     "role": "cold, secretive senior official who wants the news hidden",
+     "age": 50,
+     "appearance_en": "tall Tamil man, neat grey beard, black coat, rimless glasses"
+    },
+    {
+     "name": "கார்த்திக்",
+     "role": "Meera's journalist friend who slowly believes her",
+     "age": 30,
+     "appearance_en": "Tamil man, short beard, checked shirt, camera bag"
+    }
+   ],
+   "arc": [
+    "Day 7: at night in the Kodaikanal lab Meera finds a giant sunspot; her maths says a solar storm hits in 7 days and every light, phone and hospital machine will die. She calls her father. Two men in black coats walk in and order her to stop. Cliffhanger: she escapes with a copy of the data.",
+    "Day 6: a tense escape down the misty ghat road to Chennai; the men follow; small strange signs begin (phones glitching, a faint red glow in the sky). Cliffhanger: Raghavan is waiting at her home.",
+    "Day 5: Raghavan says the panic would be worse than the storm. Meera and journalist Karthik try to warn the public; their video vanishes. Cliffhanger: Arjun overhears something terrible.",
+    "Day 4: the family prepares while neighbours laugh at them; Arjun finds a secret list of the few people who will be protected. Cliffhanger: their names are not on it, and Raghavan's is.",
+    "Day 3: the sky turns red at night and people start to believe; panic in the city. Meera learns why Raghavan hid the truth. Cliffhanger: Selvam goes missing in the crowd.",
+    "Day 2: Meera finds the real hope: if the city switches off its grid just before the storm, the transformers survive. She must reach the control centre. Cliffhanger: Raghavan blocks the door.",
+    "Day 1 to zero hour: Raghavan finally helps; the switch-off happens seconds before the storm; the whole world goes dark, but Chennai's lights come back first. The family is together, Selvam is a hero, and a final quiet twist about the next storm sets up a possible season 2."
+   ],
+   "title_tag": "டூம்ஸ்டே",
+   "search_tags": [
+    "doomsday",
+    "doomsday tamil",
+    "doomsday tamil story",
+    "end of the world tamil"
+   ],
+   "paused_reason": "26 Nov 2026: channel is family-only (audience 68% aged 55+, 60% women)"
+  },
+  {
+   "id": "horror-4",
+   "genre": "horror",
+   "status": "paused",
+   "parts_total": 4,
+   "parts_done": 1,
+   "so_far": [
+    "Kavin and Oviya arrive in the foggy Sennimalai village to investigate a legendary clapperless bell. Guided by the mysterious Sundaram, they wait until midnight at the ancient clock tower. At the stroke of twelve, the bell vibrates on its own, projecting a giant, moving shadow of a 19th-century soldier onto the mist, which then begins to walk toward them as the tower door slowly creaks open."
+   ],
+   "title_ta": "நிழல் மணியின் ஓசை",
+   "title_en": "Echoes of the Silent Bell",
+   "premise_en": "An acoustic engineer and a historical researcher investigate a foggy mountain village where a clapperless iron bell chimes eerie notes every midnight, projecting phantom shadows. Their quest through mist-shrouded forests uncovers a 19th-century acoustic design built to guard a hidden underground valley.",
+   "characters": [
+    {
+     "name": "Kavin",
+     "role": "Acoustic Engineer",
+     "age": 29,
+     "appearance_en": "Short curly black hair, dark tan skin, round wire-rim glasses, navy blue zipped jacket over a beige linen shirt, dark denim pants.",
+     "gender": "male"
+    },
+    {
+     "name": "Oviya",
+     "role": "Archivist & Historian",
+     "age": 27,
+     "appearance_en": "Shoulder-length straight black hair tied in a half-up ponytail, olive complexion, forest green cotton kurti with rolled-up sleeves, small silver nose pin.",
+     "gender": "female"
+    },
+    {
+     "name": "Sundaram",
+     "role": "Village Caretaker",
+     "age": 58,
+     "appearance_en": "Receding gray hair, thick handlebar mustache, weathered dark brown skin, light tan khadi shirt, cream dhoti, holding a antique brass pocket watch.",
+     "gender": "male"
+    }
+   ],
+   "arc": [
+    "Part 1: Kavin and Oviya arrive in mist-laden Sennimalai village and witness the terrifying midnight phantom chime originating from a clapperless clock tower.",
+    "Part 2: A midnight search inside the abandoned colonial observatory reveals strange acoustic resonance frequency maps that distort human shadows.",
+    "Part 3: Following historical clues, the duo navigates a fog-bound night journey through dense pine forests to locate hidden subterranean basalt caverns.",
+    "Part 4: Kavin proves subterranean wind currents and natural basalt resonance created the infrasound visions, peacefully unlocking the village's lost heritage valley."
+   ],
+   "person": null,
+   "key_facts_en": null,
+   "paused_reason": "26 Nov 2026: channel is family-only (audience 68% aged 55+, 60% women)"
+  },
+  {
+   "id": "real-5",
+   "genre": "real lives",
+   "status": "paused",
+   "parts_total": 4,
+   "parts_done": 1,
+   "so_far": [
+    "This first part traces Alexander's birth in Pella, taming Bucephalus at age 12, studying under Aristotle, fighting at Chaeronea, and claiming the throne at age 20 after Philip II's assassination, ending with his historic crossing into Asia Minor."
+   ],
+   "title_ta": "அலெட்சாண்டர்: ஒரு மாமனிதன்",
+   "title_en": "Alexander: The Last Horizon",
+   "premise_en": "A dramatic four-part chronological journey of Alexander the Great, tracing his rise from Macedonian prince to conqueror of the known world, and his untimely death at Babylon based strictly on historical records.",
+   "characters": [
+    {
+     "name": "Alexander III",
+     "role": "King of Macedonia and Conqueror",
+     "age": 32,
+     "appearance_en": "Athletic build, piercing grey-blue eyes, medium-length wavy light-brown hair parted in the center, clean-shaven face, sharp jawline, wearing gleaming bronze Greek muscle cuirass armor and a crimson royal cloak."
+    },
+    {
+     "name": "Aristotle",
+     "role": "Philosopher and Tutor",
+     "age": 50,
+     "appearance_en": "Tall stature, deep-set thoughtful brown eyes, receding grey-brown hair with a short beard, wearing a traditional olive-green Greek chiton and a dark draped cloak.",
+     "gender": "male"
+    },
+    {
+     "name": "King Porus",
+     "role": "Paurava King of ancient India",
+     "age": 45,
+     "appearance_en": "Tall, muscular build, rich dark complexion, dark piercing eyes, neatly trimmed black beard, wearing elaborate gold and crimson Indian royal armor with traditional jewelry and a royal turban."
+    },
+    {
+     "name": "Olympias",
+     "role": "Queen Mother of Macedonia",
+     "age": 50,
+     "appearance_en": "Regal posture, sharp intense dark eyes, long dark braided hair interwoven with gold threads, wearing rich purple and gold royal Macedonian robes."
+    }
+   ],
+   "arc": [
+    "Part 1: The early years in Pella, tutoring under Aristotle, the assassination of Philip II, and Alexander claiming the Macedonian throne at age 20.",
+    "Part 2: The crossing into Asia Minor, the dramatic cutting of the Gordian Knot, and the massive victories against Darius III at Issus and Gaugamela.",
+    "Part 3: The campaigns through Egypt and Central Asia, founding Alexandria, and the marriage to Roxana.",
+    "Part 4: The grueling Indian campaign, the epic Battle of the Hydaspes against King Porus, the mutiny at the river, and his sudden death in Babylon."
+   ],
+   "person": "Alexander III of Macedon",
+   "key_facts_en": [
+    "Born in Pella, Macedonia in 356 BC to King Philip II and Queen Olympias.",
+    "Tamed the wild horse Bucephalus at around age 12, impressing his father.",
+    "Tutored by the Greek philosopher Aristotle from age 13 to 16 in philosophy, science, and literature.",
+    "Commanded the left wing of the Macedonian cavalry at the decisive Battle of Chaeronea at age 18 in 338 BC.",
+    "Assumed the throne of Macedonia at age 20 in 336 BC following the assassination of his father Philip II.",
+    "Crossed the Hellespont into Asia Minor in 334 BC with an army of approximately 48,000 soldiers.",
+    "Defeated the Persian king Darius III at the Battle of Issus in 333 BC and later at the Battle of Gaugamela in 331 BC.",
+    "Founded the city of Alexandria in Egypt in 331 BC, which became a major cultural and economic hub.",
+    "Married Roxana of Bactria in 327 BC to forge political alliances in Central Asia.",
+    "Invaded the Indian subcontinent and won the fiercely contested Battle of the Hydaspes against King Porus in 326 BC.",
+    "Faced a troop mutiny at the Hyphasis River in 326 BC, forcing his exhausted army to turn back toward Babylon.",
+    "Died in Babylon in June 323 BC at the age of 32 from an unspecified severe illness."
+   ],
+   "paused_reason": "26 Nov 2026: channel is family-only (audience 68% aged 55+, 60% women)"
+  },
+  {
+   "id": "family-6",
+   "genre": "family moral",
+   "status": "active",
+   "parts_total": 6,
+   "parts_done": 1,
+   "so_far": [
+    "Kadhar rushes his pottery work and breaks his clay bird, leading Periannan to teach him a lesson about patience. Through a guided storytelling session under the banyan tree, Kadhar learns that good things take time. The part ends with a cliffhanger about a missing ancient pottery mould in the village."
+   ],
+   "title_ta": "மழைச்சாரல் தாத்தா கதைகள்",
+   "title_en": "Malaichaaral Grandfather Stories",
+   "premise_en": "Every Saturday evening in a misty hill village, a wise retired pottery maker gathers his two grandchildren under a giant banyan tree. Through gentle storytelling, he helps them navigate childhood dilemmas, village harmony, and timeless moral truths.",
+   "characters": [
+    {
+     "name": "Periannan",
+     "role": "Grandfather and storyteller",
+     "age": 68,
+     "appearance_en": "Wise elderly man with a trimmed white beard, kind smiling eyes with crinkles at the corners, wearing a clean white cotton veshti and a grey woolen shawl draped over his shoulder."
+    },
+    {
+     "name": "Kadhar",
+     "role": "Elder grandson",
+     "age": 11,
+     "appearance_en": "Energetic boy with short curly black hair, expressive brown eyes, wearing a dark blue striped cotton shirt and brown shorts."
+    },
+    {
+     "name": "Poongodi",
+     "role": "Younger granddaughter",
+     "age": 8,
+     "appearance_en": "Curious bright-eyed girl with hair tied in two neat pigtails with yellow ribbons, wearing a simple green and yellow cotton salwar kameez."
+    }
+   ],
+   "arc": [
+    "Part 1: The lost clay bird teaches Kadhar the true value of patience and honest craftsmanship.",
+    "Part 2: A small dispute over a shared mango tree helps Poongodi understand the joy of selfless sharing.",
+    "Part 3: The mystery of the missing village lantern reveals the quiet power of forgiveness and trust.",
+    "Part 4: An accidental tumble into a neighbor's vegetable garden shows the children why teamwork heals old feuds.",
+    "Part 5: A rainy afternoon helping an elderly weaver teaches them to value quiet listening over speaking first.",
+    "Part 6: The annual village pottery fair brings a heartwarming realization that family is life's greatest treasure."
+   ],
+   "person": null,
+   "key_facts_en": null
+  },
+  {
+   "id": "family-7",
+   "genre": "family serial",
+   "status": "active",
+   "parts_total": 5,
+   "parts_done": 0,
+   "so_far": [],
+   "title_ta": "அம்மாவின் வீடு",
+   "title_en": "Amma's House",
+   "premise_en": "After her husband's death, 63-year-old Kamakshi's son Sundar and daughter-in-law Priya move into her ancestral house in Kumbakonam. Priya slowly takes over the kitchen, the keys and finally the house papers, and Sundar stays silent. Only 8-year-old granddaughter Nila stays by Paati's side. When they secretly plan to sell the house and send her to an old-age home, Kamakshi discovers her late husband left one last protection - and answers greed with dignity.",
+   "hot_topics": [
+    "mamiyar vs marumagal",
+    "son turning against his mother",
+    "property papers signed by trick",
+    "old-age home",
+    "grandmother and granddaughter bond",
+    "dignified comeback"
+   ],
+   "characters": [
+    {
+     "name": "Kamakshi",
+     "role": "widowed mother, retired Tamil teacher, the heroine",
+     "age": 63,
+     "gender": "female",
+     "appearance_en": "round gentle face, grey hair in a low bun, small red pottu, thin gold chain, wearing a plain maroon cotton saree"
+    },
+    {
+     "name": "Sundar",
+     "role": "her son, 36, IT employee, weak-willed, loves his mother but obeys his wife",
+     "age": 36,
+     "gender": "male",
+     "appearance_en": "oval face, short neat black hair, short trimmed black beard and moustache, wearing a light blue formal shirt and dark grey trousers"
+    },
+    {
+     "name": "Priya",
+     "role": "daughter-in-law, 32, sharp and ambitious, hiding her brother's debts",
+     "age": 32,
+     "gender": "female",
+     "appearance_en": "sharp features, straight black hair in a high ponytail, small gold earrings, wearing a bottle-green kurta with matching trousers and dupatta"
+    },
+    {
+     "name": "Nila",
+     "role": "granddaughter, 8, Paati's shadow",
+     "age": 8,
+     "gender": "female",
+     "appearance_en": "round cheeks, two short pigtails with red ribbons, wearing a pink pavadai skirt with a white blouse"
+    },
+    {
+     "name": "Meena",
+     "role": "Kamakshi's daughter, 30, married in Coimbatore, loving",
+     "age": 30,
+     "gender": "female",
+     "appearance_en": "oval face, long black braid with jasmine, wearing a mustard-yellow cotton saree"
+    },
+    {
+     "name": "Rangan",
+     "role": "late husband's best friend, 67, retired lawyer",
+     "age": 67,
+     "gender": "male",
+     "appearance_en": "thin face, white hair combed back, white moustache, black-framed glasses, wearing a white shirt and white veshti"
+    }
+   ],
+   "arc": [
+    "Part 1: Sixteen days after Appa's death, Sundar and Priya move in. Priya takes the kitchen, then the bero keys, and makes Kamakshi feel like a guest in her own house; Nila secretly brings Paati coffee. Kamakshi signs 'bank papers' Sundar brings. Cliffhanger: at night she overhears Priya on the phone - the papers were a property transfer, and next month Paati goes to an old-age home.",
+    "Part 2: Kamakshi confronts Sundar; he cannot meet her eyes and takes Priya's side. She is shifted to the small store room. Meena calls; Kamakshi hides her tears and says all is well. Priya forbids Nila from going near Paati. Cliffhanger: cleaning Appa's old trunk, Kamakshi finds his letter: 'If our son ever forgets you, go to Rangan. I left something with him.'",
+    "Part 3: Kamakshi quietly visits Rangan. He reveals Appa's registered will: the house is Kamakshi's for life and cannot be sold without her, so the transfer she signed is worthless; there is also a fixed deposit in Nila's name. Kamakshi tells Rangan to say nothing yet. Priya brings a buyer home. Cliffhanger: Sundar packs Paati's bag - 'just a few days, Amma' - and drives her to the old-age home while Nila runs crying behind the car.",
+    "Part 4: At the old-age home Kamakshi becomes everyone's Amma and starts teaching the staff's children. Nila tells Meena on the phone, and Meena rushes from Coimbatore. On registration day the registrar rejects the sale because of Appa's will; the buyer shouts and leaves. Cliffhanger: the truth about Priya - her brother's loan sharks have been threatening her family; that is why she wanted the money.",
+    "Part 5 (finale): Kamakshi comes home with Meena and Rangan, calm and dignified. She does not throw anyone out. Sundar falls at her feet; Priya breaks down and confesses about her brother. Kamakshi pays the debt from her own savings on one condition - this house will never again make a mother feel like a guest. She turns the front room into a free tuition centre for village girls, with Nila as her first student. Warm, tearful, complete ending."
+   ]
+  }
+ ]
 }

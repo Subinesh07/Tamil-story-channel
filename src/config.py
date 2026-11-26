@@ -156,3 +156,8 @@ TTS_CACHE = ROOT / "cache" / "tts"   # voiced chunks survive between runs (quota
 # character's dress colour or face changing, which fixed character cards now handle. Set PICTURE_CHECK=1 to re-enable.
 import os as _os
 PICTURE_CHECK = bool(_os.environ.get("PICTURE_CHECK"))
+
+# 26 Nov 2026: family-only channel. No weekend Doomsday/survival serial while this is True.
+FAMILY_ONLY = True
+SERIAL_HOUR = 20   # special family serials go out at 8:30 PM (Tamil TV serial prime time)
+SERIAL_MINUTE = 30

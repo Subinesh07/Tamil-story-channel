@@ -519,7 +519,7 @@ def mark_topic_used(i):
     TOPICS.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
-def write_story(rows, doomsday=False, redo=None):
+def write_story(rows, doomsday=False, redo=None, force=None):
     """Write the next part of whichever series owns the next publish date
     (doomsday=True: the next weekend 12 PM Doomsday part instead)."""
     import series as S
@@ -541,6 +541,10 @@ def write_story(rows, doomsday=False, redo=None):
             raise LLMError("NO_DOOMSDAY: season finished")
         day, genre, why = S.next_doom_date(rows), "doomsday", "weekend 12 PM"
         lo, hi, n_parts, part_words, mins, approx = DOOM_MIN_WORDS, DOOM_MAX_WORDS, 2, "620-700", "10-12", "1,300"
+    elif force:   # a chosen series at a chosen time (e.g. the 8:30 PM special family serial)
+        ser = next(s for s in data["series"] if s["id"] == force[0])
+        day, genre, why = datetime.fromisoformat(force[1]).date(), ser["genre"], "forced"
+        lo, hi, n_parts, part_words, mins, approx = MIN_WORDS, MAX_WORDS, 2, "620-700", "10-12", "1,300"
     else:
         day = S.next_publish_date(rows)
         genre, why = S.genre_for(day, rows, data)
@@ -549,7 +553,7 @@ def write_story(rows, doomsday=False, redo=None):
         from config import HORROR_MAX_WORDS, HORROR_MIN_WORDS
         lo, hi, n_parts, part_words, mins, approx = HORROR_MIN_WORDS, HORROR_MAX_WORDS, 3, "640-740", "15-18", "2,000"
     prefer = why.split(":", 1)[1] if why.startswith("weekend:") else None
-    if not doomsday and not redo:
+    if not doomsday and not redo and not force:
         ser = (S.golden_series(data) if genre == "family emotional" else
                S.active_series(data, genre, prefer) or S.create_series(genre, data, complete, used_names))
     part = int(redo["part"]) if redo else ser["parts_done"] + 1
@@ -626,7 +630,7 @@ def write_story(rows, doomsday=False, redo=None):
     row = {"id": str(next_id), "genre": genre, "title_ta": title,
            "title_en": plan['title_en'] if genre == "family emotional" else f"{plan['title_en']} | {ser['title_en']} Part {part}", "script_ta": script,
            "scene_prompts": prompts_field,
-           "publish_at": redo["publish_at"] if redo else S.publish_at(day, DOOM_HOUR if doomsday else None),
+           "publish_at": redo["publish_at"] if redo else force[1] if force else S.publish_at(day, DOOM_HOUR if doomsday else None),
            "status": "pending", "video_id": "", "fail_reason": "",
            "description_ta": desc, "series_id": ser["id"], "part": str(part),
            "thumb_quote_ta": plan.get("thumb_line1_ta", ""), "thumb_hook_ta": plan.get("thumb_line2_ta", ""),
@@ -692,7 +696,28 @@ def main():
     ap.add_argument("--max-per-run", type=int, default=5)
     ap.add_argument("--redo", default="", help="comma-separated row ids to rewrite in the new style")
     ap.add_argument("--logic", default="", help="comma-separated row ids: run the logic check and fix in place")
+    ap.add_argument("--series", default="", help="write parts of this series id at the times in --at")
+    ap.add_argument("--at", default="", help="comma-separated ISO publish times, one part each, in order")
     args = ap.parse_args()
+    if args.series:
+        rows = load_rows()
+        for at in [x.strip() for x in args.at.split(",") if x.strip()]:
+            if any(r.get("series_id") == args.series and r.get("publish_at") == at for r in rows):
+                log.info("%s at %s already written", args.series, at)
+                continue
+            for attempt in range(3):
+                try:
+                    row, premise, names = write_story(rows, force=(args.series, at))
+                    break
+                except LLMError as e:
+                    log.warning("Part at %s failed (%s), attempt %d", at, str(e)[:150], attempt + 1)
+                    if str(e).startswith(("RATE_LIMIT", "BUSY")) or attempt == 2:
+                        return 1
+            rows.append(row)
+            save_rows(rows)
+            append_index(row["id"], row["genre"], row["title_en"], premise, names)
+            log.info("Wrote %s for %s", row["title_ta"][:60], at)
+        return 0
     if args.logic:
         import series as S
         from stories import split_sentences
@@ -750,7 +775,8 @@ def main():
         save_rows(rows)
         append_index(row["id"], row["genre"], row["title_en"], premise, names)
         written += 1
-    if args.auto and not stopped_early and os.environ.get("DOOMSDAY", "on") != "off":
+    from config import FAMILY_ONLY
+    if args.auto and not stopped_early and os.environ.get("DOOMSDAY", "on") != "off" and not FAMILY_ONLY:
         import series as S
         doom_pending = sum(r["status"] == "pending" and S.is_doom(r) for r in rows)
         if doom_pending < 2:

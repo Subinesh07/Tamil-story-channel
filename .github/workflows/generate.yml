@@ -11,6 +11,14 @@ on:
         description: "First publish date YYYY-MM-DD (only needed once)"
         required: false
         default: ""
+      series_id:
+        description: "Write parts of this series (e.g. family-7) at the times below"
+        required: false
+        default: ""
+      at:
+        description: "Comma-separated ISO publish times, one part each (with series_id)"
+        required: false
+        default: ""
   schedule:
     # every 6 hours. Writes the first 30 stories, then refills to 20 when fewer than 10 are pending.
     - cron: "0 */6 * * *"
@@ -50,7 +58,9 @@ jobs:
           YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
         run: |
           COUNT="${{ inputs.count || '0' }}"
-          if [ "$COUNT" = "0" ]; then
+          if [ -n "${{ inputs.series_id }}" ]; then
+            python src/generate_stories.py --series "${{ inputs.series_id }}" --at "${{ inputs.at }}"
+          elif [ "$COUNT" = "0" ]; then
             python src/generate_stories.py --auto --max-per-run ${{ vars.STORIES_PER_RUN || '2' }}
           else
             python src/generate_stories.py --count "$COUNT" --max-per-run "$COUNT"
