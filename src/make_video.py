@@ -407,6 +407,15 @@ def drama_thumbnail(row, provider, work, out_path, n):
     path, layout = thumb_v2.make(bg, texts, out_path, genre=row.get("genre", ""), variant=n,
                                  part=row.get("part") or "")
     log.info("Thumbnail layout: %s", layout)
+    # two more layouts of the same picture (no extra credits) for YouTube Studio "Test & compare"
+    for k, tag in ((1, "B"), (2, "C")):
+        try:
+            alt = Path(str(out_path).replace("_thumbnail.jpg", f"_thumbnail{tag}.jpg"))
+            _, lay = thumb_v2.make(bg, texts, alt, genre=row.get("genre", ""), variant=n + k,
+                                   part=row.get("part") or "")
+            log.info("Test & compare thumbnail %s: %s", tag, lay)
+        except Exception as e:
+            log.info("Extra thumbnail %s skipped: %s", tag, str(e)[:80])
     return path
 
 
