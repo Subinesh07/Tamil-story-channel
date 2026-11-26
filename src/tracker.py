@@ -62,6 +62,8 @@ def facebook():
         n += 1
         ins = requests.get(f"{api}/{r['id']}/video_insights", params={"access_token": tok,
                            "metric": "blue_reels_play_count"}, timeout=30).json()
+        if "error" in ins:
+            log.warning("Reel insights refused: %s", str(ins["error"].get("message"))[:150])
         for m in ins.get("data", []):
             plays += int((m.get("values") or [{}])[0].get("value") or 0)
     out["fb_reels"], out["fb_reel_plays_total"] = n, plays
