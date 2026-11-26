@@ -98,7 +98,7 @@ def test_scene_plan_follows_story_marks():
     scenes = plan_scenes({"total": t, "sentences": sents}, len(marks), intro=2, outro=2, marks=marks)
     story = [s for s in scenes if s["kind"] == "story"]
     assert [s["first"] - 2 for s in story] == [0, 12, 30, 50]       # 31 dropped: under 8 s
-    assert [s["prompt_index"] for s in story] == [0, 1, 2, 4]
+    assert [s["prompt_index"] for s in story] == [0, 1, 3, 4]   # 30 shows the later "too soon" picture (what is narrated next)
     assert scenes[0]["kind"] == "intro" and scenes[-1]["kind"] == "outro"
 
 
