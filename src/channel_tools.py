@@ -91,12 +91,37 @@ def add_to_playlist(row, video_id):
         log.warning("Playlist add failed: %s", str(e)[:200])
 
 
+def next_part_line(row):
+    """'Next part tomorrow 8:30 PM' when it is already planned; never 'coming soon' for a finished story."""
+    import csv
+    from datetime import datetime
+    if not row.get("series_id"):
+        return "தினமும் ஒரு புது கதை – Subscribe பண்ணி 🔔 அழுத்துங்க!"
+    try:
+        rows = list(csv.DictReader(open(ROOT / "stories.csv", encoding="utf-8")))
+        later = sorted((r for r in rows if r.get("series_id") == row["series_id"]
+                        and r.get("publish_at", "") > row.get("publish_at", "")
+                        and r.get("status") not in ("parked",)), key=lambda r: r["publish_at"])
+        if later:
+            t = datetime.fromisoformat(later[0]["publish_at"])
+            days = (t.date() - datetime.fromisoformat(row["publish_at"]).date()).days
+            when = "நாளைக்கு" if days == 1 else t.strftime("%d/%m")
+            hm = t.strftime("%I:%M").lstrip("0").replace(":00", "")
+            return f"⏰ பகுதி {later[0].get('part', '')} – {when} இரவு {hm} மணிக்கு! Subscribe பண்ணி 🔔 அழுத்துங்க"
+        import series as S
+        ser = next((x for x in S.load()["series"] if x["id"] == row["series_id"]), {})
+        if str(row.get("part")) == str(ser.get("parts_total")):
+            return "🙏 இது தான் கடைசி பகுதி – முழு கதை பிடிச்சிருந்தா Share பண்ணுங்க!"
+    except Exception as e:
+        log.info("Next-part line: %s", str(e)[:100])
+    return "அடுத்த பகுதி சீக்கிரம் வருது – Subscribe பண்ணி 🔔 அழுத்துங்க!"
+
+
 def post_comment(row, video_id, poll_q=None):
     """Top comment with a question to start discussion. Pin it by hand (API cannot pin)."""
     try:
         q = (poll_q or "").replace("🗳️", "").strip() or "இந்த கதையில உங்களுக்கு பிடிச்ச இடம் எது?"
-        nxt = "அடுத்த பகுதி சீக்கிரம் வருது – Subscribe பண்ணி 🔔 அழுத்துங்க!" if row.get("series_id") \
-            else "தினமும் ஒரு புது கதை – Subscribe பண்ணி 🔔 அழுத்துங்க!"
+        nxt = next_part_line(row)
         text = f"💬 {q}\nகமெண்ட்ல சொல்லுங்க 👇\n\n{nxt}\n🌙 நிலா கதைகள்"
         c = _yt().commentThreads().insert(part="snippet", body={"snippet": {
             "videoId": video_id, "topLevelComment": {"snippet": {"textOriginal": text}}}}).execute()
