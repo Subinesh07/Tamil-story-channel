@@ -108,7 +108,7 @@ EN_TAGS = {"horror": "Tamil Horror Story", "doomsday": "Tamil Story", "family se
 # 10-11 AM at weekends (viewing runs all day). Our viewers are mostly 55+ women: they watch YouTube in the
 # afternoon and TV serials from ~6:30 PM, so 5 PM catches them first. Studio has no hourly data for us yet.
 PUBLISH_HOURS = {0: 17, 1: 17, 2: 17, 3: 17, 4: 17, 5: 11, 6: 11}
-SECOND_SLOT_HOURS = {0: 13, 1: 13, 2: 13, 3: 13, 4: 13, 5: 18, 6: 18}   # when a day has two long videos
+SECOND_SLOT_HOURS = {0: 19, 1: 19, 2: 19, 3: 19, 4: 19, 5: 18, 6: 18}   # after the 2nd Cloudflare account refills   # when a day has two long videos
 MAX_AV_DRIFT = 1.0
 
 # --- Scheduling / YouTube ---
