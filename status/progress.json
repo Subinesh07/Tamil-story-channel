@@ -246,6 +246,11 @@
     "state": "done",
     "note": "written; style [9, 8, 10], 2 logic problems fixed, foreign letters checked",
     "at": "2026-11-26T05:20:30+00:00"
+   },
+   "voice": {
+    "state": "waiting",
+    "note": "voice check could not run (gemini-3.5-flash HTTP 503); will retry next run",
+    "at": "2026-11-26T10:31:42+00:00"
    }
   },
   "20": {
@@ -278,6 +283,12 @@
   }
  },
  "events": [
+  {
+   "at": "2026-11-26T10:31:42+00:00",
+   "row": "19",
+   "level": "warn",
+   "msg": "Paused: voice check could not run (gemini-3.5-flash HTTP 503); will retry next run"
+  },
   {
    "at": "2026-11-26T05:32:29+00:00",
    "row": "23",
