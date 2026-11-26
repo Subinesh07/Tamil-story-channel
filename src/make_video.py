@@ -372,10 +372,24 @@ def drama_thumbnail(row, provider, work, out_path, n):
             prompt = None
     from config import EXPERIMENT_START
     if prompt and (row.get("publish_at") or "")[:10] >= EXPERIMENT_START:   # face thumbnails (experiment)
-        face = ("terrified, eyes wide with fear" if row.get("genre") in ("horror", "doomsday")
-                else "shocked, eyes wet with tears")
-        prompt = (f"ONE main character's face in a huge close-up filling about half the frame, {face}, "
-                  f"looking towards the viewer, background dark and simple; " + prompt)
+        if (row.get("genre") or "").startswith("family"):
+            # family drama (Tamil serial / mamiyar-marumagal channels): the CONFLICT in two faces, warm light
+            prompt = ("Two faces in big close-up: on the left the wronged person, eyes wet with tears and hurt; "
+                      "on the right the person who wronged them, cold or angry, slightly smaller; warm indoor home "
+                      "light, simple dark background, bright clear colours; " + prompt)
+        else:
+            face = "terrified, eyes wide with fear" if row.get("genre") in ("horror", "doomsday") else "shocked"
+            prompt = (f"ONE main character's face in a huge close-up filling about half the frame, {face}, "
+                      f"looking towards the viewer, background dark and simple; " + prompt)
+        try:   # same fixed faces and clothes as inside the video
+            import series as S
+            from characters import fixed_cards, story_prompt
+            ser = next((x for x in S.load().get("series", []) if x.get("id") == row.get("series_id")), {})
+            cards = fixed_cards(ser.get("characters"))
+            if cards:
+                prompt = story_prompt(prompt, cards, row.get("genre", ""))
+        except Exception as e:
+            log.info("Thumbnail cards skipped: %s", str(e)[:80])
     bg = work / "images" / "thumb_bg.png"
     bg.parent.mkdir(parents=True, exist_ok=True)
     if os.environ.get("NO_NEW_ASSETS"):

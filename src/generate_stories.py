@@ -138,8 +138,8 @@ The part opens with {opening}.
 Return JSON with exactly these keys:
 {{
  "title_ta": "YouTube title in casual Tamil, 50-90 characters: a conflict or a shocking line plus a concrete detail (an age, a number of days, a status contrast like auto driver vs IPS officer) and a curiosity ending (…என்ன நடந்தது? / கடைசியில் அதிர்ச்சி!). No ending spoilers.",
- "thumb_line1_ta": "thumbnail SETUP line, casual Tamil, 4-7 words ending with … (e.g. டிரைவர் என்று காதலித்தாள்… / அம்மாவை தனியாக தவிக்கவிட்ட மகன்…)",
- "thumb_line2_ta": "thumbnail REVEAL tease, 3-6 Tamil words that cut off before the answer, ending ..! or ? (e.g. அவன் யார் என்று தெரிந்ததும்..! / கடைசியில் நடந்தது என்ன?)",
+ "thumb_line1_ta": "thumbnail SETUP line, casual Tamil, 3-5 SHORT words ending with … (older viewers read it on a phone: fewer, bigger words) (e.g. டிரைவர் என்று காதலித்தாள்… / அம்மாவை தனியாக தவிக்கவிட்ட மகன்…)",
+ "thumb_line2_ta": "thumbnail REVEAL tease, 2-4 Tamil words that cut off before the answer, ending ..! or ? (e.g. அவன் யார் என்று தெரிந்ததும்..! / கடைசியில் நடந்தது என்ன?)",
  "thumb_ribbon_ta": "optional extra ribbon, 3-5 Tamil words of shocking contrast (e.g. கோடீஸ்வரியாக திரும்பி வந்த அம்மா!), or empty",
  "thumb_title_ta": "HORROR/DOOMSDAY ONLY: a 1-3 word big Tamil title (e.g. கடைசி பேருந்து), else empty",
  "thumb_tagline_ta": "HORROR/DOOMSDAY ONLY: a 4-7 word mystery tagline with a clue (e.g. 14 பயணிகள்… 15 டிக்கெட் யாருக்கு?), else empty",
