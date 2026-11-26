@@ -46,7 +46,14 @@ def build_metadata(row):
     script = re.sub(r"\d+\.\s*", "", row["script_ta"]).replace("।", ".").strip()
     intro = (row.get("description_ta") or "").strip() or f"{script[:200].rstrip()}…"
     chapters = f"\n\n{row['chapters']}" if row.get("chapters") else ""
-    description = (f"{intro}{chapters}\n\n{CHANNEL_NAME_TA} ({CHANNEL_NAME_EN}) - தினமும் மாலை 7 மணிக்கு ஒரு புது கதை.\n"
+    share = ("\n\n📲 இந்த கதை உங்க மனசை தொட்டா, அம்மா அப்பா குடும்பத்தோட WhatsApp-ல Share பண்ணுங்க 🙏"
+             if (row.get("genre") or "").startswith("family") else "")
+    try:   # the exact next-part time, for serials
+        from channel_tools import next_part_line
+        share += "\n" + next_part_line(row) if row.get("series_id") else ""
+    except Exception:
+        pass
+    description = (f"{intro}{chapters}{share}\n\n{CHANNEL_NAME_TA} ({CHANNEL_NAME_EN}) - தினமும் ஒரு புது குடும்பக் கதை.\n"
                    f"{DISCLOSURE_LINE}\n\n{HASHTAGS}")
     publish = datetime.fromisoformat(row["publish_at"]) if row.get("publish_at") else None
     status = {"privacyStatus": "private", "selfDeclaredMadeForKids": False,
