@@ -14,7 +14,7 @@ One story a day (time varies by weekday) + Doomsday Sat/Sun 11 AM, IST. Updated 
 | 2026-11-24 | 9 | Echoes of the Silent Bell - Part 1 | Echoes of the Silent Bell Part 1 | done | [aT5rP36PJNc](https://youtu.be/aT5rP36PJNc) |
 | 2026-11-25 | 11 | The Master of Deception: If The Shadow Becomes Real Part 2 | If The Shadow Becomes Real Part 2 | done | [H0oFO6ZW3vM](https://youtu.be/H0oFO6ZW3vM) |
 | 2026-11-26 | 12 | Alexander: The Last Horizon - Part 1 | Alexander: The Last Horizon Part 1 | done | [umpFh1o1xKY](https://youtu.be/umpFh1o1xKY) |
-| 2026-11-26 | 19 | Amma's House: Part 1 - The Hidden Betrayal | Amma's House Part 1 | pending |  |
+| 2026-11-26 | 19 | Amma's House: Part 1 - The Hidden Betrayal | Amma's House Part 1 | done | [Zl3uoVDovj4](https://youtu.be/Zl3uoVDovj4) |
 | 2026-11-27 | 13 | The Broken Bird and the Lost Mould | Malaichaaral Grandfather Stories Part 1 | pending |  |
 | 2026-11-27 | 20 | Amma's House: Part 2 | Amma's House Part 2 | pending |  |
 | 2026-11-28 | 15 | Doomsday Part 3: The Secret They Hide | Doomsday: The Last 7 Days Part 3 | parked |  |
@@ -26,4 +26,4 @@ One story a day (time varies by weekday) + Doomsday Sat/Sun 11 AM, IST. Updated 
 | 2026-11-30 | 18 | The Palm-Leaf Trail - Part 4: The Shadow of the Temple Vault | Sea, Forest, Temple: The Palm-Leaf Trail Part 4 | parked |  |
 | 2026-11-30 | 23 | Amma's House: The Grand Finale | Amma's House Part 5 | pending |  |
 
-Pending stories: **7** ⚠️ below 10, the Generate stories workflow will top this up.
+Pending stories: **6** ⚠️ below 10, the Generate stories workflow will top this up.

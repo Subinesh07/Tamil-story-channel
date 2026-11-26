@@ -248,9 +248,29 @@
     "at": "2026-11-26T05:20:30+00:00"
    },
    "voice": {
-    "state": "waiting",
-    "note": "voice check could not run (gemini-3.5-flash HTTP 503); will retry next run",
-    "at": "2026-11-26T11:28:44+00:00"
+    "state": "done",
+    "note": "Leda voice ready, listening check and click check passed",
+    "at": "2026-11-26T11:33:16+00:00"
+   },
+   "pictures": {
+    "state": "done",
+    "note": "21 pictures, all real and different",
+    "at": "2026-11-26T11:35:43+00:00"
+   },
+   "video": {
+    "state": "done",
+    "note": "10.1 min, quality check passed",
+    "at": "2026-11-26T11:41:07+00:00"
+   },
+   "short": {
+    "state": "done",
+    "note": "Short iEI1kldeP38 scheduled 30 min after the video",
+    "at": "2026-11-26T11:41:55+00:00"
+   },
+   "upload": {
+    "state": "done",
+    "note": "https://youtu.be/Zl3uoVDovj4 scheduled 2026-11-26T20:30",
+    "at": "2026-11-26T11:43:40+00:00"
    }
   },
   "20": {
@@ -283,6 +303,18 @@
   }
  },
  "events": [
+  {
+   "at": "2026-11-26T11:43:40+00:00",
+   "row": "19",
+   "level": "info",
+   "msg": "Video scheduled on YouTube (Zl3uoVDovj4)"
+  },
+  {
+   "at": "2026-11-26T11:43:19+00:00",
+   "row": "",
+   "level": "info",
+   "msg": "Row 19: 1 extra Shorts scheduled (next afternoons, 1 PM)"
+  },
   {
    "at": "2026-11-26T11:28:44+00:00",
    "row": "19",
@@ -628,10 +660,10 @@
  ],
  "limits": {
   "cloudflare": {
-   "blocked_at": "2026-11-26T03:10:45+00:00",
-   "worked_at": "2026-11-26T03:04:58+00:00",
+   "blocked_at": "2026-11-26T11:41:02+00:00",
+   "worked_at": "2026-11-26T11:34:15+00:00",
    "note": "Cloudflare daily free allowance used up (HTTP 429: {\"errors\":[{\"message\":\"AiError: AiError: you have used up your daily free allocation of 10,000 neur",
-   "last_reset_seen": "2026-11-26T03:04:58+00:00"
+   "last_reset_seen": "2026-11-26T11:34:15+00:00"
   },
   "pollinations": {
    "blocked_at": "2026-11-25T10:05:03+00:00",
@@ -641,7 +673,7 @@
    "worked_at": "2026-11-25T10:04:10+00:00"
   },
   "cloudflare_2": {
-   "worked_at": "2026-11-26T03:10:49+00:00",
+   "worked_at": "2026-11-26T11:41:06+00:00",
    "blocked_at": "2026-11-25T10:05:02+00:00",
    "note": "Cloudflare daily free allowance used up (HTTP 429: {\"errors\":[{\"message\":\"AiError: AiError: you have used up your daily free allocation of 10,000 neur",
    "last_reset_seen": "2026-11-26T03:10:49+00:00"
@@ -721,6 +753,17 @@
     "படையோட போருக்கு கிளம்புவேன்"
    ],
    "at": "2026-11-26T03:12:23+00:00"
+  },
+  "19": {
+   "post": "🏠 அம்மாவின் வீடு - பகுதி 1\n\nசொந்த மகனே செய்த துரோகம்.. காமாட்சி அம்மாவோட நிலைமை என்ன?\nகணவர் இறந்த சோகத்துல இருந்த அம்மாவுக்கு மகன் கொடுத்த அதிர்ச்சி! பத்திரத்துல கையெழுத்து போட்ட அப்புறம் நடந்த திருப்பம் என்ன?\n\n▶️ https://youtu.be/Zl3uoVDovj4\n⏰ சாயங்காலம் 8 மணிக்கு – நிலா கதைகள்\n#நிலாகதைகள் #TamilStory",
+   "poll": "🗳️ இந்த கதையில அந்த மகன் செஞ்சத பத்தி நீங்க என்ன நினைக்கிறீங்க?",
+   "options": [
+    "ரொம்ப பாவம் அந்த அம்மா",
+    "இப்படி ஒரு மகனா?",
+    "மனசு கஷ்டமா இருக்கு",
+    "அடுத்த பார்ட் சீக்கிரம் வேணும்"
+   ],
+   "at": "2026-11-26T11:43:23+00:00"
   }
  }
 }
