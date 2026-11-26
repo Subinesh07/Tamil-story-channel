@@ -66,13 +66,24 @@ def verify_passage(wav, text, key):
                                     {"text": prompt}]}],
             "generationConfig": {"responseMimeType": "application/json", "temperature": 0}}
     last = ""
-    try:
-        models = _listen_models(key)[:4]
-    except Exception as e:
-        raise GeminiQuota(f"voice check could not list models ({str(e)[:100]}); will retry next run")
-    for model in models:
+    import os
+    import time
+    # 26 Nov: one key's models all answered 503 (Gemini overloaded) and the video paused. Try every key, twice.
+    keys = [key] + [os.environ[k] for k in ("CHECK_API_KEY", "CHECK_API_KEY_2", "LLM_API_KEY", "VOICE_API_KEY_2",
+                                             "VOICE_API_KEY") if os.environ.get(k) and os.environ[k] != key]
+    tries = []
+    for k in dict.fromkeys(keys):
         try:
-            r = requests.post(f"{API}/{model}:generateContent", headers={"x-goog-api-key": key},
+            tries += [(k, m) for m in _listen_models(k)[:4]]
+        except Exception as e:
+            last = f"list models: {str(e)[:80]}"
+    if not tries:
+        raise GeminiQuota(f"voice check could not list models ({last}); will retry next run")
+    for rnd, (k, model) in enumerate(tries + tries):
+        if rnd == len(tries):
+            time.sleep(30)   # all busy: wait once, then go round again
+        try:
+            r = requests.post(f"{API}/{model}:generateContent", headers={"x-goog-api-key": k},
                               json=body, timeout=300)
             if r.status_code != 200:
                 last = f"{model} HTTP {r.status_code}"
