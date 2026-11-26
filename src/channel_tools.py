@@ -107,7 +107,8 @@ def next_part_line(row):
             days = (t.date() - datetime.fromisoformat(row["publish_at"]).date()).days
             when = "நாளைக்கு" if days == 1 else t.strftime("%d/%m")
             hm = t.strftime("%I:%M").lstrip("0").replace(":00", "")
-            return f"⏰ பகுதி {later[0].get('part', '')} – {when} இரவு {hm} மணிக்கு! Subscribe பண்ணி 🔔 அழுத்துங்க"
+            part_of_day = ("காலை" if t.hour < 12 else "மதியம்" if t.hour < 16 else "மாலை" if t.hour < 19 else "இரவு")
+            return f"⏰ பகுதி {later[0].get('part', '')} – {when} {part_of_day} {hm} மணிக்கு! Subscribe பண்ணி 🔔 அழுத்துங்க"
         import series as S
         ser = next((x for x in S.load()["series"] if x["id"] == row["series_id"]), {})
         if str(row.get("part")) == str(ser.get("parts_total")):
@@ -340,6 +341,21 @@ def review_before_apply(subs_goal=800, hours_goal=3000):
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     retry_pending_comments()
+    if len(sys.argv) > 2 and sys.argv[1] == "fixnext":   # refresh the "next part" line in a video's description
+        import csv
+        rid = sys.argv[2]
+        row = next(r for r in csv.DictReader(open(ROOT / "stories.csv", encoding="utf-8")) if r["id"] == rid)
+        yt = _yt()
+        it = yt.videos().list(part="snippet", id=row["video_id"]).execute()["items"][0]
+        sn = it["snippet"]
+        lines = [x for x in sn["description"].split("\n") if not x.startswith("⏰ பகுதி")]
+        i = next((k for k, x in enumerate(lines) if "WhatsApp" in x), 0)
+        lines.insert(i + 1, next_part_line(row))
+        sn["description"] = "\n".join(lines)
+        yt.videos().update(part="snippet", body={"id": row["video_id"], "snippet": {
+            k: sn[k] for k in ("title", "description", "categoryId", "tags", "defaultLanguage") if k in sn}}).execute()
+        print("FIXED", row["video_id"], next_part_line(row))
+        sys.exit(0)
     if len(sys.argv) > 2 and sys.argv[1] == "stats":   # quick live numbers for given video ids
         for it in _yt().videos().list(part="statistics,snippet,contentDetails", id=sys.argv[2]).execute()["items"]:
             st = it["statistics"]

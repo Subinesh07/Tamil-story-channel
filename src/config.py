@@ -104,7 +104,11 @@ EN_TAGS = {"horror": "Tamil Horror Story", "doomsday": "Tamil Story", "family se
            "real lives": "Tamil Real Story", "adventure": "Tamil Adventure Story"}
 # 7 PM-slot story time by weekday (Mon=0 ... Sun=6), IST. Published ~1 hour before India's
 # evening viewing peak (7-10 PM) so YouTube has time to start recommending it.
-PUBLISH_HOURS = {0: 18, 1: 20, 2: 18, 3: 18, 4: 19, 5: 19, 6: 17}
+# 26 Nov 2026: India-wide data says publish 4-5 PM on weekdays (indexed before the 7-10 PM peak) and
+# 10-11 AM at weekends (viewing runs all day). Our viewers are mostly 55+ women: they watch YouTube in the
+# afternoon and TV serials from ~6:30 PM, so 5 PM catches them first. Studio has no hourly data for us yet.
+PUBLISH_HOURS = {0: 17, 1: 17, 2: 17, 3: 17, 4: 17, 5: 11, 6: 11}
+SECOND_SLOT_HOURS = {0: 13, 1: 13, 2: 13, 3: 13, 4: 13, 5: 18, 6: 18}   # when a day has two long videos
 MAX_AV_DRIFT = 1.0
 
 # --- Scheduling / YouTube ---
@@ -159,5 +163,4 @@ PICTURE_CHECK = bool(_os.environ.get("PICTURE_CHECK"))
 
 # 26 Nov 2026: family-only channel. No weekend Doomsday/survival serial while this is True.
 FAMILY_ONLY = True
-SERIAL_HOUR = 20   # special family serials go out at 8:30 PM (Tamil TV serial prime time)
-SERIAL_MINUTE = 30
+SERIAL_HOUR = 17   # special serials use the day's main slot (PUBLISH_HOURS); kept for reference

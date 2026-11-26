@@ -179,10 +179,13 @@ def extra_when(long_publish_at, k):
 
 
 def upload_short(path, row, long_video_id, long_publish_at, when=None, ending=""):
-    """Upload as a Short, scheduled 30 minutes after the full video (or soon, if that has passed)."""
+    """Upload as a Short, scheduled 7:30 PM the same day (or soon, if that has passed)."""
     from youtube_upload import upload as yt_upload
     if when is None:
-        when = datetime.fromisoformat(long_publish_at) + timedelta(minutes=30) if long_publish_at else None
+        when = None
+        if long_publish_at:   # first Short in the evening Shorts window (7-9 PM IST), sending people to the video
+            lp = datetime.fromisoformat(long_publish_at)
+            when = lp.replace(hour=19, minute=30) if lp.hour < 19 else lp + timedelta(minutes=30)
     soon = datetime.now(timezone.utc) + timedelta(minutes=10)
     if not when or when < soon:
         when = soon

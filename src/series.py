@@ -225,7 +225,7 @@ def publish_at(day, hour=None):
             shift = int(load_strategy().get("publish_hour", PUBLISH_HOUR)) - PUBLISH_HOUR
         except Exception:
             shift = 0
-        hour = min(21, max(16, PUBLISH_HOURS[day.weekday()] + max(-2, min(2, shift))))
+        hour = PUBLISH_HOURS[day.weekday()]   # fixed research-based day times (tuner shift paused, 26 Nov)
     return datetime.combine(day, time(hour), TZ).isoformat()
 
 
