@@ -393,6 +393,12 @@
  },
  "events": [
   {
+   "at": "2026-11-27T17:40:41+00:00",
+   "row": "",
+   "level": "info",
+   "msg": "Row 11: new thumbnail tried (10 views vs average 187)"
+  },
+  {
    "at": "2026-11-27T15:46:19+00:00",
    "row": "21",
    "level": "info",
