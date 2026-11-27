@@ -305,9 +305,9 @@
     "at": "2026-11-26T05:21:19+00:00"
    },
    "voice": {
-    "state": "done",
-    "note": "Leda voice ready, listening check and click check passed",
-    "at": "2026-11-27T13:13:39+00:00"
+    "state": "waiting",
+    "note": "passage 2 kept failing the listening check: Whisper heard English at 0:00, 0:05, 0:10, 0:15",
+    "at": "2026-11-27T14:27:41+00:00"
    },
    "pictures": {
     "state": "done",
@@ -377,6 +377,12 @@
   }
  },
  "events": [
+  {
+   "at": "2026-11-27T14:27:41+00:00",
+   "row": "20",
+   "level": "warn",
+   "msg": "Paused: passage 2 kept failing the listening check: Whisper heard English at 0:00, 0:05, 0:10, 0:15"
+  },
   {
    "at": "2026-11-27T13:20:13+00:00",
    "row": "20",
