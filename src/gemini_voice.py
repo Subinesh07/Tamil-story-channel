@@ -231,6 +231,10 @@ def synthesize(sentences, cache_key):
     key = keys.pop(0)
     cache = TTS_CACHE / cache_key
     cache.mkdir(parents=True, exist_ok=True)
+    if os.environ.get("RECHECK_VOICE"):   # listen again to every saved passage (re-voice the ones that fail)
+        for f in cache.glob("*.ok"):
+            f.unlink()
+        log.info("Leda: every saved passage will be checked again")
     model = None
     pieces, made = [], 0
     for k, idxs in enumerate(chunks_for(sentences)):

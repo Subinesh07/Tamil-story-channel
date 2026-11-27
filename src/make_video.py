@@ -504,6 +504,8 @@ def main():
                                                               "thumb_quote_ta", "thumb_hook_ta", "thumb_text")})
         except Exception as e:
             log.warning("Text repair failed: %s", str(e)[:150])
+    if "recheck_voice" in (row.get("fail_reason") or ""):
+        os.environ["RECHECK_VOICE"] = "1"
     # a story marked "needs_approval" is always uploaded privately without a schedule (any run)
     if "needs_approval" in (row.get("fail_reason") or ""):
         os.environ["HOLD_FOR_APPROVAL"] = "1"
