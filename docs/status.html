@@ -220,6 +220,7 @@ function renderToday(rows) {
       [`${v}-heart`, `<b>Heart / reply to comments</b>: <a target="_blank" href="https://studio.youtube.com">Studio → Comments ↗</a>`]);
     if (new Date(r.publish_at) <= now - 24 * H) items.push(
       [`${v}-ctr`, `<b>Click rate after 24 h</b> (target 4%+, tell Claude if under 3%): <a target="_blank" href="https://studio.youtube.com/video/${v}/analytics/tab-reach_viewers/period-default">open ↗</a>`]);
+    if (!items.length) return "";
     total += items.length; done += items.filter(([k]) => ticks[k]).length;
     return `<div class="h3">${t} – ${esc(title)} ${live ? '<span class="pill">🟢 live</span>' : '<span class="pill">⏰ scheduled</span>'}</div>` +
       items.map(([k, h]) => box(k, h)).join("");
