@@ -356,6 +356,12 @@ if __name__ == "__main__":
             k: sn[k] for k in ("title", "description", "categoryId", "tags", "defaultLanguage") if k in sn}}).execute()
         print("FIXED", row["video_id"], next_part_line(row))
         sys.exit(0)
+    if len(sys.argv) > 2 and sys.argv[1] == "public":   # publish videos (comma list) right now
+        for vid in sys.argv[2].split(","):
+            _yt().videos().update(part="status", body={"id": vid, "status": {
+                "privacyStatus": "public", "selfDeclaredMadeForKids": False}}).execute()
+            print("PUBLIC", vid)
+        sys.exit(0)
     if len(sys.argv) > 2 and sys.argv[1] == "private":   # hide videos (comma list) - nothing is deleted
         for vid in sys.argv[2].split(","):
             _yt().videos().update(part="status", body={"id": vid, "status": {
