@@ -58,12 +58,14 @@
   <div class="sub" id="updated">Loading…</div>
 </header>
 <main>
+  <div class="card" style="border-color:var(--gold)"><h2>✅ Today's checklist</h2><div id="today">Loading…</div>
+    <div class="legend">Ticks are remembered on this phone. End screen and Related video can be done as soon as a video is uploaded;
+      pin, share and the post need the video to be public.</div></div>
+
   <div class="card"><h2>Health</h2><div id="health" class="health">Checking…</div><div id="issues"></div></div>
 
   <div class="card"><h2>📊 Key analytics</h2><div id="analytics">Loading…</div>
     <div class="legend">Updated every day from YouTube Analytics (it runs 1–2 days behind). Green = on target, amber = close, red = needs work.</div></div>
-
-  <div class="card"><h2>✅ Today's 2-minute checklist</h2><div id="today">Loading…</div></div>
 
   <div class="card"><h2>Buttons</h2>
     <div class="btns">
@@ -192,19 +194,41 @@ function renderAnalytics(an, trk, exp) {
 function renderToday(rows) {
   const el = document.getElementById("today"), now = new Date();
   const day = (x) => new Date(x).toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
-  const today = day(now);
-  const vids = rows.filter(r => r.video_id && r.publish_at && day(r.publish_at) === today).sort((a, b) => a.publish_at.localeCompare(b.publish_at));
-  if (!vids.length) { el.innerHTML = "No video goes out today."; return; }
-  el.innerHTML = vids.map(r => {
+  const today = day(now), tmr = day(new Date(now.getTime() + 24 * H)), yst = day(new Date(now.getTime() - 24 * H));
+  const vids = rows.filter(r => r.video_id && r.publish_at && [yst, today, tmr].includes(day(r.publish_at)))
+                   .sort((a, b) => a.publish_at.localeCompare(b.publish_at));
+  if (!vids.length) { el.innerHTML = "Nothing to do – no video goes out today or tomorrow yet."; return; }
+  const key = (id) => "todo-" + id;
+  let ticks = {}; try { ticks = JSON.parse(localStorage.getItem("todo") || "{}"); } catch (e) {}
+  const box = (id, html) => `<label class="todo" style="display:block"><input type="checkbox" data-k="${id}" ${ticks[id] ? "checked" : ""}> ${html}</label>`;
+  let total = 0, done = 0;
+  const out = vids.map(r => {
     const v = r.video_id, t = ist(r.publish_at), title = (r.title_ta || "").split(" | ")[0];
+    const live = new Date(r.publish_at) <= now;
     const shorts = (((r.fail_reason || "").match(/shorts?:([\w,-]+)/) || [])[1] || "").split(",").filter(x => x.length === 11);
-    return `<div class="h3">${t} – ${esc(title)}</div>
-      <div class="todo">☐ <b>End screen</b> → Playlist (the serial) + Subscribe: <a target="_blank" href="https://studio.youtube.com/video/${v}/edit">open editor</a></div>
-      <div class="todo">☐ <b>Pin the story comment</b> (after it goes public): <a target="_blank" href="https://youtu.be/${v}">open video</a></div>` +
-      shorts.slice(0, 2).map((s, k) => `<div class="todo">☐ <b>Short ${k + 1} → Related video</b>: <a target="_blank" href="https://studio.youtube.com/video/${s}/edit">open Short</a></div>`).join("") +
-      `<div class="todo">☐ <b>Share to WhatsApp</b> in the first hour: <a target="_blank" href="https://wa.me/?text=${encodeURIComponent(title + " https://youtu.be/" + v)}">share</a></div>
-      <div class="todo">☐ <b>After 24 h: click rate</b> (target 4%+): <a target="_blank" href="https://studio.youtube.com/video/${v}/analytics/tab-reach_viewers/period-default">open</a></div>`;
+    const items = [
+      [`${v}-end`, `<b>End screen</b> → Playlist (the serial) + Subscribe → Save: <a target="_blank" href="https://studio.youtube.com/video/${v}/edit">open editor ↗</a>`],
+      ...shorts.slice(0, 2).map((s, k) => [`${s}-rel`, `<b>Short ${k + 1} → Related video</b> = this video → Save: <a target="_blank" href="https://studio.youtube.com/video/${s}/edit">open Short ↗</a>`]),
+    ];
+    const old = day(r.publish_at) === yst;
+    if (old) items.length = 0;   // yesterday's videos: only the 24-hour click-rate check
+    if (live && !old) items.push(
+      [`${v}-pin`, `<b>Pin the story comment</b> (⋮ → Pin): <a target="_blank" href="https://youtu.be/${v}">open video ↗</a>
+         <span class="fix">– not there yet? <a target="_blank" href="${ACT}analytics.yml">post it now ↗</a> (Run workflow → mode: <code>comment:${r.id}</code>)</span>`],
+      [`${v}-wa`, `<b>Share on WhatsApp</b> (family groups + status): <a target="_blank" href="https://wa.me/?text=${encodeURIComponent(title + "\nhttps://youtu.be/" + v)}">share ↗</a>`],
+      [`${v}-post`, `<b>Community post + poll</b>: copy from <a href="#community">Post &amp; poll checklist ↓</a>`],
+      [`${v}-heart`, `<b>Heart / reply to comments</b>: <a target="_blank" href="https://studio.youtube.com">Studio → Comments ↗</a>`]);
+    if (new Date(r.publish_at) <= now - 24 * H) items.push(
+      [`${v}-ctr`, `<b>Click rate after 24 h</b> (target 4%+, tell Claude if under 3%): <a target="_blank" href="https://studio.youtube.com/video/${v}/analytics/tab-reach_viewers/period-default">open ↗</a>`]);
+    total += items.length; done += items.filter(([k]) => ticks[k]).length;
+    return `<div class="h3">${t} – ${esc(title)} ${live ? '<span class="pill">🟢 live</span>' : '<span class="pill">⏰ scheduled</span>'}</div>` +
+      items.map(([k, h]) => box(k, h)).join("");
   }).join("");
+  el.innerHTML = `<div class="goal">Done <b>${done} / ${total}</b><div class="gbar"><i style="width:${total ? done / total * 100 : 0}%"></i></div></div>` + out;
+  el.querySelectorAll("input[type=checkbox]").forEach(c => c.addEventListener("change", () => {
+    ticks[c.dataset.k] = c.checked; try { localStorage.setItem("todo", JSON.stringify(ticks)); } catch (e) {}
+    renderToday(rows);
+  }));
 }
 
 async function main() {
