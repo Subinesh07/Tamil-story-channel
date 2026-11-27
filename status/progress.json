@@ -305,29 +305,29 @@
     "at": "2026-11-26T05:21:19+00:00"
    },
    "voice": {
-    "state": "waiting",
-    "note": "passage 2 kept failing the listening check: Whisper heard English at 0:00, 0:05, 0:10, 0:15",
-    "at": "2026-11-27T14:27:41+00:00"
+    "state": "done",
+    "note": "Leda voice ready, listening check and click check passed",
+    "at": "2026-11-27T14:41:36+00:00"
    },
    "pictures": {
     "state": "done",
     "note": "25 pictures, all real and different",
-    "at": "2026-11-27T13:14:14+00:00"
+    "at": "2026-11-27T14:42:00+00:00"
    },
    "video": {
     "state": "done",
-    "note": "10.3 min, quality check passed",
-    "at": "2026-11-27T13:18:37+00:00"
+    "note": "9.9 min, quality check passed",
+    "at": "2026-11-27T14:45:26+00:00"
    },
    "short": {
     "state": "done",
-    "note": "Short WEI81gtiYRY scheduled 30 min after the video",
-    "at": "2026-11-27T13:19:21+00:00"
+    "note": "Short RA1t0_fYHe8 scheduled 30 min after the video",
+    "at": "2026-11-27T14:47:37+00:00"
    },
    "upload": {
     "state": "done",
-    "note": "https://youtu.be/98OHCAUgogs scheduled 2026-11-27T20:30",
-    "at": "2026-11-27T13:20:13+00:00"
+    "note": "https://youtu.be/VbIdo7nTar0 scheduled 2026-11-27T19:45",
+    "at": "2026-11-27T14:48:16+00:00"
    }
   },
   "21": {
@@ -377,6 +377,18 @@
   }
  },
  "events": [
+  {
+   "at": "2026-11-27T14:48:16+00:00",
+   "row": "20",
+   "level": "info",
+   "msg": "Video scheduled on YouTube (VbIdo7nTar0)"
+  },
+  {
+   "at": "2026-11-27T14:48:07+00:00",
+   "row": "",
+   "level": "info",
+   "msg": "Row 20: 1 extra Shorts scheduled (next afternoons, 1 PM)"
+  },
   {
    "at": "2026-11-27T14:27:41+00:00",
    "row": "20",
@@ -807,7 +819,7 @@
  "limits": {
   "cloudflare": {
    "blocked_at": "2026-11-27T05:17:28+00:00",
-   "worked_at": "2026-11-27T13:18:36+00:00",
+   "worked_at": "2026-11-27T14:45:26+00:00",
    "note": "Cloudflare daily free allowance used up (HTTP 429: {\"errors\":[{\"message\":\"AiError: AiError: you have used up your daily free allocation of 10,000 neur",
    "last_reset_seen": "2026-11-27T13:18:36+00:00"
   },
@@ -816,7 +828,7 @@
    "note": "Pollinations free allowance used up"
   },
   "leda": {
-   "worked_at": "2026-11-27T05:16:36+00:00"
+   "worked_at": "2026-11-27T14:41:26+00:00"
   },
   "cloudflare_2": {
    "worked_at": "2026-11-26T13:05:00+00:00",
@@ -923,15 +935,15 @@
    "at": "2026-11-26T13:13:25+00:00"
   },
   "20": {
-   "post": "🏠 அம்மாவின் வீடு - பகுதி 2\n\nகாமாட்சி பாட்டியோட அந்த மர்மமான ரகசியம் என்னவா இருக்கும்?\nமருமகள் போடுற பிளான்ல இருந்து பாட்டி தப்பிப்பாங்களா? அந்த கடைசி ரகசியம் தான் இப்போ பெரிய ட்விஸ்ட்!\n\n▶️ https://youtu.be/98OHCAUgogs\n⏰ சாயங்காலம் 8 மணிக்கு – நிலா கதைகள்\n#நிலாகதைகள் #TamilStory",
-   "poll": "🗳️ காமாட்சி பாட்டி அந்த ரகசியத்தை வச்சு என்ன செய்வாங்க?",
+   "post": "🏠 அம்மாவின் வீடு - பகுதி 2\n\nKamakshi Paatti-ku therinja antha kadisi secret enna irukkum?\nPriya potta plan-la irundhu paatti thappippangala?\nKanavar vittu pona secret ippo veliya vara poguthu!\n\n▶️ https://youtu.be/VbIdo7nTar0\n⏰ சாயங்காலம் 7 மணிக்கு – நிலா கதைகள்\n#நிலாகதைகள் #TamilStory",
+   "poll": "🗳️ Next part-la Kamakshi Paatti enna mudivu eduppanga?",
    "options": [
-    "மருமகளை வீட்டை விட்டு துரத்துவாங்க",
-    "வீட்டை தானமா கொடுத்துடுவாங்க",
-    "ரகசியத்தை யார்கிட்டயும் சொல்லமாட்டாங்க",
-    "மகன் திருந்தி பாட்டியை காப்பாத்துவான்"
+    "Veetta Priya-kitta koduppanga",
+    "Kanavar secret-a veliyiduvanga",
+    "Police complaint kuduppanga",
+    "Maganukku paadam karpippanga"
    ],
-   "at": "2026-11-27T13:20:12+00:00"
+   "at": "2026-11-27T14:48:15+00:00"
   }
  }
 }
