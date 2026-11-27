@@ -52,3 +52,8 @@ On top of that, the yes/no listening check is not reliable on 3–4 minute passa
 with the script (4+ English words not in the script, or the length off by more than 25%, or under 60% match = re-voice);
 (3) affected videos were hidden/deleted and remade after re-listening (`recheck_voice` in the row's fail_reason);
 (4) new analytics modes: `private:`, `public:`, `postpone:`, `postponevid:`, `setthumb:`, `clip:`/`listen:` (transcribe audio).
+**Update (same evening):** Gemini's word-by-word transcript also failed - it *translated* Leda's English into the
+matching Tamil script. **Whisper** (plain speech recognition, `src/langcheck.py`) found it exactly: 3:45-4:02 English
+at 76-90%; Leda was reading our own style instructions ("…as written, never translate…"). Whisper now checks every
+Leda passage in 5-second steps and the finished video before upload; English anywhere = re-voice / no upload.
+Manual check of any video: Actions → "Language check" → file `story_<id>.mp4` (optional zoom "start end").
