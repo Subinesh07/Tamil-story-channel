@@ -148,10 +148,9 @@ OUTRO_LINES = [
 # --- Gemini voice (main narrator) ---
 TTS_ENGINE = "gemini"          # "gemini" (Leda) or "edge" (Pallavi). Never mixed within a video.
 GEMINI_VOICE = "Leda"
-GEMINI_STYLE = ("Read this Tamil story aloud like a warm, emotional storyteller from Tamil Nadu. "
-                "Natural, slightly brisk conversational pace; short pauses between sentences; "
-                "expressive: rising on questions, softer on sad lines, lively on dialogue. "
-                "Speak ONLY in Tamil, read the text exactly as written, never translate or add English sentences")
+# 27 Nov: the long English instruction was read ALOUD by Leda (Whisper caught it). Keep it to a few words -
+# Google's own guidance for speech style is a short lead-in like "Say warmly:". Retries send the Tamil text alone.
+GEMINI_STYLE = "Say warmly, like a Tamil storyteller"
 GEMINI_TEMPO = 1.08            # gentle speed-up after synthesis (pitch unchanged); close to the reference voice
 GEMINI_CHUNK_CHARS = 4000      # long passages = few requests (free daily limit is small)
 TTS_CACHE = ROOT / "cache" / "tts"   # voiced chunks survive between runs (quota pauses)

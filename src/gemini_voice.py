@@ -27,6 +27,10 @@ API = "https://generativelanguage.googleapis.com/v1beta/models"
 OLD_STYLES = [
     "Read this Tamil story aloud like a warm, emotional storyteller from Tamil Nadu. "
     "Natural, slightly brisk conversational pace; short pauses between sentences; "
+    "expressive: rising on questions, softer on sad lines, lively on dialogue. "
+    "Speak ONLY in Tamil, read the text exactly as written, never translate or add English sentences",
+    "Read this Tamil story aloud like a warm, emotional storyteller from Tamil Nadu. "
+    "Natural, slightly brisk conversational pace; short pauses between sentences; "
     "expressive: rising on questions, softer on sad lines, lively on dialogue",
 ]
 
@@ -203,8 +207,9 @@ def _punct(s):
     return s if re.search(r"[.!?…]$", s) else s + "."
 
 
-def _request(model, key, text):
-    body = {"contents": [{"parts": [{"text": f"{GEMINI_STYLE}:\n\n{text}"}]}],
+def _request(model, key, text, plain=False):
+    # plain=True: only the Tamil text, no English at all for Leda to read out (used on retries)
+    body = {"contents": [{"parts": [{"text": text if plain else f"{GEMINI_STYLE}:\n\n{text}"}]}],
             "generationConfig": {"responseModalities": ["AUDIO"],
                                  "speechConfig": {"voiceConfig": {"prebuiltVoiceConfig": {"voiceName": GEMINI_VOICE}}}}}
     for attempt in range(4):
@@ -321,7 +326,7 @@ def synthesize(sentences, cache_key):
                     model = model or tts_model(key)
                     log.info("Leda: voicing passage %d (%d sentences, %d chars) with %s", k + 1, len(idxs),
                              len(text), model)
-                    pcm, rate = _request(model, key, text)
+                    pcm, rate = _request(model, key, text, plain=tries >= 1)
                     break
                 except GeminiQuota as e:
                     if not keys:
@@ -351,7 +356,7 @@ def synthesize(sentences, cache_key):
           tries += 1
           log.warning("Leda: passage %d failed the listening check (%s); voicing it again", k + 1, why)
           wav.unlink(missing_ok=True)
-          if tries >= 3:
+          if tries >= 4:
               raise VoiceCheckFailed(f"passage {k + 1} kept failing the listening check: {why}")
         spans = align_by_pauses(wav, [sentences[i] for i in idxs])
         pieces.append((wav, [(i, s, e) for i, (s, e) in zip(idxs, spans)]))
