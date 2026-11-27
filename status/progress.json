@@ -307,27 +307,27 @@
    "voice": {
     "state": "done",
     "note": "Leda voice ready, listening check and click check passed",
-    "at": "2026-11-27T03:34:10+00:00"
+    "at": "2026-11-27T13:13:39+00:00"
    },
    "pictures": {
     "state": "done",
     "note": "25 pictures, all real and different",
-    "at": "2026-11-27T03:41:19+00:00"
+    "at": "2026-11-27T13:14:14+00:00"
    },
    "video": {
     "state": "done",
     "note": "10.3 min, quality check passed",
-    "at": "2026-11-27T03:45:38+00:00"
+    "at": "2026-11-27T13:18:37+00:00"
    },
    "short": {
     "state": "done",
-    "note": "Short L1oeDvTFjYY scheduled 30 min after the video",
-    "at": "2026-11-27T03:46:26+00:00"
+    "note": "Short WEI81gtiYRY scheduled 30 min after the video",
+    "at": "2026-11-27T13:19:21+00:00"
    },
    "upload": {
     "state": "done",
-    "note": "https://youtu.be/AsDKQ3rf0RQ scheduled 2026-11-27T17:00",
-    "at": "2026-11-27T03:47:28+00:00"
+    "note": "https://youtu.be/98OHCAUgogs scheduled 2026-11-27T20:30",
+    "at": "2026-11-27T13:20:13+00:00"
    }
   },
   "21": {
@@ -377,6 +377,18 @@
   }
  },
  "events": [
+  {
+   "at": "2026-11-27T13:20:13+00:00",
+   "row": "20",
+   "level": "info",
+   "msg": "Video scheduled on YouTube (98OHCAUgogs)"
+  },
+  {
+   "at": "2026-11-27T13:20:07+00:00",
+   "row": "",
+   "level": "info",
+   "msg": "Row 20: 1 extra Shorts scheduled (next afternoons, 1 PM)"
+  },
   {
    "at": "2026-11-27T05:17:29+00:00",
    "row": "21",
@@ -789,9 +801,9 @@
  "limits": {
   "cloudflare": {
    "blocked_at": "2026-11-27T05:17:28+00:00",
-   "worked_at": "2026-11-27T03:39:45+00:00",
+   "worked_at": "2026-11-27T13:18:36+00:00",
    "note": "Cloudflare daily free allowance used up (HTTP 429: {\"errors\":[{\"message\":\"AiError: AiError: you have used up your daily free allocation of 10,000 neur",
-   "last_reset_seen": "2026-11-27T03:39:45+00:00"
+   "last_reset_seen": "2026-11-27T13:18:36+00:00"
   },
   "pollinations": {
    "blocked_at": "2026-11-27T05:17:29+00:00",
@@ -905,15 +917,15 @@
    "at": "2026-11-26T13:13:25+00:00"
   },
   "20": {
-   "post": "🏠 அம்மாவின் வீடு - பகுதி 2\n\nகாமாட்சி பாட்டியோட அந்த மர்ம ரகசியம் என்னன்னு தெரியுமா?\nவீட்டை அபகரிக்க துடிக்கும் மருமகள் ப்ரியா! பாட்டியோட கணவர் விட்டுப்போன அந்த ரகசியம் என்ன?\n\n▶️ https://youtu.be/AsDKQ3rf0RQ\n⏰ சாயங்காலம் 5 மணிக்கு – நிலா கதைகள்\n#நிலாகதைகள் #TamilStory",
-   "poll": "🗳️ அடுத்த பார்ட்ல என்ன நடக்கும்னு நினைக்கிறீங்க?",
+   "post": "🏠 அம்மாவின் வீடு - பகுதி 2\n\nகாமாட்சி பாட்டியோட அந்த மர்மமான ரகசியம் என்னவா இருக்கும்?\nமருமகள் போடுற பிளான்ல இருந்து பாட்டி தப்பிப்பாங்களா? அந்த கடைசி ரகசியம் தான் இப்போ பெரிய ட்விஸ்ட்!\n\n▶️ https://youtu.be/98OHCAUgogs\n⏰ சாயங்காலம் 8 மணிக்கு – நிலா கதைகள்\n#நிலாகதைகள் #TamilStory",
+   "poll": "🗳️ காமாட்சி பாட்டி அந்த ரகசியத்தை வச்சு என்ன செய்வாங்க?",
    "options": [
-    "பாட்டி வீட்டை காப்பாத்துவாங்க",
-    "ப்ரியா பிளான் சக்சஸ் ஆகும்",
-    "மர்ம ரகசியம் வெளிய வரும்",
-    "மகன் மனம் மாறுவான்"
+    "மருமகளை வீட்டை விட்டு துரத்துவாங்க",
+    "வீட்டை தானமா கொடுத்துடுவாங்க",
+    "ரகசியத்தை யார்கிட்டயும் சொல்லமாட்டாங்க",
+    "மகன் திருந்தி பாட்டியை காப்பாத்துவான்"
    ],
-   "at": "2026-11-27T03:47:27+00:00"
+   "at": "2026-11-27T13:20:12+00:00"
   }
  }
 }
