@@ -335,10 +335,15 @@ def synthesize(sentences, cache_key):
           # NEVER keep a passage unchecked: on 26 Nov an unchecked passage had Leda reading the English
           # instructions aloud (Part 2, 3:40). If Gemini cannot listen, the video pauses and the next run retries.
           ok, why = verify_passage(wav, text, key)
-          if ok:   # second, stricter check by plain code on a word-by-word transcript
-              ok, why = transcript_check(wav, text, key)
-              if not ok:
-                  log.warning("Leda: passage %d failed the word-by-word check: %s", k + 1, why)
+          if ok:   # Whisper (plain speech recognition) listens in 5-second steps for ANY English speech
+              try:
+                  from langcheck import english_windows
+              except Exception as e:   # never skip: no Whisper = pause, the next run retries
+                  raise GeminiQuota(f"Whisper language check unavailable ({str(e)[:80]}); will retry next run")
+              bad = english_windows(wav)
+              if bad:
+                  ok, why = False, "Whisper heard English at " + ", ".join(f"{s // 60}:{s % 60:02d}" for s, _ in bad[:6])
+                  log.warning("Leda: passage %d: %s", k + 1, why)
           if ok:
               checked.write_text("ok")
               log.info("Leda: passage %d passed the listening check", k + 1)

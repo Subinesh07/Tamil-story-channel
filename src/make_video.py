@@ -239,6 +239,15 @@ def produce(row, upload=True, check_duration=True):
     if not upload:
         log.info("Upload skipped (--no-upload)")
         return None
+    # last gate: Whisper listens to the FINISHED video; any English speech = no upload (27 Nov incident)
+    if os.environ.get("YT_REFRESH_TOKEN"):
+        from langcheck import english_windows
+        bad = english_windows(out / video.name, skip_start=10, skip_end=25)   # intro music / Subscribe outro
+        if bad:
+            where = ", ".join(f"{s // 60}:{s % 60:02d}" for s, _ in bad[:8])
+            update_row(row["id"], fail_reason=f"recheck_voice - Whisper heard English in the finished video at {where}")
+            raise RuntimeError(f"Not uploading: Whisper heard English in the finished video at {where}")
+        log.info("Whisper: the finished video is Tamil all the way through")
     log.info("== Upload ==")
     from youtube_upload import set_thumbnail
     from youtube_upload import upload as yt_upload

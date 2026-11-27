@@ -14,6 +14,28 @@ def load(path):
     return np.frombuffer(raw, np.int16).astype(np.float32) / 32768
 
 
+_MODEL = None
+
+
+def english_windows(path, win=5, threshold=0.5, skip_start=0, skip_end=0):
+    """Every stretch where Whisper hears English. 27 Nov: Leda read our English instructions aloud at 3:45-4:02;
+    Whisper flagged it at 76-90% while Gemini's own checks said 'all Tamil'. Returns [(start_sec, english_prob)]."""
+    global _MODEL
+    _MODEL = _MODEL or WhisperModel("small", device="cpu", compute_type="int8")
+    audio = load(str(path))
+    bad = []
+    total = len(audio) // 16000
+    for start in range(skip_start, max(1, total - 1 - skip_end), win):
+        seg = audio[start * 16000:(start + win) * 16000]
+        if len(seg) < 16000 * 2 or float(np.abs(seg).mean()) < 0.003:   # too short or silence/music only
+            continue
+        lang, prob, probs = _MODEL.detect_language(seg)
+        en = dict(probs).get("en", 0.0)
+        if lang == "en" and en >= threshold:   # top language English, clearly
+            bad.append((start, round(en, 2)))
+    return bad
+
+
 def windows_range(path, a, b, win, model):
     audio = load(path)
     out = []
