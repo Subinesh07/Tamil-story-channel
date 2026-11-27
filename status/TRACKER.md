@@ -2,7 +2,7 @@
 _Updated 2026-11-27 (every day automatically)_
 
 ## 💰 Monetisation goal (YouTube Partner Programme)
-- Subscribers: **12 / 1000**  `░░░░░░░░░░░░░░░░░░░░ 1.2%`
+- Subscribers: **14 / 1000**  `░░░░░░░░░░░░░░░░░░░░ 1.4%`
 - Watch hours: **23.8 / 4000**  `░░░░░░░░░░░░░░░░░░░░ 0.6%`  (YouTube counts long videos only; this includes Shorts)
 
 ## 🔁 Change
@@ -17,7 +17,7 @@ _Updated 2026-11-27 (every day automatically)_
 ## 📅 Day by day (latest first)
 | Date | YT subs | YT views that day | YT watch hrs (total) | FB followers | FB reel plays (total) |
 |---|---|---|---|---|---|
-| 2026-11-27 | 12 | 117 | 23.8 | 0 | 0 |
+| 2026-11-27 | 14 | 117 | 23.8 | 0 | 0 |
 | 2026-11-26 | 10 | 283 | 22.6 | 0 | 0 |
 
 ## 🧪 Did the 26 Nov changes work?
