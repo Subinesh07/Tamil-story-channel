@@ -32,10 +32,15 @@ jobs:
           YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
           YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
           FB_PAGE_TOKEN: ${{ secrets.FB_PAGE_TOKEN }}
+          CHECK_API_KEY: ${{ secrets.CHECK_API_KEY }}
+          CHECK_API_KEY_2: ${{ secrets.CHECK_API_KEY_2 }}
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+          VOICE_API_KEY: ${{ secrets.VOICE_API_KEY }}
+          VOICE_API_KEY_2: ${{ secrets.VOICE_API_KEY_2 }}
         run: |
           MODE="${{ github.event.inputs.mode }}"
           if [ "$MODE" = "backfill" ]; then python src/channel_tools.py backfill; fi
-          case "$MODE" in add:*) python src/channel_tools.py add "${MODE#add:}";; comment:*) python src/channel_tools.py comment "${MODE#comment:}";; stats:*) python src/channel_tools.py stats "${MODE#stats:}"; exit 0;; fixnext:*) python src/channel_tools.py fixnext "${MODE#fixnext:}"; exit 0;; setthumb:*) python src/channel_tools.py setthumb "${MODE#setthumb:}"; exit 0;; public:*) python src/channel_tools.py public "${MODE#public:}"; exit 0;; private:*) python src/channel_tools.py private "${MODE#private:}"; exit 0;; postponevid:*) A="${MODE#postponevid:}"; python src/channel_tools.py postponevid "${A%%@*}" "${A#*@}"; exit 0;; postpone:*) A="${MODE#postpone:}"; python src/channel_tools.py postpone "${A%%@*}" "${A#*@}"; exit 0;; esac
+          case "$MODE" in add:*) python src/channel_tools.py add "${MODE#add:}";; comment:*) python src/channel_tools.py comment "${MODE#comment:}";; stats:*) python src/channel_tools.py stats "${MODE#stats:}"; exit 0;; fixnext:*) python src/channel_tools.py fixnext "${MODE#fixnext:}"; exit 0;; setthumb:*) python src/channel_tools.py setthumb "${MODE#setthumb:}"; exit 0;; listen:*) A="${MODE#listen:}"; IFS=@ read -r R S E <<< "$A"; python src/listen.py "$R" "$S" "$E"; exit 0;; public:*) python src/channel_tools.py public "${MODE#public:}"; exit 0;; private:*) python src/channel_tools.py private "${MODE#private:}"; exit 0;; postponevid:*) A="${MODE#postponevid:}"; python src/channel_tools.py postponevid "${A%%@*}" "${A#*@}"; exit 0;; postpone:*) A="${MODE#postpone:}"; python src/channel_tools.py postpone "${A%%@*}" "${A#*@}"; exit 0;; esac
           python src/channel_tools.py
           python src/tracker.py || echo "tracker skipped"
       - name: Reminder before applying for monetization
