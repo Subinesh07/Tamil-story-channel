@@ -32,6 +32,7 @@ jobs:
           YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
           YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
           FB_PAGE_TOKEN: ${{ secrets.FB_PAGE_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
           CHECK_API_KEY: ${{ secrets.CHECK_API_KEY }}
           CHECK_API_KEY_2: ${{ secrets.CHECK_API_KEY_2 }}
           LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
