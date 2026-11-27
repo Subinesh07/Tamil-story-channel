@@ -34,7 +34,12 @@ def main():
     keys = [os.environ[k] for k in ("CHECK_API_KEY", "CHECK_API_KEY_2", "LLM_API_KEY", "VOICE_API_KEY_2",
                                     "VOICE_API_KEY") if os.environ.get(k)]
     subprocess.run(["gh", "release", "download", "videos", "-p", f"story_{rid}.mp4", "--clobber"], check=True)
-    subprocess.run(["ffmpeg", "-v", "error", "-y", "-ss", str(a), "-to", str(b), "-i", f"story_{rid}.mp4",
+    import shutil
+    ff = shutil.which("ffmpeg")
+    if not ff:
+        import imageio_ffmpeg
+        ff = imageio_ffmpeg.get_ffmpeg_exe()
+    subprocess.run([ff, "-v", "error", "-y", "-ss", str(a), "-to", str(b), "-i", f"story_{rid}.mp4",
                     "-vn", "-ac", "1", "-b:a", "64k", "clip.mp3"], check=True)
     print(f"TRANSCRIPT {a:.0f}s-{b:.0f}s:\n" + transcribe("clip.mp3", keys))
 
