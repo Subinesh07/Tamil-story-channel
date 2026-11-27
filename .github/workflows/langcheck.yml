@@ -1,0 +1,19 @@
+name: Language check (which language is spoken)
+on:
+  workflow_dispatch:
+    inputs:
+      file:
+        description: "Release asset to check, e.g. story_20.mp4"
+        required: true
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg && pip install -q faster-whisper numpy
+      - run: gh release download videos -p "${{ inputs.file }}" --clobber && python src/langcheck.py "${{ inputs.file }}" 20
+        env:
+          GH_TOKEN: ${{ github.token }}
