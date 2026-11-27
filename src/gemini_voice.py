@@ -267,11 +267,9 @@ def synthesize(sentences, cache_key):
                     key, model = keys.pop(0), None
             _pcm_to_wav(pcm, rate, wav)
             made += 1
-          try:
-              ok, why = verify_passage(wav, text, key)
-          except GeminiQuota as e:   # Gemini overloaded everywhere: keep Leda's passage unchecked (26 Nov)
-              log.warning("Leda: passage %d kept WITHOUT the listening check (%s)", k + 1, str(e)[:90])
-              ok, why = True, ""
+          # NEVER keep a passage unchecked: on 26 Nov an unchecked passage had Leda reading the English
+          # instructions aloud (Part 2, 3:40). If Gemini cannot listen, the video pauses and the next run retries.
+          ok, why = verify_passage(wav, text, key)
           if ok:
               checked.write_text("ok")
               log.info("Leda: passage %d passed the listening check", k + 1)

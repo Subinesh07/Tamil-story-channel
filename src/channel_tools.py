@@ -356,6 +356,13 @@ if __name__ == "__main__":
             k: sn[k] for k in ("title", "description", "categoryId", "tags", "defaultLanguage") if k in sn}}).execute()
         print("FIXED", row["video_id"], next_part_line(row))
         sys.exit(0)
+    if len(sys.argv) > 3 and sys.argv[1] == "postpone":   # move a scheduled (private) video to a later time
+        import csv
+        row = next(r for r in csv.DictReader(open(ROOT / "stories.csv", encoding="utf-8")) if r["id"] == sys.argv[2])
+        _yt().videos().update(part="status", body={"id": row["video_id"], "status": {
+            "privacyStatus": "private", "publishAt": sys.argv[3], "selfDeclaredMadeForKids": False}}).execute()
+        print("POSTPONED", row["video_id"], sys.argv[3])
+        sys.exit(0)
     if len(sys.argv) > 2 and sys.argv[1] == "setthumb":   # put assets/thumbs/row_<id>.jpg on that row's video
         import csv
         from googleapiclient.http import MediaFileUpload
