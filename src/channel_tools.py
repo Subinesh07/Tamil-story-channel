@@ -356,6 +356,15 @@ if __name__ == "__main__":
             k: sn[k] for k in ("title", "description", "categoryId", "tags", "defaultLanguage") if k in sn}}).execute()
         print("FIXED", row["video_id"], next_part_line(row))
         sys.exit(0)
+    if len(sys.argv) > 2 and sys.argv[1] == "setthumb":   # put assets/thumbs/row_<id>.jpg on that row's video
+        import csv
+        from googleapiclient.http import MediaFileUpload
+        rid = sys.argv[2]
+        row = next(r for r in csv.DictReader(open(ROOT / "stories.csv", encoding="utf-8")) if r["id"] == rid)
+        f = ROOT / "assets" / "thumbs" / f"row_{rid}.jpg"
+        _yt().thumbnails().set(videoId=row["video_id"], media_body=MediaFileUpload(str(f), mimetype="image/jpeg")).execute()
+        print("THUMB SET", row["video_id"], f.name)
+        sys.exit(0)
     if len(sys.argv) > 2 and sys.argv[1] == "stats":   # quick live numbers for given video ids
         for it in _yt().videos().list(part="statistics,snippet,contentDetails", id=sys.argv[2]).execute()["items"]:
             st = it["statistics"]
