@@ -22,10 +22,10 @@ One story a day (time varies by weekday) + Doomsday Sat/Sun 11 AM, IST. Updated 
 | 2026-11-29 | 16 | Doomsday: Day 4 - The Classified Bunker List | Doomsday: The Last 7 Days Part 4 | parked |  |
 | 2026-11-29 | 22 | Amma's House: Part 4 | Amma's House Part 4 | pending |  |
 | 2026-11-29 | 17 | The Sunken Lamp's Secret | Sea, Forest, Temple: The Palm-Leaf Trail Part 3 | parked |  |
-| 2026-11-29 | 13 | The Broken Bird and the Lost Mould | Malaichaaral Grandfather Stories Part 1 | pending |  |
+| 2026-11-29 | 13 | The Broken Bird and the Lost Mould | Malaichaaral Grandfather Stories Part 1 | done | [GVK5nfdhBBU](https://youtu.be/GVK5nfdhBBU) |
 | 2026-11-30 | 23 | Amma's House: The Grand Finale | Amma's House Part 5 | pending |  |
 | 2026-11-30 | 18 | The Palm-Leaf Trail - Part 4: The Shadow of the Temple Vault | Sea, Forest, Temple: The Palm-Leaf Trail Part 4 | parked |  |
 | 2026-12-01 | 24 | Betrayal in the Family: Iniya's Career at Stake | If The Shadow Becomes Real Part 4 | pending |  |
 | 2026-12-02 | 25 | If The Shadow Becomes Real - Part 5 | If The Shadow Becomes Real Part 5 | pending |  |
 
-Pending stories: **7** ⚠️ below 10, the Generate stories workflow will top this up.
+Pending stories: **6** ⚠️ below 10, the Generate stories workflow will top this up.
