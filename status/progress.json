@@ -339,12 +339,27 @@
    "voice": {
     "state": "done",
     "note": "Leda voice ready, listening check and click check passed",
-    "at": "2026-11-27T05:16:53+00:00"
+    "at": "2026-11-27T15:34:24+00:00"
    },
    "pictures": {
-    "state": "waiting",
-    "note": "all free picture allowances are used up for today",
-    "at": "2026-11-27T05:17:29+00:00"
+    "state": "done",
+    "note": "26 pictures, all real and different",
+    "at": "2026-11-27T15:37:24+00:00"
+   },
+   "video": {
+    "state": "done",
+    "note": "9.7 min, quality check passed",
+    "at": "2026-11-27T15:41:46+00:00"
+   },
+   "short": {
+    "state": "done",
+    "note": "Short bsMPzAf9FEI scheduled 30 min after the video",
+    "at": "2026-11-27T15:44:56+00:00"
+   },
+   "upload": {
+    "state": "done",
+    "note": "https://youtu.be/SrpwF8m5eqo scheduled 2026-11-28T11:00",
+    "at": "2026-11-27T15:46:19+00:00"
    }
   },
   "22": {
@@ -377,6 +392,18 @@
   }
  },
  "events": [
+  {
+   "at": "2026-11-27T15:46:19+00:00",
+   "row": "21",
+   "level": "info",
+   "msg": "Video scheduled on YouTube (SrpwF8m5eqo)"
+  },
+  {
+   "at": "2026-11-27T15:46:09+00:00",
+   "row": "",
+   "level": "info",
+   "msg": "Row 21: 1 extra Shorts scheduled (next afternoons, 1 PM)"
+  },
   {
    "at": "2026-11-27T15:19:50+00:00",
    "row": "13",
@@ -830,7 +857,7 @@
  ],
  "limits": {
   "cloudflare": {
-   "blocked_at": "2026-11-27T15:12:29+00:00",
+   "blocked_at": "2026-11-27T15:35:06+00:00",
    "worked_at": "2026-11-27T15:03:32+00:00",
    "note": "Cloudflare daily free allowance used up (HTTP 429: {\"errors\":[{\"message\":\"AiError: AiError: you have used up your daily free allocation of 10,000 neur",
    "last_reset_seen": "2026-11-27T13:18:36+00:00"
@@ -840,10 +867,10 @@
    "note": "Pollinations free allowance used up"
   },
   "leda": {
-   "worked_at": "2026-11-27T15:01:36+00:00"
+   "worked_at": "2026-11-27T15:34:08+00:00"
   },
   "cloudflare_2": {
-   "worked_at": "2026-11-27T15:12:38+00:00",
+   "worked_at": "2026-11-27T15:35:12+00:00",
    "blocked_at": "2026-11-27T05:17:28+00:00",
    "note": "Cloudflare daily free allowance used up (HTTP 429: {\"errors\":[{\"message\":\"AiError: AiError: you have used up your daily free allocation of 10,000 neur",
    "last_reset_seen": "2026-11-27T15:12:38+00:00"
@@ -956,6 +983,17 @@
     "Maganukku paadam karpippanga"
    ],
    "at": "2026-11-27T14:48:15+00:00"
+  },
+  "21": {
+   "post": "🏠 அம்மாவின் வீடு - பகுதி 3\n\nகாமாகுமாரி அம்மாவுக்கு வக்கீல் சொன்ன அந்த அதிர்ச்சி உண்மை என்ன?\nவீட்டு பத்திரத்தை வாங்குன சுந்தர் அடுத்து என்ன பண்ண போறான்?\nவக்கீல் சொன்ன அந்த ரகசியம் கதையை எப்படி திருப்ப போகுது?\n\n▶️ https://youtu.be/SrpwF8m5eqo\n⏰ காலை 11 மணிக்கு – நிலா கதைகள்\n#நிலாகதைகள் #TamilStory",
+   "poll": "🗳️ இந்த கதையில யாரு மேல உங்களுக்கு அதிக சந்தேகம் இருக்கு?",
+   "options": [
+    "சுந்தர் மேல",
+    "மருமகள் மேல",
+    "வக்கீல் மேல",
+    "காமாகுமாரி அம்மா மேல"
+   ],
+   "at": "2026-11-27T15:46:18+00:00"
   }
  }
 }

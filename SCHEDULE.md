@@ -17,7 +17,7 @@ One story a day (time varies by weekday) + Doomsday Sat/Sun 11 AM, IST. Updated 
 | 2026-11-26 | 19 | Amma's House: Part 1 - The Hidden Betrayal | Amma's House Part 1 | done | [Zl3uoVDovj4](https://youtu.be/Zl3uoVDovj4) |
 | 2026-11-27 | 20 | Amma's House: Part 2 | Amma's House Part 2 | done | [VbIdo7nTar0](https://youtu.be/VbIdo7nTar0) |
 | 2026-11-28 | 15 | Doomsday Part 3: The Secret They Hide | Doomsday: The Last 7 Days Part 3 | parked |  |
-| 2026-11-28 | 21 | Amma's House Part 3 | Amma's House Part 3 | pending |  |
+| 2026-11-28 | 21 | Amma's House Part 3 | Amma's House Part 3 | done | [SrpwF8m5eqo](https://youtu.be/SrpwF8m5eqo) |
 | 2026-11-28 | 14 | If The Shadow Becomes Real: Part 3 | If The Shadow Becomes Real Part 3 | pending |  |
 | 2026-11-29 | 16 | Doomsday: Day 4 - The Classified Bunker List | Doomsday: The Last 7 Days Part 4 | parked |  |
 | 2026-11-29 | 22 | Amma's House: Part 4 | Amma's House Part 4 | pending |  |
@@ -28,4 +28,4 @@ One story a day (time varies by weekday) + Doomsday Sat/Sun 11 AM, IST. Updated 
 | 2026-12-01 | 24 | Betrayal in the Family: Iniya's Career at Stake | If The Shadow Becomes Real Part 4 | pending |  |
 | 2026-12-02 | 25 | If The Shadow Becomes Real - Part 5 | If The Shadow Becomes Real Part 5 | pending |  |
 
-Pending stories: **6** ⚠️ below 10, the Generate stories workflow will top this up.
+Pending stories: **5** ⚠️ below 10, the Generate stories workflow will top this up.
