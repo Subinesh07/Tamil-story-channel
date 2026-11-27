@@ -46,6 +46,67 @@ def _listen_models(key):
     return [n for n in names if "lite" not in n] + [n for n in names if "lite" in n]
 
 
+def _transcribe(mp3, key):
+    b64 = base64.b64encode(mp3.read_bytes()).decode()
+    prompt = ("Transcribe EXACTLY what is spoken, word for word, in the language spoken (Tamil in Tamil letters, "
+              "English in English letters). Do not translate, summarise or correct. Return only the transcript.")
+    keys = [key] + [os.environ[k] for k in ("CHECK_API_KEY", "CHECK_API_KEY_2", "LLM_API_KEY", "VOICE_API_KEY_2",
+                                             "VOICE_API_KEY") if os.environ.get(k) and os.environ[k] != key]
+    last = ""
+    for k in dict.fromkeys(keys):
+        for model in ("gemini-3.5-flash", "gemini-3-flash", "gemini-2.5-flash"):
+            r = requests.post(f"{API}/{model}:generateContent", headers={"x-goog-api-key": k}, timeout=300,
+                              json={"contents": [{"parts": [{"inline_data": {"mime_type": "audio/mp3", "data": b64}},
+                                                            {"text": prompt}]}]})
+            if r.status_code == 200:
+                try:
+                    return r.json()["candidates"][0]["content"]["parts"][0]["text"]
+                except (KeyError, IndexError):
+                    last = f"{model} empty answer"
+                    continue
+            last = f"{model} HTTP {r.status_code}"
+    raise GeminiQuota(f"word-by-word check could not run ({last}); will retry next run")
+
+
+def transcript_check(wav, text, key):
+    """27 Nov: the yes/no listening check passed a passage where Leda spoke English (and the voice went out of
+    sync). This check writes the audio out word by word in 60-second pieces and compares it with the script
+    using plain code: any run of 4+ English words that are not in the script, or a transcript much longer
+    or shorter than the script, fails the passage. Returns (ok, reason)."""
+    import difflib
+    tmp = wav.with_suffix("")
+    total = wave.open(str(wav)).getnframes() / wave.open(str(wav)).getframerate()
+    heard = []
+    for k, start in enumerate(range(0, int(total) + 1, 60)):
+        piece = tmp.with_name(f"{tmp.name}.t{k}.mp3")
+        subprocess.run(["ffmpeg", "-v", "error", "-y", "-ss", str(start), "-t", "61", "-i", str(wav), "-ac", "1",
+                        "-ar", "16000", "-b:a", "32k", str(piece)], check=True)
+        try:
+            heard.append(_transcribe(piece, key))
+        finally:
+            piece.unlink(missing_ok=True)
+    said = " ".join(heard)
+    script_latin = {w.lower() for w in re.findall(r"[A-Za-z']+", text)}
+    run, worst = [], []
+    for w in re.findall(r"[A-Za-z']+|[^\sA-Za-z']+", said):
+        if re.fullmatch(r"[A-Za-z']+", w) and w.lower() not in script_latin:
+            run.append(w)
+            worst = run if len(run) > len(worst) else worst
+        elif not re.fullmatch(r"[\W\d_]+", w):
+            run = []
+    if len(worst) >= 4:
+        return False, "English not in the script was spoken: " + " ".join(worst[:12])
+    norm = lambda x: re.sub(r"[\W\d_]+", "", x)
+    a, b = norm(text), norm(said)
+    ratio = len(b) / max(1, len(a))
+    if ratio > 1.25 or ratio < 0.75:
+        return False, f"spoken text is {ratio:.0%} of the script length (lines added or skipped)"
+    sim = difflib.SequenceMatcher(None, a, b, autojunk=False).ratio()
+    if sim < 0.6:
+        return False, f"spoken words match the script only {sim:.0%}"
+    return True, ""
+
+
 def verify_passage(wav, text, key):
     """Gemini listens to the voiced passage. Returns (ok, reason).
     Catches Leda switching to English, reading the instructions aloud, skipping or adding lines."""
@@ -274,6 +335,10 @@ def synthesize(sentences, cache_key):
           # NEVER keep a passage unchecked: on 26 Nov an unchecked passage had Leda reading the English
           # instructions aloud (Part 2, 3:40). If Gemini cannot listen, the video pauses and the next run retries.
           ok, why = verify_passage(wav, text, key)
+          if ok:   # second, stricter check by plain code on a word-by-word transcript
+              ok, why = transcript_check(wav, text, key)
+              if not ok:
+                  log.warning("Leda: passage %d failed the word-by-word check: %s", k + 1, why)
           if ok:
               checked.write_text("ok")
               log.info("Leda: passage %d passed the listening check", k + 1)

@@ -40,3 +40,15 @@ now stops it. Newest first. Keep adding to this file whenever something new goes
 4. Video: no clicks or clipping in the audio (click check), duration in range, subtitles match sentences, audio/video in sync, H.264/AAC format, Tamil letters render.
 5. Upload: not already on YouTube (same title); a remake waits until the old video is deleted.
 6. Thumbnail: curiosity layout with picture (story picture if the allowance is out).
+
+## 28. Leda spoke English / voice out of sync with subtitles (27 Nov 2026)
+**What happened:** Part 2 of "Amma's House" went live with Leda speaking English in one stretch, which pushed
+the voice out of sync with the subtitles. Two other videos had passages saved the same way.
+**Why:** on 26 Nov, to beat a Gemini overload, the voice step was changed to KEEP a passage without checking it
+when Gemini could not listen. Overnight Gemini was only rate-limited (429), so passages were kept unchecked.
+On top of that, the yes/no listening check is not reliable on 3–4 minute passages.
+**Fix:** (1) a passage is never kept unchecked again - if Gemini cannot listen, the video pauses;
+(2) a second check: Gemini writes the passage out word by word in 60-second pieces and plain code compares it
+with the script (4+ English words not in the script, or the length off by more than 25%, or under 60% match = re-voice);
+(3) affected videos were hidden/deleted and remade after re-listening (`recheck_voice` in the row's fail_reason);
+(4) new analytics modes: `private:`, `public:`, `postpone:`, `postponevid:`, `setthumb:`, `clip:`/`listen:` (transcribe audio).
