@@ -14,6 +14,17 @@ def load(path):
     return np.frombuffer(raw, np.int16).astype(np.float32) / 32768
 
 
+def windows_range(path, a, b, win, model):
+    audio = load(path)
+    out = []
+    t = a
+    while t + win <= b:
+        lang, prob, probs = model.detect_language(audio[int(t * 16000):int((t + win) * 16000)])
+        out.append((t, lang, prob, dict(probs).get("en", 0.0)))
+        t += win
+    return out
+
+
 def windows(path, win=20, model=None):
     model = model or WhisperModel("small", device="cpu", compute_type="int8")
     audio = load(path)
@@ -28,7 +39,23 @@ def windows(path, win=20, model=None):
     return out
 
 
+def words(path, a, b, model=None):
+    """What Whisper hears between a and b seconds, in the language it detects (no translation)."""
+    model = model or WhisperModel("small", device="cpu", compute_type="int8")
+    audio = load(path)[int(a * 16000):int(b * 16000)]
+    segs, info = model.transcribe(audio, task="transcribe", vad_filter=False)
+    return [(a + s.start, a + s.end, s.text.strip()) for s in segs]
+
+
 if __name__ == "__main__":
+    if len(sys.argv) > 3:   # zoom: python langcheck.py file start end
+        f, a, b = sys.argv[1], float(sys.argv[2]), float(sys.argv[3])
+        m = WhisperModel("small", device="cpu", compute_type="int8")
+        for start, lang, prob, en in windows_range(f, a, b, 5, m):
+            print(f"ZOOM {int(start) // 60}:{int(start) % 60:02d}  {lang} {prob:.2f} (english {en:.2f})")
+        for s0, s1, t in words(f, a, b, m):
+            print(f"HEARD {int(s0) // 60}:{int(s0) % 60:02d}-{int(s1) // 60}:{int(s1) % 60:02d}  {t}")
+        sys.exit(0)
     win = int(sys.argv[2]) if len(sys.argv) > 2 else 20
     for start, lang, prob, en in windows(sys.argv[1], win):
         flag = "  <<< ENGLISH" if lang == "en" or en > 0.3 else ""
