@@ -47,6 +47,54 @@ def youtube():
     return out
 
 
+def studio_numbers():
+    """The Studio numbers that matter, for the status page (status/analytics.json)."""
+    import re
+    from google.oauth2.credentials import Credentials
+    from googleapiclient.discovery import build
+    creds = Credentials(None, refresh_token=os.environ["YT_REFRESH_TOKEN"].strip(),
+                        client_id=os.environ["YT_CLIENT_ID"].strip(),
+                        client_secret=os.environ["YT_CLIENT_SECRET"].strip(),
+                        token_uri="https://oauth2.googleapis.com/token")
+    yt = build("youtube", "v3", credentials=creds, cache_discovery=False)
+    ya = build("youtubeAnalytics", "v2", credentials=creds, cache_discovery=False)
+    end = date.today()
+
+    def q(start, **k):
+        return ya.reports().query(ids="channel==MINE", startDate=str(start), endDate=str(end), **k).execute()
+    out = {"updated": str(end)}
+    d = q(end - timedelta(days=30), dimensions="day",
+          metrics="views,estimatedMinutesWatched,averageViewDuration,subscribersGained").get("rows", [])
+    out["daily"] = [{"date": r[0], "views": int(r[1]), "watch_min": int(r[2]), "avg_sec": int(r[3]),
+                     "subs": int(r[4])} for r in d]
+    v = q(date(2026, 1, 1), dimensions="video", sort="-views", maxResults=60,
+          metrics="views,averageViewDuration,averageViewPercentage,subscribersGained,likes,comments").get("rows", [])
+    info = {}
+    ids = [r[0] for r in v]
+    for k in range(0, len(ids), 50):
+        for it in yt.videos().list(part="snippet,contentDetails", id=",".join(ids[k:k + 50])).execute().get("items", []):
+            m = re.match(r"PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?", it["contentDetails"]["duration"])
+            secs = sum(int(x or 0) * f for x, f in zip(m.groups(), (3600, 60, 1)))
+            info[it["id"]] = (it["snippet"]["title"], it["snippet"]["publishedAt"][:10], secs)
+    out["videos"] = sorted([{"id": r[0], "title": info.get(r[0], ("", "", 0))[0], "published": info.get(r[0], ("", "", 0))[1],
+                             "length_sec": info.get(r[0], ("", "", 0))[2], "views": int(r[1]), "avg_sec": int(r[2]),
+                             "pct": round(float(r[3]), 1), "subs": int(r[4]), "likes": int(r[5]), "comments": int(r[6])}
+                            for r in v if r[0] in info], key=lambda x: x["published"], reverse=True)
+    t = q(end - timedelta(days=28), dimensions="insightTrafficSourceType", metrics="views,averageViewDuration").get("rows", [])
+    out["traffic"] = [{"source": r[0], "views": int(r[1]), "avg_sec": int(r[2])} for r in sorted(t, key=lambda r: -r[1])]
+    try:
+        a = q(end - timedelta(days=90), dimensions="ageGroup,gender", metrics="viewerPercentage").get("rows", [])
+        out["audience"] = [{"age": r[0], "gender": r[1], "pct": round(float(r[2]), 1)} for r in a]
+    except Exception as e:
+        log.info("Audience numbers unavailable: %s", str(e)[:80])
+    try:
+        out["retention"] = json.loads((STATUS / "retention.json").read_text())
+    except Exception:
+        pass
+    (STATUS / "analytics.json").write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
+    return {}
+
+
 def facebook():
     tok = os.environ.get("FB_PAGE_TOKEN", "").strip()
     if not tok:
@@ -82,7 +130,7 @@ def main():
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
     STATUS.mkdir(exist_ok=True)
     row = {"date": str(date.today())}
-    for name, fn in (("YouTube", youtube), ("Facebook", facebook)):
+    for name, fn in (("YouTube", youtube), ("Facebook", facebook), ("Studio page", studio_numbers)):
         try:
             row.update(fn())
         except Exception as e:
