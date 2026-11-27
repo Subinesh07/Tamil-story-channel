@@ -364,9 +364,12 @@ if __name__ == "__main__":
         sys.exit(0)
     if len(sys.argv) > 2 and sys.argv[1] == "private":   # hide videos (comma list) - nothing is deleted
         for vid in sys.argv[2].split(","):
-            _yt().videos().update(part="status", body={"id": vid, "status": {
-                "privacyStatus": "private", "selfDeclaredMadeForKids": False}}).execute()
-            print("PRIVATE", vid)
+            try:
+                _yt().videos().update(part="status", body={"id": vid, "status": {
+                    "privacyStatus": "private", "selfDeclaredMadeForKids": False}}).execute()
+                print("PRIVATE", vid)
+            except Exception as e:
+                print("SKIP", vid, "(already deleted)" if "404" in str(e) else str(e)[:100])
         sys.exit(0)
     if len(sys.argv) > 3 and sys.argv[1] == "postponevid":
         _yt().videos().update(part="status", body={"id": sys.argv[2], "status": {
