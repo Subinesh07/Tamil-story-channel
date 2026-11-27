@@ -30,6 +30,11 @@ def transcribe(audio_mp3, keys):
 
 
 def main():
+    keys = [os.environ[k] for k in ("CHECK_API_KEY", "CHECK_API_KEY_2", "LLM_API_KEY", "VOICE_API_KEY_2",
+                                    "VOICE_API_KEY") if os.environ.get(k)]
+    if sys.argv[1].endswith(".mp3"):   # a clip already cut
+        print("TRANSCRIPT " + sys.argv[1] + ":\n" + transcribe(sys.argv[1], keys))
+        return
     rid, a, b = sys.argv[1], float(sys.argv[2]), float(sys.argv[3])
     keys = [os.environ[k] for k in ("CHECK_API_KEY", "CHECK_API_KEY_2", "LLM_API_KEY", "VOICE_API_KEY_2",
                                     "VOICE_API_KEY") if os.environ.get(k)]
