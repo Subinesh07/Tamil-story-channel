@@ -74,7 +74,9 @@ def produce(row, upload=True, check_duration=True):
         title = f"{title}, பகுதி {part}"
     n = int(rid) if rid.isdigit() else 0
     from engage import FICTION_LINE
-    intro = split_sentences(INTRO_LINES[n % len(INTRO_LINES)].format(title=title)) + [FICTION_LINE]
+    # 28 Nov 2026: no spoken title card / "இது ஒரு கற்பனை கதை" before the story - viewers decide in the first
+    # seconds; the story's own hook now opens the video. The fiction line moves to the end (and the description).
+    intro = []
     from strategy import load as load_strategy
     outro_pool = OUTRO_LINES
     if load_strategy().get("engagement_push"):
@@ -100,7 +102,7 @@ def produce(row, upload=True, check_duration=True):
         except Exception as e:
             log.warning("Engagement lines skipped: %s", str(e)[:150])
             end = []
-    outro = end + outro
+    outro = [FICTION_LINE] + end + outro
     sentences = intro + story + outro
     log.info("Row %s '%s': %d story sentences (+%d intro, +%d outro), %d prompts", rid,
              row["title_en"], len(story), len(intro), len(outro), len(prompts))

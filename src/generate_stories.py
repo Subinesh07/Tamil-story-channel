@@ -196,11 +196,21 @@ def write_part(plan, part, previous_text="", final_note=None, parts=PARTS, part_
     chars = "\n".join(f"- {c['name']}: {c['role']}, {c.get('age', '')}" for c in plan["characters"])
     beat_text = "\n".join(f"{i + 1}. {b['summary_en']} ({b['emotion']})" for i, b in enumerate(chunk))
     lesson = retention_lesson()
-    context = (lesson + "COLD OPEN: begin with 3-4 short gripping lines from the most dramatic moment of THIS episode "
-               "(a flash-forward, present tense, no names explained yet), then one bridge line such as "
-               "'இதெல்லாம் எப்படி ஆரம்பிச்சது? கொஞ்சம் பின்னாடி போவோம்…', then tell the story from its start."
+    # 28 Nov 2026 research (whole channel): half the viewers left between 12 and 40 seconds - right where the old
+    # bridge line "இதெல்லாம் எப்படி ஆரம்பிச்சது? கொஞ்சம் பின்னாடி போவோம்" sent the story backwards into slow backstory.
+    keep = ("KEEP THEM WATCHING (viewers are mostly Tamil grandmothers watching on a phone): about every 15 sentences end "
+            "a moment on a small cliffhanger (a secret, a knock at the door, a paper nobody has read yet). Once in the "
+            "middle, the narrator asks the viewer one warm, relatable question, e.g. 'உங்க வீட்டுலயும் இப்படி "
+            "நடந்திருக்கா?'. Short sentences, clear who is speaking, no English words. ")
+    context = (lesson + keep + "OPENING (first 30 seconds decide everything): sentence 1 names the hero and her pain in "
+               "plain words a grandmother instantly understands (e.g. '63 வயசு காமாட்சி அம்மாவை, சொந்த மகனே வீட்டை "
+               "விட்டு வெளியே அனுப்ப நினைச்சான்.'). Then 2-3 gripping lines from the most dramatic moment of THIS "
+               "episode. Then ONE promise line that keeps them till the end, e.g. 'ஆனா கடைசில நடந்த திருப்பத்தை "
+               "யாருமே எதிர்பார்க்கல… கடைசி வரை பாருங்க.' NEVER say 'கொஞ்சம் பின்னாடி போவோம்' or 'இதெல்லாம் எப்படி "
+               "ஆரம்பிச்சது'. After the promise, continue forward with tension; give backstory only in one or two "
+               "sentences when it is needed."
                if part == 0 else
-               "The story so far ends like this; continue seamlessly from it:\n" + previous_text[-1200:])
+               keep + "The story so far ends like this; continue seamlessly from it:\n" + previous_text[-1200:])
     last = part == PARTS - 1
     ending = ((final_note or "Finish the story with these beats and give it a satisfying, complete ending.")
               if last else "Stop at the end of these beats, mid-story; do not conclude.")
