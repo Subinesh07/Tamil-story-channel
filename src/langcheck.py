@@ -21,7 +21,7 @@ def english_windows(path, win=5, threshold=0.5, skip_start=0, skip_end=0):
     """Every stretch where Whisper hears English. 27 Nov: Leda read our English instructions aloud at 3:45-4:02;
     Whisper flagged it at 76-90% while Gemini's own checks said 'all Tamil'. Returns [(start_sec, english_prob)]."""
     global _MODEL
-    _MODEL = _MODEL or WhisperModel("small", device="cpu", compute_type="int8")
+    _MODEL = _MODEL or WhisperModel("small", device="cpu", compute_type="int8", cpu_threads=4)
     audio = load(str(path))
     bad = []
     total = len(audio) // 16000
@@ -39,18 +39,18 @@ def english_windows(path, win=5, threshold=0.5, skip_start=0, skip_end=0):
 EN_WORDS = ("story", "teller", "tamil", "warm", "storyteller", "narrat", "speak", "like a")
 
 
-def english_strict(path, skip_start=0, skip_end=0):
+def english_strict(path, skip_start=0, skip_end=0, windows=True):
     """28 Nov 2026: 'Tamil storyteller' (about 1 second) inside Tamil speech slipped past the 5-second check.
     Two extra listens: (a) 2-second steps, 1 second apart, flag English at a lower bar; (b) Whisper writes down
     what it hears and any English word in Latin letters (or the words of our old instructions) fails the passage."""
     import re as _re
     global _MODEL
-    _MODEL = _MODEL or WhisperModel("small", device="cpu", compute_type="int8")
+    _MODEL = _MODEL or WhisperModel("small", device="cpu", compute_type="int8", cpu_threads=4)
     audio = load(str(path))
     total = len(audio) / 16000
     bad, hits = [], []
     t = float(skip_start)
-    while t + 2 <= total - skip_end:
+    while windows and t + 2 <= total - skip_end:
         seg = audio[int(t * 16000):int((t + 2) * 16000)]
         if float(np.abs(seg).mean()) >= 0.003:
             lang, prob, probs = _MODEL.detect_language(seg)
@@ -62,7 +62,8 @@ def english_strict(path, skip_start=0, skip_end=0):
     bad += [(h, 0.9) for h in hits if h + 1 in hits]
     a = int(skip_start * 16000)
     b = int((total - skip_end) * 16000)
-    segs, _ = _MODEL.transcribe(audio[a:b], task="transcribe", vad_filter=False)
+    segs, _ = _MODEL.transcribe(audio[a:b], task="transcribe", vad_filter=False, beam_size=1,
+                                condition_on_previous_text=False)
     for sg in segs:
         txt = sg.text.lower()
         latin = _re.findall(r"[a-z]{3,}", txt)
@@ -83,7 +84,7 @@ def windows_range(path, a, b, win, model):
 
 
 def windows(path, win=20, model=None):
-    model = model or WhisperModel("small", device="cpu", compute_type="int8")
+    model = model or WhisperModel("small", device="cpu", compute_type="int8", cpu_threads=4)
     audio = load(path)
     out = []
     for start in range(0, len(audio) // 16000, win):
@@ -98,7 +99,7 @@ def windows(path, win=20, model=None):
 
 def words(path, a, b, model=None):
     """What Whisper hears between a and b seconds, in the language it detects (no translation)."""
-    model = model or WhisperModel("small", device="cpu", compute_type="int8")
+    model = model or WhisperModel("small", device="cpu", compute_type="int8", cpu_threads=4)
     audio = load(path)[int(a * 16000):int(b * 16000)]
     segs, info = model.transcribe(audio, task="transcribe", vad_filter=False)
     return [(a + s.start, a + s.end, s.text.strip()) for s in segs]
@@ -107,7 +108,7 @@ def words(path, a, b, model=None):
 if __name__ == "__main__":
     if len(sys.argv) > 3:   # zoom: python langcheck.py file start end
         f, a, b = sys.argv[1], float(sys.argv[2]), float(sys.argv[3])
-        m = WhisperModel("small", device="cpu", compute_type="int8")
+        m = WhisperModel("small", device="cpu", compute_type="int8", cpu_threads=4)
         for start, lang, prob, en in windows_range(f, a, b, 5, m):
             print(f"ZOOM {int(start) // 60}:{int(start) % 60:02d}  {lang} {prob:.2f} (english {en:.2f})")
         for s0, s1, t in words(f, a, b, m):

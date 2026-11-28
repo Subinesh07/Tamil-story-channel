@@ -348,7 +348,7 @@ def synthesize(sentences, cache_key):
               except Exception as e:   # never skip: no Whisper = pause, the next run retries
                   raise GeminiQuota(f"Whisper language check unavailable ({str(e)[:80]}); will retry next run")
               from langcheck import english_strict
-              bad = english_windows(wav) + english_strict(wav)
+              bad = english_windows(wav) + english_strict(wav, windows=False)
               if bad:
                   ok, why = False, "Whisper heard English at " + ", ".join(f"{s // 60}:{s % 60:02d}" for s, _ in bad[:6])
                   log.warning("Leda: passage %d: %s", k + 1, why)
