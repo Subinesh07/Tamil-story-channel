@@ -9,13 +9,13 @@
   },
   "trending_themes": [
     "பயங்கரம்",
-    "இரவு",
-    "தனுஷ்கோடியில்",
-    "கடல்",
-    "காட்டேரிகள்",
     "லாரி",
     "டிரைவர்களை",
-    "வேட்டையாடும்"
+    "வேட்டையாடும்",
+    "ஆவியின்",
+    "உயிரை",
+    "நடுங்க",
+    "வைக்கும்"
   ],
   "engagement_push": false,
   "history": [
@@ -57,6 +57,12 @@
       "date": "2026-11-25",
       "changes": [
         "Everything is on track: no changes needed this week."
+      ]
+    },
+    {
+      "date": "2026-11-28",
+      "changes": [
+        "Story writer will lean towards these popular themes (ideas only): பயங்கரம், லாரி, டிரைவர்களை, வேட்டையாடும், ஆவியின், உயிரை, நடுங்க, வைக்கும்"
       ]
     }
   ]
