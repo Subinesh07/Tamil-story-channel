@@ -396,17 +396,27 @@
    "voice": {
     "state": "done",
     "note": "Leda voice ready, listening check and click check passed",
-    "at": "2026-11-28T15:47:42+00:00"
+    "at": "2026-11-28T18:57:53+00:00"
    },
    "pictures": {
     "state": "done",
-    "note": "28 pictures, all real and different",
-    "at": "2026-11-28T15:57:20+00:00"
+    "note": "30 pictures, all real and different",
+    "at": "2026-11-28T19:03:25+00:00"
    },
    "video": {
     "state": "done",
     "note": "9.4 min, quality check passed",
-    "at": "2026-11-28T16:00:50+00:00"
+    "at": "2026-11-28T19:08:51+00:00"
+   },
+   "short": {
+    "state": "done",
+    "note": "Short oDJ4sAqXN10 scheduled 30 min after the video",
+    "at": "2026-11-28T19:59:27+00:00"
+   },
+   "upload": {
+    "state": "done",
+    "note": "https://youtu.be/xln37CPu7U4 scheduled 2026-11-29T11:00",
+    "at": "2026-11-28T20:02:36+00:00"
    }
   },
   "23": {
@@ -465,6 +475,18 @@
   }
  },
  "events": [
+  {
+   "at": "2026-11-28T20:02:36+00:00",
+   "row": "22",
+   "level": "info",
+   "msg": "Video scheduled on YouTube (xln37CPu7U4)"
+  },
+  {
+   "at": "2026-11-28T20:02:28+00:00",
+   "row": "",
+   "level": "info",
+   "msg": "Row 22: 1 extra Shorts scheduled (next afternoons, 1 PM)"
+  },
   {
    "at": "2026-11-28T17:08:14+00:00",
    "row": "23",
@@ -932,24 +954,12 @@
    "row": "8",
    "level": "warn",
    "msg": "Paused: all free picture allowances are used up for today"
-  },
-  {
-   "at": "2026-11-21T22:38:02+00:00",
-   "row": "16",
-   "level": "info",
-   "msg": "Story written: டூம்ஸ்டே 😱 இன்னும் 3 நாள்ல உலகம் அழியப்போகுது! அந்த ரகசிய லிஸ்ட்ல நம்ம பேரு… | ட"
-  },
-  {
-   "at": "2026-11-21T20:44:42+00:00",
-   "row": "8",
-   "level": "warn",
-   "msg": "Paused: all free picture allowances are used up for today"
   }
  ],
  "limits": {
   "cloudflare": {
    "blocked_at": "2026-11-27T23:53:37+00:00",
-   "worked_at": "2026-11-28T15:55:28+00:00",
+   "worked_at": "2026-11-28T19:00:53+00:00",
    "note": "Cloudflare daily free allowance used up (HTTP 429: {\"errors\":[{\"message\":\"AiError: AiError: you have used up your daily free allocation of 10,000 neur",
    "last_reset_seen": "2026-11-28T15:55:28+00:00"
   },
@@ -958,7 +968,7 @@
    "note": "Pollinations free allowance used up"
   },
   "leda": {
-   "worked_at": "2026-11-28T15:47:31+00:00"
+   "worked_at": "2026-11-28T18:57:37+00:00"
   },
   "cloudflare_2": {
    "worked_at": "2026-11-27T23:53:41+00:00",
@@ -1096,6 +1106,17 @@
     "அடுத்த பார்ட்க்கு வெயிட்டிங்!"
    ],
    "at": "2026-11-28T00:04:00+00:00"
+  },
+  "22": {
+   "post": "🏠 அம்மாவின் வீடு - பகுதி 4\n\nAmma-va veliyethittu veetta vikka mudiyuma? Inaikku enna aachu theriyuma?\nAmma-va veliyethuna paavam summa viduma? Lawyer vandhu enna sonnaaru-nu paarunga!\n\n▶️ https://youtu.be/xln37CPu7U4\n⏰ காலை 11 மணிக்கு – நிலா கதைகள்\n#நிலாகதைகள் #TamilStory",
+   "poll": "🗳️ Amma-ku ippadi oru nelaimai vandha neenga enna pannuvinga?",
+   "options": [
+    "Sanda pottu thaduppen",
+    "Lawyer kitta poven",
+    "Amma-va kootitu poven",
+    "Police-ku call pannuven"
+   ],
+   "at": "2026-11-28T20:02:34+00:00"
   }
  }
 }
