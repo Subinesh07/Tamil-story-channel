@@ -59,7 +59,17 @@ def english_strict(path, skip_start=0, skip_end=0, windows=True):
                 hits.append(int(t))
         t += 1.0
     # English loanwords written in Tamil (ப்ளீஸ், ஸ்டோர் ரூம்) are fine: need 2 English windows in a row
-    bad += [(h, 0.9) for h in hits if h + 1 in hits]
+    # 28 Nov: Tamil-script loanwords in a row ("பயர், டாக்குமெண்ட் சைன் பண்ண ரெஜிஸ்டர்") also trip 2 windows.
+    # So each pair is confirmed: Whisper writes down those 4 seconds; a real English slip comes out in Latin letters.
+    for h in hits:
+        if h + 1 not in hits:
+            continue
+        seg = audio[int(max(0, h - 1) * 16000):int((h + 3) * 16000)]
+        sgs, _ = _MODEL.transcribe(seg, task="transcribe", vad_filter=False, beam_size=1,
+                                   condition_on_previous_text=False)
+        txt = " ".join(x.text for x in sgs).lower()
+        if len(_re.findall(r"[a-z]{2,}", txt)) >= 2 or any(e in txt for e in EN_WORDS):
+            bad.append((h, 0.9))
     a = int(skip_start * 16000)
     b = int((total - skip_end) * 16000)
     segs, _ = _MODEL.transcribe(audio[a:b], task="transcribe", vad_filter=False, beam_size=1,

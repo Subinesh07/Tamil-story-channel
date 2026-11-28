@@ -204,7 +204,9 @@ def write_part(plan, part, previous_text="", final_note=None, parts=PARTS, part_
             "நடந்திருக்கா?'. Short sentences, clear who is speaking, no English words. "
             "Mix sentence lengths: very short lines in tense moments, slightly longer, gentle lines in emotional ones. "
             "Put '…' just before every reveal or shock so the narrator pauses (e.g. 'அந்த பேப்பர்ல இருந்தது… அவங்க "
-            "கையெழுத்து!'). ")
+            "கையெழுத்து!'). "
+            "Use Tamil words, never two English loanwords in a row (write 'பத்திரத்துல கையெழுத்து போட பதிவு "
+            "அலுவலகத்துக்கு', not 'டாக்குமெண்ட் சைன் பண்ண ரெஜிஸ்டர் ஆபீஸ்க்கு'). ")
     context = (lesson + keep + "OPENING (first 30 seconds decide everything): sentence 1 names the hero and her pain in "
                "plain words a grandmother instantly understands (e.g. '63 வயசு காமாட்சி அம்மாவை, சொந்த மகனே வீட்டை "
                "விட்டு வெளியே அனுப்ப நினைச்சான்.'). Then 2-3 gripping lines from the most dramatic moment of THIS "
