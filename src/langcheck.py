@@ -36,6 +36,41 @@ def english_windows(path, win=5, threshold=0.5, skip_start=0, skip_end=0):
     return bad
 
 
+EN_WORDS = ("story", "teller", "tamil", "warm", "storyteller", "narrat", "speak", "like a")
+
+
+def english_strict(path, skip_start=0, skip_end=0):
+    """28 Nov 2026: 'Tamil storyteller' (about 1 second) inside Tamil speech slipped past the 5-second check.
+    Two extra listens: (a) 2-second steps, 1 second apart, flag English at a lower bar; (b) Whisper writes down
+    what it hears and any English word in Latin letters (or the words of our old instructions) fails the passage."""
+    import re as _re
+    global _MODEL
+    _MODEL = _MODEL or WhisperModel("small", device="cpu", compute_type="int8")
+    audio = load(str(path))
+    total = len(audio) / 16000
+    bad, hits = [], []
+    t = float(skip_start)
+    while t + 2 <= total - skip_end:
+        seg = audio[int(t * 16000):int((t + 2) * 16000)]
+        if float(np.abs(seg).mean()) >= 0.003:
+            lang, prob, probs = _MODEL.detect_language(seg)
+            en = dict(probs).get("en", 0.0)
+            if (lang == "en" and en >= 0.4) or en >= 0.6:
+                hits.append(int(t))
+        t += 1.0
+    # English loanwords written in Tamil (ப்ளீஸ், ஸ்டோர் ரூம்) are fine: need 2 English windows in a row
+    bad += [(h, 0.9) for h in hits if h + 1 in hits]
+    a = int(skip_start * 16000)
+    b = int((total - skip_end) * 16000)
+    segs, _ = _MODEL.transcribe(audio[a:b], task="transcribe", vad_filter=False)
+    for sg in segs:
+        txt = sg.text.lower()
+        latin = _re.findall(r"[a-z]{3,}", txt)
+        if any(e in txt for e in EN_WORDS if " " in e) or any(w.startswith(e) for w in latin for e in EN_WORDS):
+            bad.append((int(skip_start + sg.start), 1.0))
+    return sorted(set(bad))
+
+
 def windows_range(path, a, b, win, model):
     audio = load(path)
     out = []
@@ -77,6 +112,10 @@ if __name__ == "__main__":
             print(f"ZOOM {int(start) // 60}:{int(start) % 60:02d}  {lang} {prob:.2f} (english {en:.2f})")
         for s0, s1, t in words(f, a, b, m):
             print(f"HEARD {int(s0) // 60}:{int(s0) % 60:02d}-{int(s1) // 60}:{int(s1) % 60:02d}  {t}")
+        sys.exit(0)
+    if len(sys.argv) > 2 and sys.argv[2] == "strict":
+        found = english_strict(sys.argv[1], skip_start=3, skip_end=25)
+        print("STRICT", ", ".join(f"{s // 60}:{s % 60:02d}" for s, _ in found) or "clean")
         sys.exit(0)
     win = int(sys.argv[2]) if len(sys.argv) > 2 else 20
     for start, lang, prob, en in windows(sys.argv[1], win):

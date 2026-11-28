@@ -262,7 +262,9 @@ def produce(row, upload=True, check_duration=True):
     # last gate: Whisper listens to the FINISHED video; any English speech = no upload (27 Nov incident)
     if os.environ.get("YT_REFRESH_TOKEN"):
         from langcheck import english_windows
-        bad = english_windows(out / video.name, skip_start=10, skip_end=25)   # intro music / Subscribe outro
+        from langcheck import english_strict
+        bad = (english_windows(out / video.name, skip_start=10, skip_end=25)
+               + english_strict(out / video.name, skip_start=3, skip_end=25))
         if bad:
             where = ", ".join(f"{s // 60}:{s % 60:02d}" for s, _ in bad[:8])
             update_row(row["id"], fail_reason=f"recheck_voice - Whisper heard English in the finished video at {where}")

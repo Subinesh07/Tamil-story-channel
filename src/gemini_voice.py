@@ -209,7 +209,9 @@ def _punct(s):
 
 def _request(model, key, text, plain=False):
     # plain=True: only the Tamil text, no English at all for Leda to read out (used on retries)
-    body = {"contents": [{"parts": [{"text": text if plain else f"{GEMINI_STYLE}:\n\n{text}"}]}],
+    # 28 Nov 2026: Leda read "Tamil storyteller" aloud again. No English instruction is EVER sent now:
+    # Leda gets only the Tamil story text (GEMINI_STYLE stays in the cache key only, so saved voice is reused).
+    body = {"contents": [{"parts": [{"text": text}]}],
             "generationConfig": {"responseModalities": ["AUDIO"],
                                  "speechConfig": {"voiceConfig": {"prebuiltVoiceConfig": {"voiceName": GEMINI_VOICE}}}}}
     for attempt in range(4):
@@ -345,7 +347,8 @@ def synthesize(sentences, cache_key):
                   from langcheck import english_windows
               except Exception as e:   # never skip: no Whisper = pause, the next run retries
                   raise GeminiQuota(f"Whisper language check unavailable ({str(e)[:80]}); will retry next run")
-              bad = english_windows(wav)
+              from langcheck import english_strict
+              bad = english_windows(wav) + english_strict(wav)
               if bad:
                   ok, why = False, "Whisper heard English at " + ", ".join(f"{s // 60}:{s % 60:02d}" for s, _ in bad[:6])
                   log.warning("Leda: passage %d: %s", k + 1, why)
