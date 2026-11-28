@@ -250,6 +250,31 @@
     "state": "done",
     "note": "written; style [9, 8, 9], 4 logic problems fixed, foreign letters checked",
     "at": "2026-11-22T18:18:28+00:00"
+   },
+   "voice": {
+    "state": "done",
+    "note": "Leda voice ready, listening check and click check passed",
+    "at": "2026-11-27T23:51:47+00:00"
+   },
+   "pictures": {
+    "state": "done",
+    "note": "27 pictures, all real and different",
+    "at": "2026-11-27T23:55:25+00:00"
+   },
+   "video": {
+    "state": "done",
+    "note": "10.1 min, quality check passed",
+    "at": "2026-11-27T23:59:43+00:00"
+   },
+   "short": {
+    "state": "done",
+    "note": "Short 7jSAE9ignNE scheduled 30 min after the video",
+    "at": "2026-11-28T00:02:55+00:00"
+   },
+   "upload": {
+    "state": "done",
+    "note": "https://youtu.be/4POhBmuELSI scheduled 2026-11-28T19:00",
+    "at": "2026-11-28T00:04:00+00:00"
    }
   },
   "17": {
@@ -392,6 +417,18 @@
   }
  },
  "events": [
+  {
+   "at": "2026-11-28T00:04:00+00:00",
+   "row": "14",
+   "level": "info",
+   "msg": "Video scheduled on YouTube (4POhBmuELSI)"
+  },
+  {
+   "at": "2026-11-28T00:03:53+00:00",
+   "row": "",
+   "level": "info",
+   "msg": "Row 14: 1 extra Shorts scheduled (next afternoons, 1 PM)"
+  },
   {
    "at": "2026-11-27T17:40:41+00:00",
    "row": "",
@@ -863,7 +900,7 @@
  ],
  "limits": {
   "cloudflare": {
-   "blocked_at": "2026-11-27T15:35:06+00:00",
+   "blocked_at": "2026-11-27T23:53:37+00:00",
    "worked_at": "2026-11-27T15:03:32+00:00",
    "note": "Cloudflare daily free allowance used up (HTTP 429: {\"errors\":[{\"message\":\"AiError: AiError: you have used up your daily free allocation of 10,000 neur",
    "last_reset_seen": "2026-11-27T13:18:36+00:00"
@@ -873,10 +910,10 @@
    "note": "Pollinations free allowance used up"
   },
   "leda": {
-   "worked_at": "2026-11-27T15:34:08+00:00"
+   "worked_at": "2026-11-27T23:51:31+00:00"
   },
   "cloudflare_2": {
-   "worked_at": "2026-11-27T15:35:12+00:00",
+   "worked_at": "2026-11-27T23:53:41+00:00",
    "blocked_at": "2026-11-27T05:17:28+00:00",
    "note": "Cloudflare daily free allowance used up (HTTP 429: {\"errors\":[{\"message\":\"AiError: AiError: you have used up your daily free allocation of 10,000 neur",
    "last_reset_seen": "2026-11-27T15:12:38+00:00"
@@ -1000,6 +1037,17 @@
     "காமாகுமாரி அம்மா மேல"
    ],
    "at": "2026-11-27T15:46:18+00:00"
+  },
+  "14": {
+   "post": "🏠 நிழல் நிஜமானால் - பகுதி 3\n\nதந்தையின் இறப்புக்கு பின் இனியா கைக்கு கிடைச்ச அந்த சீக்ரெட் என்ன?\nகதிர்வேலோட போலி ஆவணங்களை இனியா எப்படி உடைக்க போறா?\nபார்ட் 3-ல எதிர்பார்க்காத பல திருப்பங்கள் காத்துட்டு இருக்கு!\n\n▶️ https://youtu.be/4POhBmuELSI\n⏰ சாயங்காலம் 7 மணிக்கு – நிலா கதைகள்\n#நிலாகதைகள் #TamilStory",
+   "poll": "🗳️ பார்ட் 3-வோட அந்த க்ளைமாக்ஸ் ட்விஸ்ட் எப்படி இருந்துச்சு?",
+   "options": [
+    "செம ஷாக்கிங் ட்விஸ்ட்!",
+    "லைட்டா கெஸ் பண்ணிட்டேன்!",
+    "இனியா செம கெத்து!",
+    "அடுத்த பார்ட்க்கு வெயிட்டிங்!"
+   ],
+   "at": "2026-11-28T00:04:00+00:00"
   }
  }
 }
