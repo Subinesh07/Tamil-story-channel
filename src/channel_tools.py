@@ -120,6 +120,17 @@ def next_part_line(row):
 
 def post_comment(row, video_id, poll_q=None):
     """Top comment with a question to start discussion. Pin it by hand (API cannot pin)."""
+    try:   # never twice: skip if the channel already commented (two runs at once caused 3 copies on 27 Nov)
+        yt = _yt()
+        me = yt.channels().list(part="id", mine=True).execute()["items"][0]["id"]
+        for t in yt.commentThreads().list(part="snippet", videoId=video_id, maxResults=50,
+                                          order="time").execute().get("items", []):
+            if t["snippet"]["topLevelComment"]["snippet"].get("authorChannelId", {}).get("value") == me:
+                log.info("Channel comment already on %s (%s) - not posting again", video_id, t["id"])
+                return t["id"]
+    except Exception as e:
+        if "403" not in str(e):
+            log.info("Duplicate-comment check skipped: %s", str(e)[:100])
     try:
         q = (poll_q or "").replace("🗳️", "").strip() or "இந்த கதையில உங்களுக்கு பிடிச்ச இடம் எது?"
         nxt = next_part_line(row)
