@@ -394,9 +394,19 @@
     "at": "2026-11-26T05:29:30+00:00"
    },
    "voice": {
-    "state": "waiting",
-    "note": "voice check could not run (gemini-3.5-flash HTTP 429); will retry next run",
-    "at": "2026-11-28T07:13:57+00:00"
+    "state": "done",
+    "note": "Leda voice ready, listening check and click check passed",
+    "at": "2026-11-28T15:47:42+00:00"
+   },
+   "pictures": {
+    "state": "done",
+    "note": "28 pictures, all real and different",
+    "at": "2026-11-28T15:57:20+00:00"
+   },
+   "video": {
+    "state": "done",
+    "note": "9.4 min, quality check passed",
+    "at": "2026-11-28T16:00:50+00:00"
    }
   },
   "23": {
@@ -451,10 +461,10 @@
  },
  "events": [
   {
-   "at": "2026-11-28T16:26:20+00:00",
-   "row": "",
-   "level": "info",
-   "msg": "Row 19: new thumbnail tried (32 views vs average 162)"
+   "at": "2026-11-28T16:27:48+00:00",
+   "row": "22",
+   "level": "error",
+   "msg": "FAILED: Not uploading: Whisper heard English in the finished video at 1:46"
   },
   {
    "at": "2026-11-28T15:09:43+00:00",
@@ -934,16 +944,16 @@
  "limits": {
   "cloudflare": {
    "blocked_at": "2026-11-27T23:53:37+00:00",
-   "worked_at": "2026-11-27T15:03:32+00:00",
+   "worked_at": "2026-11-28T15:55:28+00:00",
    "note": "Cloudflare daily free allowance used up (HTTP 429: {\"errors\":[{\"message\":\"AiError: AiError: you have used up your daily free allocation of 10,000 neur",
-   "last_reset_seen": "2026-11-27T13:18:36+00:00"
+   "last_reset_seen": "2026-11-28T15:55:28+00:00"
   },
   "pollinations": {
    "blocked_at": "2026-11-27T05:17:29+00:00",
    "note": "Pollinations free allowance used up"
   },
   "leda": {
-   "worked_at": "2026-11-28T06:03:13+00:00"
+   "worked_at": "2026-11-28T15:47:31+00:00"
   },
   "cloudflare_2": {
    "worked_at": "2026-11-27T23:53:41+00:00",
