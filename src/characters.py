@@ -152,5 +152,6 @@ def story_prompt(scene, cards, genre=""):
             return next((a for a in names(n)[1:] if re.fullmatch(r"[A-Za-z .'\-]+", a)), n)
         head += "Characters: " + " | ".join(f"{label(n)} = {cards[n]}" for n in present) + ". "
     rules = ("Rules: only the named people, every head fully inside the frame with space above, "
-             "five fingers on each hand, natural bodies, no text or letters. ")
+             "faces clearly show the emotion of the scene, anatomically correct hands with five fingers and "
+             "natural wrists, natural bodies, no text or letters. ")
     return head + rules + "Scene: " + scene
