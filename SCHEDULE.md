@@ -29,5 +29,7 @@ One story a day (time varies by weekday) + Doomsday Sat/Sun 11 AM, IST. Updated 
 | 2026-12-02 | 25 | If The Shadow Becomes Real - Part 5 | If The Shadow Becomes Real Part 5 | pending |  |
 | 2026-12-03 | 26 | The Hidden Debt Revealed: A Father's Betrayal Exposed | If The Shadow Becomes Real Part 6 | pending |  |
 | 2026-12-04 | 27 | The Shared Mango Tree Secret | Malaichaaral Grandfather Stories Part 2 | pending |  |
+| 2026-12-05 | 28 | The Demolition Trap: Iniya's Arrest | If The Shadow Becomes Real Part 7 | pending |  |
+| 2026-12-06 | 29 | Nizhal Nijamanal Part 8 | If The Shadow Becomes Real Part 8 | pending |  |
 
-Pending stories: **5** ⚠️ below 10, the Generate stories workflow will top this up.
+Pending stories: **7** ⚠️ below 10, the Generate stories workflow will top this up.

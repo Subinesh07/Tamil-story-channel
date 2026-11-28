@@ -433,9 +433,35 @@
     "note": "written; style [9, 9, 10], 2 logic problems fixed, foreign letters checked",
     "at": "2026-11-28T00:56:37+00:00"
    }
+  },
+  "28": {
+   "script": {
+    "state": "done",
+    "note": "written; style [10, 9, 10], 4 logic problems fixed, foreign letters checked",
+    "at": "2026-11-28T15:09:06+00:00"
+   }
+  },
+  "29": {
+   "script": {
+    "state": "done",
+    "note": "written; style [8, 9, 9], 4 logic problems fixed, foreign letters checked",
+    "at": "2026-11-28T15:09:43+00:00"
+   }
   }
  },
  "events": [
+  {
+   "at": "2026-11-28T15:09:43+00:00",
+   "row": "29",
+   "level": "info",
+   "msg": "Story written: போலீஸ் ஸ்டேஷனில் திடீர் திருப்பம்! - நிழல் நிஜமானால் இறுதிப் பகுதி | நிழல் நிஜமா"
+  },
+  {
+   "at": "2026-11-28T15:09:06+00:00",
+   "row": "28",
+   "level": "info",
+   "msg": "Story written: வீட்டை இடிக்க வந்த புல்டோசர்... இனியாவுக்கு காத்திருந்த பெரிய அதிர்ச்சி! | நிழல்"
+  },
   {
    "at": "2026-11-28T07:13:57+00:00",
    "row": "22",
@@ -903,18 +929,6 @@
    "row": "6",
    "level": "warn",
    "msg": "Paused: voice check could not run (gemini-3.5-flash HTTP 503); will retry next run"
-  },
-  {
-   "at": "2026-11-21T17:12:32+00:00",
-   "row": "10",
-   "level": "info",
-   "msg": "Video scheduled on YouTube (zhaPl2ODEPA)"
-  },
-  {
-   "at": "2026-11-21T13:52:33+00:00",
-   "row": "10",
-   "level": "warn",
-   "msg": "Paused: Doomsday Part 2 waits for free pictures (Cloudflare used up). Voice is saved."
   }
  ],
  "limits": {
