@@ -414,6 +414,11 @@
     "state": "done",
     "note": "written; style [8, 7, 9], 3 logic problems fixed, foreign letters checked",
     "at": "2026-11-26T05:32:29+00:00"
+   },
+   "voice": {
+    "state": "waiting",
+    "note": "voice check could not run (gemini-3.5-flash HTTP 503); will retry next run",
+    "at": "2026-11-28T17:08:14+00:00"
    }
   },
   "24": {
@@ -460,6 +465,12 @@
   }
  },
  "events": [
+  {
+   "at": "2026-11-28T17:08:14+00:00",
+   "row": "23",
+   "level": "warn",
+   "msg": "Paused: voice check could not run (gemini-3.5-flash HTTP 503); will retry next run"
+  },
   {
    "at": "2026-11-28T16:27:48+00:00",
    "row": "22",
@@ -933,12 +944,6 @@
    "row": "8",
    "level": "warn",
    "msg": "Paused: all free picture allowances are used up for today"
-  },
-  {
-   "at": "2026-11-21T18:42:11+00:00",
-   "row": "6",
-   "level": "info",
-   "msg": "Video scheduled on YouTube (cQ3rhliRRpU)"
   }
  ],
  "limits": {
