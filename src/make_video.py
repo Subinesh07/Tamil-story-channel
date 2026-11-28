@@ -333,6 +333,19 @@ def make_extra_shorts(row, video_id):
         log.warning("Extra Shorts failed: %s", str(e)[:200])
 
 
+def series_name_for_thumb(row):
+    """Series name on the thumbnail, for videos published from SERIES_TAG_START."""
+    from config import SERIES_TAG_START
+    if not row.get("series_id") or (row.get("publish_at") or "")[:10] < SERIES_TAG_START:
+        return ""
+    try:
+        import series as S
+        ser = next((x for x in S.load().get("series", []) if x.get("id") == row["series_id"]), {})
+        return (ser.get("title_ta") or "").strip()
+    except Exception:
+        return ""
+
+
 def previous_part_link(row):
     """Link to the previous part of the same series (keeps viewers watching the whole series)."""
     if not row.get("series_id") or not (row.get("part") or "").isdigit():
@@ -413,15 +426,16 @@ def drama_thumbnail(row, provider, work, out_path, n):
         pics = sorted((work / "images").glob("scene_*.png")) or sorted(
             (ROOT / "cache" / "images" / f"row_{row['id']}").glob("*.png"))
         bg.write_bytes(pics[min(len(pics) - 1, max(0, len(pics) // 2))].read_bytes())
+    sname = series_name_for_thumb(row)
     path, layout = thumb_v2.make(bg, texts, out_path, genre=row.get("genre", ""), variant=n,
-                                 part=row.get("part") or "")
+                                 part=row.get("part") or "", series=sname)
     log.info("Thumbnail layout: %s", layout)
     # two more layouts of the same picture (no extra credits) for YouTube Studio "Test & compare"
     for k, tag in ((1, "B"), (2, "C")):
         try:
             alt = out_path.with_name(out_path.name.replace("_thumbnail.jpg", f"_thumbnail{tag}.jpg"))
             _, lay = thumb_v2.make(bg, texts, alt, genre=row.get("genre", ""), variant=n + k,
-                                   part=row.get("part") or "")
+                                   part=row.get("part") or "", series=sname)
             log.info("Test & compare thumbnail %s: %s", tag, lay)
         except Exception as e:
             log.info("Extra thumbnail %s skipped: %s", tag, str(e)[:80])

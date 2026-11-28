@@ -109,7 +109,7 @@ def ribbons(d, x, y, text, max_w, start=66, min_size=44, bg=RED, fg=WHITE):
     return y
 
 
-def part_ribbon(d, part):
+def part_ribbon(d, part, series=""):
     f = _font(52)
     label = f"பகுதி {part}"
     w = _w(d, label, f) + 50
@@ -117,6 +117,18 @@ def part_ribbon(d, part):
     d.rounded_rectangle([x + 6, y + 6, x + w + 6, y + 82], radius=18, fill=BLACK)
     d.rounded_rectangle([x, y, x + w, y + 76], radius=18, fill=RED, outline=YELLOW, width=5)
     heavy(d, (x + 25, y - 2), label, f, YELLOW, outline=5, shadow=0)
+    if series:
+        series_tag(d, series, y + 94)
+
+
+def series_tag(d, name, y=26):
+    """Series name strip (top-right) so viewers can spot every part of a serial on the channel page."""
+    f = _fit_line(d, name, 420, 46, min_size=30)
+    w = _w(d, name, f) + 40
+    x = WIDTH - w - 30
+    d.rounded_rectangle([x + 5, y + 5, x + w + 5, y + f.size * 1.35 + 5], radius=14, fill=BLACK)
+    d.rounded_rectangle([x, y, x + w, y + f.size * 1.35], radius=14, fill=WHITE, outline=BLACK, width=3)
+    _draw(d, (x + 20, y + f.size * 0.04), name, f, fill=(150, 0, 0))
 
 
 def badge(d, x, y):
@@ -268,7 +280,7 @@ GENRE_LAYOUTS = {
 }
 
 
-def make(bg, texts, out_path, genre="", variant=0, part=""):
+def make(bg, texts, out_path, genre="", variant=0, part="", series=""):
     choices = GENRE_LAYOUTS.get(genre, list(LAYOUTS))
     name = choices[variant % len(choices)]
     texts = {k: (v or "").strip() for k, v in texts.items()}
@@ -279,9 +291,11 @@ def make(bg, texts, out_path, genre="", variant=0, part=""):
     texts["line2"] = texts["line2"] or texts.get("tagline", "") or "கடைசியில் நடந்தது என்ன?"
     if genre in ("horror", "doomsday") and texts.get("title"):
         name = "horror_title"
-    texts = {**texts, "_reserve": 340 if part else 100}
+    texts = {**texts, "_reserve": (460 if series else 340) if part else (460 if series else 100)}
     img = LAYOUTS[name](_prep(bg, horror=(genre in ("horror", "doomsday"))), texts)
     if part:
-        part_ribbon(ImageDraw.Draw(img), part)
+        part_ribbon(ImageDraw.Draw(img), part, series)
+    elif series:
+        series_tag(ImageDraw.Draw(img), series)
     img.save(out_path, "JPEG", quality=92, optimize=True)
     return out_path, name

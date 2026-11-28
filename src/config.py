@@ -163,3 +163,5 @@ PICTURE_CHECK = bool(_os.environ.get("PICTURE_CHECK"))
 # 26 Nov 2026: family-only channel. No weekend Doomsday/survival serial while this is True.
 FAMILY_ONLY = True
 SERIAL_HOUR = 17   # special serials use the day's main slot (PUBLISH_HOURS); kept for reference
+
+SERIES_TAG_START = "2026-11-30"   # series name shown on thumbnails from this publish date
