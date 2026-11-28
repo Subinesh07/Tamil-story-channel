@@ -189,6 +189,22 @@ def produce(row, upload=True, check_duration=True):
         else:
             images.append(next(it))
 
+    # thumbnail first (28 Nov 2026): the video opens on the same picture the viewer just clicked
+    thumb = None
+    try:
+        thumb = drama_thumbnail(row, provider, work, out / f"story_{rid}_thumbnail.jpg", n)
+        if not thumb:
+            thumb = make_thumbnail(story_imgs[min(1, len(story_imgs) - 1)], title,
+                                   out / f"story_{rid}_thumbnail.jpg", variant=n)
+    except Exception as e:
+        log.warning("Thumbnail failed: %s", e)
+    first_pic = work / "images" / "thumb_bg.png"
+    try:
+        scenes, images = opening_montage(scenes, images, story_imgs,
+                                         first_pic if first_pic.exists() else None)
+    except Exception as e:
+        log.warning("Opening montage skipped: %s", str(e)[:150])
+
     log.info("== Render ==")
     cards = []
     for s in scenes:
@@ -225,14 +241,6 @@ def produce(row, upload=True, check_duration=True):
     # intro frame too, so the title card can be checked in the artifacts
     run(["ffmpeg", "-y", "-ss", f"{max(0.5, scenes[0]['duration'] / 2):.2f}", "-i", str(video),
          "-frames:v", "1", str(out / f"story_{rid}_intro_frame.png")], check=False)
-    thumb = None
-    try:
-        thumb = drama_thumbnail(row, provider, work, out / f"story_{rid}_thumbnail.jpg", n)
-        if not thumb:
-            thumb = make_thumbnail(story_imgs[min(1, len(story_imgs) - 1)], title,
-                                   out / f"story_{rid}_thumbnail.jpg", variant=n)
-    except Exception as e:
-        log.warning("Thumbnail failed: %s", e)
     if not ok:
         raise RuntimeError("Quality gate failed: " + " | ".join(failures))
     LAST.update(video=out / video.name, timings=timings, intro=len(intro), outro=len(outro), title=title)
@@ -346,6 +354,33 @@ def series_name_for_thumb(row):
         return (ser.get("title_ta") or "").strip()
     except Exception:
         return ""
+
+
+def opening_montage(scenes, images, story_imgs, first_pic=None, secs=30.0, cut=3.5):
+    """28 Nov 2026 research: half the viewers left by 30 s and each picture stayed ~20 s on screen.
+    The first ~30 s (the flash-forward hook) now change picture every ~3.5 s: the thumbnail picture first,
+    then this episode's own dramatic pictures (no new picture credits). The rest of the video is unchanged."""
+    if not scenes or scenes[0]["kind"] != "story":
+        return scenes, images
+    k = 0
+    while k < len(scenes) and scenes[k]["kind"] == "story" and scenes[k]["start"] < secs:
+        k += 1
+    if k == 0:
+        return scenes, images
+    end = scenes[k - 1]["end"]
+    n = max(2, int(round(end / cut)))
+    step = end / n
+    pool = ([first_pic] if first_pic else []) + [images[0]] + list(reversed(story_imgs[len(story_imgs) * 2 // 3:]))
+    pool += [im for im in story_imgs if im not in pool]
+    head_imgs = pool[:n - 1] + [images[k - 1]]   # last cut = the picture the story itself is on
+    head = []
+    for j in range(n):
+        s = dict(scenes[0])
+        s.update(start=round(j * step, 3), end=round((j + 1) * step, 3), duration=round(step, 3),
+                 montage=True)
+        head.append(s)
+    log.info("Opening montage: %d pictures in the first %.0f s (was %d)", n, end, k)
+    return head + scenes[k:], head_imgs + images[k:]
 
 
 def previous_part_link(row):
