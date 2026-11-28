@@ -159,7 +159,8 @@ def make_short(video, timings, intro_len, title, out_path, seg=None, cta="மு
          "-c:v", "libx264", "-preset", "veryfast", "-crf", "21", "-c:a", "aac", "-b:a", "160k",
          "-movflags", "+faststart", str(out_path)])
     log.info("Short trailer: %.0f s from %.0f s", dur, a)
-    return Path(out_path)
+    from short_outro import append   # ending card: tap the button for the full story, like, subscribe, quiz
+    return append(out_path)
 
 
 EXTRA = [  # (title ending, call to action) for Short 2 and Short 3 - different every time they appear
