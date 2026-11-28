@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-27",
+ "updated": "2026-11-28",
  "daily": [
   {
    "date": "2026-11-18",
@@ -49,79 +49,122 @@
    "watch_min": 67,
    "avg_sec": 74,
    "subs": 0
+  },
+  {
+   "date": "2026-11-25",
+   "views": 1113,
+   "watch_min": 294,
+   "avg_sec": 22,
+   "subs": 2
   }
  ],
  "videos": [
+  {
+   "id": "eD8Aezm0XXc",
+   "title": "அப்பாவோட சொத்துக்காக சொந்த சித்தப்பா செஞ்ச சதி… 26 வயசு… – கடைசில என்ன ஆச்சு?… | Tamil Family Story",
+   "published": "2026-11-26",
+   "length_sec": 54,
+   "views": 1,
+   "avg_sec": 4,
+   "pct": 9.1,
+   "subs": 0,
+   "likes": 0,
+   "comments": 0
+  },
+  {
+   "id": "umpFh1o1xKY",
+   "title": "20 வயதில் ராஜாவான அலெக்சாண்டர்: 48,000… | அலெட்சாண்டர்: ஒரு மாமனிதன் - பகுதி 1 | Tamil Real Story",
+   "published": "2026-11-26",
+   "length_sec": 584,
+   "views": 1,
+   "avg_sec": 196,
+   "pct": 33.6,
+   "subs": 0,
+   "likes": 0,
+   "comments": 0
+  },
   {
    "id": "8UAOaEqCF5E",
    "title": "காட்டுக்குள் மாட்டிய 4 பேரின் தவிப்பு! 400 வருஷ இரகசியம்...… – கடைசில என்ன ஆச்சு? 🔥 #shorts",
    "published": "2026-11-25",
    "length_sec": 55,
-   "views": 4,
-   "avg_sec": 36,
-   "pct": 65.6,
+   "views": 1005,
+   "avg_sec": 20,
+   "pct": 37.6,
+   "subs": 1,
+   "likes": 6,
+   "comments": 0
+  },
+  {
+   "id": "1MKTWtmS-5E",
+   "title": "அப்பாவோட சொத்துக்காக சொந்த சித்தப்பா செஞ்ச சதி… 26 வயசு பொண்ணுக்கு… #shorts",
+   "published": "2026-11-25",
+   "length_sec": 55,
+   "views": 24,
+   "avg_sec": 9,
+   "pct": 17.3,
+   "subs": 0,
+   "likes": 0,
+   "comments": 0
+  },
+  {
+   "id": "H0oFO6ZW3vM",
+   "title": "அப்பாவோட சொத்துக்காக சொந்த சித்தப்பா செஞ்ச சதி… 26 வயசு பொண்ணுக்கு… | நிழல் நிஜமானால் - பகுதி 2",
+   "published": "2026-11-25",
+   "length_sec": 605,
+   "views": 8,
+   "avg_sec": 99,
+   "pct": 16.4,
    "subs": 0,
    "likes": 1,
-   "comments": 0
+   "comments": 1
   },
   {
    "id": "0c9ksBPUUik",
    "title": "சென்னிமலை கிராமத்து மணி சத்தம்... நள்ளிரவு 12 மணிக்கு நிழலாக… – கடைசில என்ன ஆச்சு? 🔥 #shorts",
    "published": "2026-11-25",
    "length_sec": 51,
-   "views": 2,
-   "avg_sec": 16,
-   "pct": 31.4,
+   "views": 7,
+   "avg_sec": 15,
+   "pct": 29.8,
    "subs": 0,
    "likes": 1,
    "comments": 1
-  },
-  {
-   "id": "s1J9NbHRoD8",
-   "title": "காட்டுக்குள் மாட்டிய 4 பேரின் தவிப்பு! 400 வருஷ இரகசியம்...… – இதுக்கப்புறம் என்ன? 😱 #shorts",
-   "published": "2026-11-24",
-   "length_sec": 54,
-   "views": 19,
-   "avg_sec": 25,
-   "pct": 46.6,
-   "subs": 0,
-   "likes": 2,
-   "comments": 2
   },
   {
    "id": "aT5rP36PJNc",
    "title": "சென்னிமலை கிராமத்து மணி சத்தம்... நள்ளிரவு 12 மணிக்கு நிழலாக வந்த… | நிழல் மணியின் ஓசை - பகுதி 1",
    "published": "2026-11-24",
    "length_sec": 591,
-   "views": 17,
-   "avg_sec": 29,
-   "pct": 4.9,
+   "views": 23,
+   "avg_sec": 30,
+   "pct": 5.1,
    "subs": 0,
    "likes": 1,
    "comments": 3
+  },
+  {
+   "id": "s1J9NbHRoD8",
+   "title": "காட்டுக்குள் மாட்டிய 4 பேரின் தவிப்பு! 400 வருஷ இரகசியம்...… – இதுக்கப்புறம் என்ன? 😱 #shorts",
+   "published": "2026-11-24",
+   "length_sec": 54,
+   "views": 21,
+   "avg_sec": 23,
+   "pct": 43.8,
+   "subs": 0,
+   "likes": 2,
+   "comments": 2
   },
   {
    "id": "Q2PptarOnMA",
    "title": "சென்னிமலை கிராமத்து மணி சத்தம்... நள்ளிரவு 12 மணிக்கு நிழலாக வந்த… #shorts",
    "published": "2026-11-24",
    "length_sec": 55,
-   "views": 3,
-   "avg_sec": 14,
-   "pct": 27.1,
+   "views": 4,
+   "avg_sec": 13,
+   "pct": 23.9,
    "subs": 0,
    "likes": 2,
-   "comments": 1
-  },
-  {
-   "id": "m1Hx3XQXee0",
-   "title": "காட்டுக்குள் மாட்டிய 4 பேரின் தவிப்பு! 400 வருஷ இரகசியம்...… #shorts",
-   "published": "2026-11-23",
-   "length_sec": 52,
-   "views": 12,
-   "avg_sec": 17,
-   "pct": 33.8,
-   "subs": 0,
-   "likes": 1,
    "comments": 1
   },
   {
@@ -129,19 +172,31 @@
    "title": "காட்டுக்குள் மாட்டிய 4 பேரின் தவிப்பு! 400 வருஷ இரகசியம்...… | கடலும் காடும் கோயிலும் - பகுதி 2",
    "published": "2026-11-23",
    "length_sec": 673,
-   "views": 10,
-   "avg_sec": 173,
-   "pct": 25.8,
+   "views": 17,
+   "avg_sec": 109,
+   "pct": 16.3,
    "subs": 0,
    "likes": 3,
    "comments": 0
+  },
+  {
+   "id": "m1Hx3XQXee0",
+   "title": "காட்டுக்குள் மாட்டிய 4 பேரின் தவிப்பு! 400 வருஷ இரகசியம்...… #shorts",
+   "published": "2026-11-23",
+   "length_sec": 52,
+   "views": 14,
+   "avg_sec": 16,
+   "pct": 31.1,
+   "subs": 0,
+   "likes": 1,
+   "comments": 1
   },
   {
    "id": "RVwLaNsQOXk",
    "title": "டூம்ஸ்டே 😱 மலையிலிருந்து தப்பித்த மீரா! 6 நாளில் அழியும்… #shorts",
    "published": "2026-11-22",
    "length_sec": 54,
-   "views": 299,
+   "views": 300,
    "avg_sec": 12,
    "pct": 22.4,
    "subs": 0,
@@ -153,9 +208,9 @@
    "title": "பாட்டி கொடுத்த பனை ஓலை ரகசியம்… மர நடுவுல மறைஞ்சிருந்த… | கடலும் காடும் கோயிலும் - பகுதி 1",
    "published": "2026-11-22",
    "length_sec": 1197,
-   "views": 192,
-   "avg_sec": 82,
-   "pct": 6.9,
+   "views": 229,
+   "avg_sec": 83,
+   "pct": 7.0,
    "subs": 0,
    "likes": 3,
    "comments": 1
@@ -165,7 +220,7 @@
    "title": "டூம்ஸ்டே 😱 மலையிலிருந்து தப்பித்த மீரா! 6 நாளில் அழியும்… | டூம்ஸ்டே பகுதி 2",
    "published": "2026-11-22",
    "length_sec": 578,
-   "views": 54,
+   "views": 57,
    "avg_sec": 67,
    "pct": 11.7,
    "subs": 0,
@@ -177,9 +232,9 @@
    "title": "பாட்டி கொடுத்த பனை ஓலை ரகசியம்… மர நடுவுல மறைஞ்சிருந்த… #shorts",
    "published": "2026-11-22",
    "length_sec": 52,
-   "views": 7,
-   "avg_sec": 38,
-   "pct": 73.2,
+   "views": 9,
+   "avg_sec": 22,
+   "pct": 44.0,
    "subs": 0,
    "likes": 0,
    "comments": 0
@@ -189,9 +244,9 @@
    "title": "அப்பா மறைச்சு வச்ச அந்த உயில்… இனியா கண்டுபிடிச்சது என்ன? | நிழல் நிஜமானால் - பகுதி 1",
    "published": "2026-11-21",
    "length_sec": 1138,
-   "views": 202,
-   "avg_sec": 125,
-   "pct": 11.0,
+   "views": 206,
+   "avg_sec": 123,
+   "pct": 10.8,
    "subs": 1,
    "likes": 2,
    "comments": 1
@@ -201,9 +256,9 @@
    "title": "அப்பா மறைச்சு வச்ச அந்த உயில்… இனியா கண்டுபிடிச்சது என்ன? #shorts",
    "published": "2026-11-21",
    "length_sec": 55,
-   "views": 123,
+   "views": 124,
    "avg_sec": 38,
-   "pct": 70.7,
+   "pct": 69.9,
    "subs": 0,
    "likes": 1,
    "comments": 1
@@ -213,9 +268,9 @@
    "title": "டூம்ஸ்டே 😱 7 நாள்ல உலகமே இருட்டாகும்! மீரா கண்டுபிடிச்ச ரகசியம் | டூம்ஸ்டே பகுதி 1",
    "published": "2026-11-21",
    "length_sec": 586,
-   "views": 71,
-   "avg_sec": 74,
-   "pct": 12.8,
+   "views": 73,
+   "avg_sec": 72,
+   "pct": 12.4,
    "subs": 0,
    "likes": 3,
    "comments": 3
@@ -225,9 +280,9 @@
    "title": "டூம்ஸ்டே 😱 7 நாள்ல உலகமே இருட்டாகும்! மீரா கண்டுபிடிச்ச ரகசியம் #shorts",
    "published": "2026-11-21",
    "length_sec": 53,
-   "views": 55,
-   "avg_sec": 32,
-   "pct": 60.4,
+   "views": 58,
+   "avg_sec": 31,
+   "pct": 59.1,
    "subs": 0,
    "likes": 1,
    "comments": 0
@@ -249,7 +304,7 @@
    "title": "அம்மாவுக்குத் தெரியாத அந்த ரகசியம்",
    "published": "2026-11-19",
    "length_sec": 1254,
-   "views": 151,
+   "views": 153,
    "avg_sec": 151,
    "pct": 12.1,
    "subs": 0,
@@ -271,24 +326,29 @@
  ],
  "traffic": [
   {
-   "source": "SUBSCRIBER",
-   "views": 898,
-   "avg_sec": 199
+   "source": "SHORTS",
+   "views": 1499,
+   "avg_sec": 21
   },
   {
-   "source": "SHORTS",
-   "views": 479,
-   "avg_sec": 23
+   "source": "SUBSCRIBER",
+   "views": 940,
+   "avg_sec": 192
   },
   {
    "source": "RELATED_VIDEO",
-   "views": 409,
-   "avg_sec": 95
+   "views": 416,
+   "avg_sec": 97
   },
   {
    "source": "YT_CHANNEL",
-   "views": 92,
-   "avg_sec": 89
+   "views": 124,
+   "avg_sec": 72
+  },
+  {
+   "source": "YT_SEARCH",
+   "views": 27,
+   "avg_sec": 5
   },
   {
    "source": "EXT_URL",
@@ -297,13 +357,13 @@
   },
   {
    "source": "YT_OTHER_PAGE",
-   "views": 20,
-   "avg_sec": 161
+   "views": 21,
+   "avg_sec": 153
   },
   {
-   "source": "YT_SEARCH",
-   "views": 19,
-   "avg_sec": 5
+   "source": "SHORTS_CONTENT_LINKS",
+   "views": 3,
+   "avg_sec": 75
   },
   {
    "source": "NO_LINK_OTHER",
@@ -323,61 +383,66 @@
  ],
  "audience": [
   {
+   "age": "age18-24",
+   "gender": "male",
+   "pct": 3.4
+  },
+  {
    "age": "age25-34",
    "gender": "female",
-   "pct": 2.3
+   "pct": 2.7
   },
   {
    "age": "age25-34",
    "gender": "male",
-   "pct": 3.0
+   "pct": 6.2
   },
   {
    "age": "age35-44",
    "gender": "female",
-   "pct": 6.9
+   "pct": 5.6
   },
   {
    "age": "age35-44",
    "gender": "male",
-   "pct": 8.6
+   "pct": 7.9
   },
   {
    "age": "age45-54",
    "gender": "female",
-   "pct": 8.6
+   "pct": 7.4
   },
   {
    "age": "age45-54",
    "gender": "male",
-   "pct": 2.1
+   "pct": 6.7
   },
   {
    "age": "age55-64",
    "gender": "female",
-   "pct": 12.6
+   "pct": 9.5
   },
   {
    "age": "age55-64",
    "gender": "male",
-   "pct": 6.3
+   "pct": 12.7
   },
   {
    "age": "age65-",
    "gender": "female",
-   "pct": 30.0
+   "pct": 17.4
   },
   {
    "age": "age65-",
    "gender": "male",
-   "pct": 19.6
+   "pct": 20.5
   }
  ],
  "retention": {
-  "date": "2026-11-27",
-  "at_10": 0.45013333333333333,
-  "at_25": 0.1939,
-  "at_50": 0.11583333333333334,
-  "at_75": 0.07786666666666667
+  "date": "2026-11-28",
+  "at_10": 0.7148,
+  "at_25": 0.2920666666666667,
+  "at_50": 0.17783333333333332,
+  "at_75": 0.13
  }
 }
