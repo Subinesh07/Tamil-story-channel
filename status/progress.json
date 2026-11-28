@@ -414,9 +414,35 @@
     "note": "written; style [9, 8, 9], 5 logic problems fixed, foreign letters checked",
     "at": "2026-11-26T16:07:25+00:00"
    }
+  },
+  "26": {
+   "script": {
+    "state": "done",
+    "note": "written; style [9, 10, 10], 5 logic problems fixed, foreign letters checked",
+    "at": "2026-11-28T00:53:41+00:00"
+   }
+  },
+  "27": {
+   "script": {
+    "state": "done",
+    "note": "written; style [9, 9, 10], 2 logic problems fixed, foreign letters checked",
+    "at": "2026-11-28T00:56:37+00:00"
+   }
   }
  },
  "events": [
+  {
+   "at": "2026-11-28T00:56:37+00:00",
+   "row": "27",
+   "level": "info",
+   "msg": "Story written: மாமரம் யாருக்கு? தாதா பாட்டி சொன்ன ரகசியம்… அந்த மர்மமான… | மழைச்சாரல் தாத்தா கத"
+  },
+  {
+   "at": "2026-11-28T00:53:41+00:00",
+   "row": "26",
+   "level": "info",
+   "msg": "Story written: 20 வருட ரகசியக் கடன் பத்திரம்… துரோகியின் முகத்திரை கிழிந்த தருணம்! | நிழல் நிஜம"
+  },
   {
    "at": "2026-11-28T00:04:00+00:00",
    "row": "14",
@@ -884,18 +910,6 @@
    "row": "5",
    "level": "info",
    "msg": "நிழல் நிஜமானால் Part 1 went public"
-  },
-  {
-   "at": "2026-11-21T06:00:00+00:00",
-   "row": "7",
-   "level": "info",
-   "msg": "Doomsday Part 1 Short went public"
-  },
-  {
-   "at": "2026-11-21T05:30:00+00:00",
-   "row": "7",
-   "level": "info",
-   "msg": "Doomsday Part 1 went public"
   }
  ],
  "limits": {

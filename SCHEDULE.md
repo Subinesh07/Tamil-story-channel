@@ -27,5 +27,7 @@ One story a day (time varies by weekday) + Doomsday Sat/Sun 11 AM, IST. Updated 
 | 2026-11-30 | 18 | The Palm-Leaf Trail - Part 4: The Shadow of the Temple Vault | Sea, Forest, Temple: The Palm-Leaf Trail Part 4 | parked |  |
 | 2026-12-01 | 24 | Betrayal in the Family: Iniya's Career at Stake | If The Shadow Becomes Real Part 4 | pending |  |
 | 2026-12-02 | 25 | If The Shadow Becomes Real - Part 5 | If The Shadow Becomes Real Part 5 | pending |  |
+| 2026-12-03 | 26 | The Hidden Debt Revealed: A Father's Betrayal Exposed | If The Shadow Becomes Real Part 6 | pending |  |
+| 2026-12-04 | 27 | The Shared Mango Tree Secret | Malaichaaral Grandfather Stories Part 2 | pending |  |
 
-Pending stories: **4** ⚠️ below 10, the Generate stories workflow will top this up.
+Pending stories: **6** ⚠️ below 10, the Generate stories workflow will top this up.
