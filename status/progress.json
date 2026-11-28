@@ -451,6 +451,12 @@
  },
  "events": [
   {
+   "at": "2026-11-28T16:26:20+00:00",
+   "row": "",
+   "level": "info",
+   "msg": "Row 19: new thumbnail tried (32 views vs average 162)"
+  },
+  {
    "at": "2026-11-28T15:09:43+00:00",
    "row": "29",
    "level": "info",
@@ -923,12 +929,6 @@
    "row": "6",
    "level": "info",
    "msg": "Video scheduled on YouTube (cQ3rhliRRpU)"
-  },
-  {
-   "at": "2026-11-21T17:19:09+00:00",
-   "row": "6",
-   "level": "warn",
-   "msg": "Paused: voice check could not run (gemini-3.5-flash HTTP 503); will retry next run"
   }
  ],
  "limits": {
