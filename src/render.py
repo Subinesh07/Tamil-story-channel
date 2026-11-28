@@ -8,12 +8,14 @@ from ffutil import run
 log = logging.getLogger(__name__)
 
 
-def render_scene_clip(image, duration, zoom_in, out_path):
+def render_scene_clip(image, duration, zoom_in, out_path, punch=False):
     frames = max(2, round(duration * FPS))
-    z = (f"1+{ZOOM_AMOUNT}*on/{frames - 1}" if zoom_in
-         else f"{1 + ZOOM_AMOUNT}-{ZOOM_AMOUNT}*on/{frames - 1}")
+    amt = 0.22 if punch else ZOOM_AMOUNT   # 28 Nov: emotional lines push in towards the faces
+    z = (f"1+{amt}*on/{frames - 1}" if zoom_in or punch
+         else f"{1 + amt}-{amt}*on/{frames - 1}")
+    ypos = "ih*0.38-(ih/zoom/2)" if punch else "ih/2-(ih/zoom/2)"
     vf = (f"scale={WIDTH * 2}:{HEIGHT * 2}:flags=lanczos,"
-          f"zoompan=z='{z}':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)'"
+          f"zoompan=z='{z}':x='iw/2-(iw/zoom/2)':y='max(0,{ypos})'"
           f":d=1:s={WIDTH}x{HEIGHT}:fps={FPS},format=yuv420p")
     run(["ffmpeg", "-y", "-loop", "1", "-framerate", str(FPS), "-i", str(image),
          "-vf", vf, "-frames:v", str(frames), "-c:v", "libx264", "-preset", X264_PRESET,
@@ -32,7 +34,7 @@ def render_video(scenes, images, narration, ass_path, total, work_dir, out_path,
         dur = sc["duration"] + (XFADE if k < len(scenes) - 1 else 0)
         clip = clip_dir / f"clip_{k:02d}.mp4"
         log.info("Scene %d/%d: %.1f s (%s)", k + 1, len(scenes), dur, "in" if k % 2 == 0 else "out")
-        render_scene_clip(img, dur, zoom_in=(k % 2 == 0), out_path=clip)
+        render_scene_clip(img, dur, zoom_in=(k % 2 == 0), out_path=clip, punch=bool(sc.get("punch")))
         clips.append(clip)
 
     inputs = []

@@ -205,6 +205,13 @@ def produce(row, upload=True, check_duration=True):
     except Exception as e:
         log.warning("Opening montage skipped: %s", str(e)[:150])
 
+    import re as _re
+    _emo = _re.compile(r"அழு|கண்ணீர்|கதறி|அதிர்ச்சி|உடைந்து|நடுங்கி|கத்தி|!")
+    for s in scenes:   # emotional lines get a slow push-in towards the faces
+        if s["kind"] == "story" and not s.get("montage"):
+            txt = " ".join(sents[k].get("text", "") for k in range(s.get("first", 0), s.get("last", -1) + 1))
+            s["punch"] = bool(_emo.search(txt))
+
     log.info("== Render ==")
     cards = []
     for s in scenes:
@@ -217,6 +224,9 @@ def produce(row, upload=True, check_duration=True):
     build_ass(timings, ass, cards)
     video = work / f"story_{rid}.mp4"
     sfx = []
+    mont = [s for s in scenes if s.get("montage")]
+    if mont:   # attention reset right where new viewers used to drift (25-35 s)
+        sfx.append(("whoosh", max(0.0, mont[-1]["end"] - 0.8)))
     for s in scenes:
         if s["kind"] == "intro":
             sfx.append(("chime", s["start"] + 0.2))

@@ -137,7 +137,7 @@ The part opens with {opening}.
 
 Return JSON with exactly these keys:
 {{
- "title_ta": "YouTube title in casual Tamil, 50-90 characters: a conflict or a shocking line plus a concrete detail (an age, a number of days, a status contrast like auto driver vs IPS officer) and a curiosity ending (…என்ன நடந்தது? / கடைசியில் அதிர்ச்சி!). No ending spoilers.",
+ "title_ta": "YouTube title in casual Tamil, 40-60 characters, the hook in the FIRST 35 characters (phones cut the rest); title, thumbnail and the story's first line all come from the SAME dramatic moment, but the thumbnail lines must use DIFFERENT words from the title: a conflict or a shocking line plus a concrete detail (an age, a number of days, a status contrast like auto driver vs IPS officer) and a curiosity ending (…என்ன நடந்தது? / கடைசியில் அதிர்ச்சி!). No ending spoilers.",
  "thumb_line1_ta": "thumbnail SETUP line, casual Tamil, 3-5 SHORT words ending with … (older viewers read it on a phone: fewer, bigger words) (e.g. டிரைவர் என்று காதலித்தாள்… / அம்மாவை தனியாக தவிக்கவிட்ட மகன்…)",
  "thumb_line2_ta": "thumbnail REVEAL tease, 2-4 Tamil words that cut off before the answer, ending ..! or ? (e.g. அவன் யார் என்று தெரிந்ததும்..! / கடைசியில் நடந்தது என்ன?)",
  "thumb_ribbon_ta": "optional extra ribbon, 3-5 Tamil words of shocking contrast (e.g. கோடீஸ்வரியாக திரும்பி வந்த அம்மா!), or empty",
@@ -201,7 +201,10 @@ def write_part(plan, part, previous_text="", final_note=None, parts=PARTS, part_
     keep = ("KEEP THEM WATCHING (viewers are mostly Tamil grandmothers watching on a phone): about every 15 sentences end "
             "a moment on a small cliffhanger (a secret, a knock at the door, a paper nobody has read yet). Once in the "
             "middle, the narrator asks the viewer one warm, relatable question, e.g. 'உங்க வீட்டுலயும் இப்படி "
-            "நடந்திருக்கா?'. Short sentences, clear who is speaking, no English words. ")
+            "நடந்திருக்கா?'. Short sentences, clear who is speaking, no English words. "
+            "Mix sentence lengths: very short lines in tense moments, slightly longer, gentle lines in emotional ones. "
+            "Put '…' just before every reveal or shock so the narrator pauses (e.g. 'அந்த பேப்பர்ல இருந்தது… அவங்க "
+            "கையெழுத்து!'). ")
     context = (lesson + keep + "OPENING (first 30 seconds decide everything): sentence 1 names the hero and her pain in "
                "plain words a grandmother instantly understands (e.g. '63 வயசு காமாட்சி அம்மாவை, சொந்த மகனே வீட்டை "
                "விட்டு வெளியே அனுப்ப நினைச்சான்.'). Then 2-3 gripping lines from the most dramatic moment of THIS "
